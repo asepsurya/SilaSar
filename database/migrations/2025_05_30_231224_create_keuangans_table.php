@@ -14,10 +14,8 @@ return new class extends Migration
         Schema::create('keuangans', function (Blueprint $table) {
             $table->id();
             $table->string('tanggal');
-            $table->string('waktu');
             $table->string('deskripsi');
             $table->unsignedBigInteger('id_akun');
-            $table->unsignedBigInteger('id_akun_second');
             $table->enum('tipe', ['pemasukan', 'pengeluaran']);
             $table->decimal('total', 15, 2);
             $table->string('id_rekening');

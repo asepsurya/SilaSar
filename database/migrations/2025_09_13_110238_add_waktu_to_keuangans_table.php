@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('akuns', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_akun');
-            $table->enum('jenis_akun', ['pemasukan', 'pengeluaran']);
-            $table->timestamps();
+        Schema::table('keuangans', function (Blueprint $table) {
+            $table->string('waktu');
+            $table->unsignedBigInteger('id_akun_second');
         });
     }
 
@@ -24,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('akuns');
+        Schema::table('keuangans', function (Blueprint $table) {
+            $table->string('waktu');
+            $table->unsignedBigInteger('id_akun_second');
+        });
     }
 };

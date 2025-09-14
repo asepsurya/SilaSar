@@ -24,11 +24,22 @@ class KeuanganController extends Controller
         $rekening = Rekening::where('auth', auth()->user()->id)->latest()->get();
         $akun = Akun::all();
 
-        // Default: ambil semua transaksi user
+        if (request('periode')) {
+            [$tahun, $bulan] = explode('-', request('periode'));
+        } else {
+            $bulan = date('m');
+            $tahun = date('Y');
+        }
+
+
         $transaksi = Keuangan::with(['akun', 'rekening'])
-    ->where('auth', auth()->user()->id)
-    ->orderBy('tanggal', 'asc') // atau 'desc' jika ingin terbaru duluan
-    ->get();
+        ->where('auth', auth()->id())
+        ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+        ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+        ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') desc")
+        ->paginate(10);
+
+        $currentDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1);
 
         // Ambil parameter sort dan filter tanggal dari request
         $sort = request('sort', 'desc');
@@ -55,7 +66,7 @@ class KeuanganController extends Controller
         return view('keuangan.index',[
             'activeMenu' => 'keuangan',
             'active' => 'keuangan',
-        ],compact('logs','rekening','akun','transaksi'));
+        ],compact('logs','rekening','akun','transaksi','currentDate','tahun','bulan'));
     }
     public function IndexAkun(){
         $akun = Akun::all();
@@ -82,18 +93,18 @@ class KeuanganController extends Controller
             'nama_akun' => 'required|string|max:255',
             'jenis_akun' => 'required|in:pemasukan,pengeluaran',
         ]);
-    
+
         $akun = Akun::findOrFail($request->id);
         $akun->update([
             'nama_akun' => $request->nama_akun,
             'jenis_akun' => $request->jenis_akun,
         ]);
-    
+
         activity('ikm')
             ->performedOn($akun)
             ->causedBy(auth()->user())
             ->log('Mengupdate Akun ' . $request->nama_akun);
-    
+
         return redirect()->back()->with("success", "Data has been saved successfully!");
     }
 
@@ -136,7 +147,7 @@ class KeuanganController extends Controller
             'kredit' => 0,
             'saldo' => $validated['jumlah'],
         ]);
-        
+
         Keuangan::create([
             'tanggal' => now()->format('d/m/Y'),
             'deskripsi' => 'Modal Awal',
@@ -172,7 +183,7 @@ class KeuanganController extends Controller
             // Cek apakah sudah ada default rekening di App
             $defaultRekening = App::where(['key' => 'default_rekening','auth'=> auth()->user()->id])->first();
             if ($defaultRekening) {
-                
+
                 // Gunakan rekening default yang sudah ada
                 $rekening = Rekening::where('kode_rekening', $defaultRekening->value)->first();
                 if ($rekening) {
@@ -219,7 +230,7 @@ class KeuanganController extends Controller
                     App::where(['key' => 'default_rekening','auth'=> auth()->user()->id])->update([
                         'value' => $rekeningid
                     ]);
-                    
+
                     Artisan::call('optimize:clear');
                 }
             } else {
@@ -292,15 +303,17 @@ class KeuanganController extends Controller
 
     public function keuanganUpdate(Request $request){
         $request->validate([
-            'id' => 'required|exists:keuangans,id',
             'tanggal' => 'required',
             'deskripsi' => 'required|string',
+            'waktu' => 'required|string',
             'id_akun' => 'required|exists:akuns,id',
+            'id_akun_second' => 'required|exists:akuns,id',
             'tipe' => 'required|in:pemasukan,pengeluaran',
             'total' => 'required|numeric',
             'id_rekening' => 'nullable|exists:rekenings,id',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
+
 
         $keuangan = Keuangan::findOrFail($request->id);
         $oldTotal = $keuangan->total;
@@ -355,7 +368,7 @@ class KeuanganController extends Controller
             }
         }
 
-        $data = $request->only(['tanggal', 'deskripsi', 'id_akun', 'tipe', 'total', 'id_rekening']);
+        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second', 'tipe', 'total']);
         $data['auth'] = auth()->user()->id;
 
         if ($request->hasFile('foto')) {
@@ -494,7 +507,7 @@ class KeuanganController extends Controller
             ->performedOn($rekening)
             ->causedBy(auth()->user())
             ->log('Menghapus rekening beserta seluruh transaksi terkait');
-    
+
        return redirect()->back()->with("success", "Rekening dan seluruh transaksi terkait berhasil dihapus!");
     }
 
@@ -527,7 +540,7 @@ class KeuanganController extends Controller
     try {
         $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
         $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
-        
+
         $keuangan->whereRaw("
             STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
         ", [$from, $to]);
@@ -628,13 +641,13 @@ public function neraca()
     // Bagi menjadi Neraca dan Laba Rugi
     $neraca = $saldoAkuns->whereIn('tipe', ['aset','liabilitas','ekuitas'])
                          ->groupBy('tipe'); // hasil array per tipe
-                         
+
     $labaRugi = $saldoAkuns->whereIn('tipe', ['pendapatan','beban'])
                             ->groupBy('tipe'); // hasil array per tipe
 
     // Ambil 10 log terbaru pengguna
     $logs = Activity::where([
-                'causer_id'=>auth()->user()->id, 
+                'causer_id'=>auth()->user()->id,
                 'log_name' => 'ikm'
             ])
             ->latest()
@@ -653,7 +666,7 @@ public function neraca()
     public function neracaSaldo(request $request)
     {
         $logs = Activity::where([
-                'causer_id'=>auth()->user()->id, 
+                'causer_id'=>auth()->user()->id,
                 'log_name' => 'ikm'
             ])
             ->latest()

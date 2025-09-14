@@ -1,6 +1,6 @@
 <div class="border-b border-black/10 dark:border-white/10 py-[22px] px-7 flex items-center justify-between">
     <div class="flex items-center gap-2">
-     
+
         <button type="button" class=" text-black dark:text-white" >
             <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130" class="block dark:hidden">
             <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130" class="hidden dark:block">
@@ -150,7 +150,7 @@
                                                 <input type="hidden" name="id" value="{{ auth()->user()->id }}">
                                                 <input :type="showPassword ? 'text' : 'password'"  placeholder="Masukan Password Baru" name="password"
                                                     class="w-full border px-3 py-2 rounded pr-10 focus:outline-none focus:ring focus:border-blue-300" />
-                                               
+
                                                     <button type="button" @click="showPassword = !showPassword"
                                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
                                                     tabindex="-1">
@@ -163,7 +163,7 @@
                                                             stroke-width="2"
                                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.07.238-.152.47-.244.696M15 12a3 3 0 01-6 0m9.75 5.25L4.5 4.5" />
                                                     </svg>
-                                                    
+
                                                     <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg"
                                                         class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                                         stroke="currentColor">
@@ -172,7 +172,7 @@
                                                             d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.24-3.67M9.88 9.88a3 3 0 104.24 4.24M6.12 6.12l11.76 11.76" />
                                                     </svg>
                                                 </button>
-                                                
+
                                             </div>
                                              <small>*) Pastikan Password yang anda masukan sudah benar.</small>
                                         </div>
@@ -262,8 +262,8 @@
 </div>
 
 <nav class="w-full fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-black  border-t border-gray-200 dark:border-white/10  md:hidden" >
-    <div class="flex justify-between">
-        
+    <div class="relative flex justify-between">
+
         <!-- Keuangan -->
         <a href="{{ route('index.keuangan') }}"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'keuangan' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
@@ -275,34 +275,49 @@
             <span class="text-[10px]">Keuangan</span>
         </a>
 
-        <!-- Dashboard -->
+        <!-- Grafik -->
         <a href="{{ route('dashboard.keuangan') }}"
-           class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'keuangan' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
+           class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'grafik' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
             <x-icon name="dashboard" class="w-5 h-5 mb-1" />
             <span class="text-[10px]">Grafik</span>
         </a>
-        <!-- Dashboard -->
+
+        <!-- Akun -->
         <a href="/akun"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'akun' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
-             <!-- Ikon Kiri -->
-            <x-icon name="forms" class=" w-6 h-6 mr-2" />
+            <x-icon name="forms" class="w-6 h-6 mb-1" />
             <span class="text-[10px]">Akun</span>
         </a>
-        <!-- Dashboard -->
+
+        <!-- Rekening -->
         <a href="/rekening"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'rekening' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
-             <x-icon name="layer" class=" w-6 h-6 mr-2" />
+            <x-icon name="layer" class="w-6 h-6 mb-1" />
             <span class="text-[10px]">Rekening</span>
         </a>
 
-
-        <!-- Keuangan -->
+        <!-- Usaha Saya -->
         <a href="/setelan"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'setelan' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
-            <!-- Ikon User (Heroicons) -->
-               <x-icon name="user-1" class=" w-6 h-6 mr-2" />
+            <x-icon name="user-1" class="w-6 h-6 mb-1" />
             <span class="text-[10px]">Usaha Saya</span>
         </a>
 
+        <!-- Tombol + (absolute, di atas) -->
+        @if(Request::is('keuangan'))
+        <a href="#"
+           @click.prevent="$dispatch('transaksi')"
+           class="absolute -top-5 left-1/2 transform -translate-x-1/2
+                  flex items-center justify-center w-12 h-12
+                  bg-blue-600 hover:bg-blue-700 text-white
+                  rounded-full shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+        </a>
+        @endif
+
     </div>
+
 </nav>
