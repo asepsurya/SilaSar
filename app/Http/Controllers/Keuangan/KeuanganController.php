@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Models\HistoryRekening;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Flasher\Laravel\Facade\Flasher;
 use App\Http\Controllers\Controller;
@@ -22,7 +23,6 @@ class KeuanganController extends Controller
 {
     public function index(){
         $rekening = Rekening::where('auth', auth()->user()->id)->latest()->get();
-        $akun = Akun::all();
 
         if (request('periode')) {
             [$tahun, $bulan] = explode('-', request('periode'));
@@ -31,13 +31,13 @@ class KeuanganController extends Controller
             $tahun = date('Y');
         }
 
-
         $transaksi = Keuangan::with(['akun', 'rekening'])
         ->where('auth', auth()->id())
         ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
         ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-        ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') desc")
-        ->paginate(10);
+        ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') desc") // urut berdasarkan tanggal
+        ->orderBy('id', 'desc') // jika tanggal sama, urut berdasarkan id terbaru
+        ->simplePaginate(31);
 
         $currentDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1);
 
@@ -59,15 +59,25 @@ class KeuanganController extends Controller
             // Jika format salah, tampilkan semua
             }
         }
+        $akun = Akun::with('kategori')->get();
 
+        $akunJs = $akun->map(function ($a) {
+            return [
+                'id' => $a->id,
+                'text' => $a->kode_akun . ' | ' . $a->nama_akun,
+                'kategori' => $a->kategori->nama_kategori ?? '',
+                'tipe' => $a->kategori->tipe ?? '', // <--- ini penting
+            ];
+        });
 
 
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('keuangan.index',[
             'activeMenu' => 'keuangan',
             'active' => 'keuangan',
-        ],compact('logs','rekening','akun','transaksi','currentDate','tahun','bulan'));
+        ],compact('logs','rekening','akun','transaksi','currentDate','tahun','bulan','akunJs'));
     }
+
     public function IndexAkun(){
         $akun = Akun::all();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
@@ -169,13 +179,14 @@ class KeuanganController extends Controller
             'waktu' => 'required|string',
             'id_akun' => 'required|exists:akuns,id',
             'id_akun_second' => 'required|exists:akuns,id',
-            'tipe' => 'required|in:pemasukan,pengeluaran',
+            'tipe' => 'required',
+            'jenis_transaksi' => 'nullable|string',
             'total' => 'required|numeric',
             'id_rekening' => 'nullable|exists:rekenings,id',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
-        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second', 'tipe', 'total']);
+        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second', 'tipe','jenis_transaksi','total']);
         $data['auth'] = auth()->user()->id;
 
         // Handle rekening
@@ -302,6 +313,7 @@ class KeuanganController extends Controller
     }
 
     public function keuanganUpdate(Request $request){
+       
         $request->validate([
             'tanggal' => 'required',
             'deskripsi' => 'required|string',
@@ -310,6 +322,7 @@ class KeuanganController extends Controller
             'id_akun_second' => 'required|exists:akuns,id',
             'tipe' => 'required|in:pemasukan,pengeluaran',
             'total' => 'required|numeric',
+            'jenis_transaksi' => 'nullable|string',
             'id_rekening' => 'nullable|exists:rekenings,id',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
@@ -368,7 +381,7 @@ class KeuanganController extends Controller
             }
         }
 
-        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second', 'tipe', 'total']);
+        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second','jenis_transaksi', 'tipe', 'total']);
         $data['auth'] = auth()->user()->id;
 
         if ($request->hasFile('foto')) {
@@ -655,8 +668,8 @@ public function neraca()
             ->get();
 
     return view('keuangan.neraca', [
-        'activeMenu' => 'keuangan',
-        'active' => 'keuangan',
+        'activeMenu' => 'laporan',
+        'active' => 'neraca',
         'neraca' => $neraca,
         'labaRugi' => $labaRugi,
         'logs' => $logs
@@ -694,9 +707,107 @@ public function neraca()
         ->get();
     return view('keuangan.neracasaldo',[
         'activeMenu' => 'laporan',
-        'active' => 'neracaSaldo',
+        'active' => 'neracasaldo',
         'logs' => $logs
     ],compact('data','bulan','tahun'));
 
     }
+  
+    public function labarugi(Request $request)
+    {
+        // Ambil logs aktivitas terakhir
+        $logs = Activity::where([
+            'causer_id' => auth()->user()->id,
+            'log_name' => 'ikm'
+        ])->latest()->take(10)->get();
+
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        // Ambil semua transaksi bulan ini beserta kedua akun
+        $items = Keuangan::with(['akun.kategori', 'akunSecond.kategori'])
+            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+            ->get();
+
+        // Inisialisasi array Laba Rugi
+        $labaRugi = [
+            'pendapatan' => collect(),
+            'hpp' => collect(),
+            'beban_operasional' => collect(),
+            'pendapatan_lainnya' => collect(),
+            'beban_lainnya' => collect(),
+        ];
+
+        $addedAkun = []; // array untuk menjumlahkan total per akun
+
+        // Loop semua transaksi untuk kumpulkan total per akun
+        foreach ($items as $item) {
+            $akunList = [$item->akun, $item->akunSecond];
+            foreach ($akunList as $akun) {
+                if (!$akun || !$akun->kategori) continue;
+
+                $key = $akun->id;
+                if (!isset($addedAkun[$key])) {
+                    $addedAkun[$key] = 0;
+                }
+                $addedAkun[$key] += $item->total;
+            }
+        }
+
+        // Mapping nama kategori ke tipe Laba Rugi
+        $kategoriMap = [
+            'Pendapatan' => 'pendapatan',
+            'Pendapatan Lainnya' => 'pendapatan_lainnya',
+            'Harga Pokok Penjualan' => 'hpp',
+            'Beban' => 'beban_operasional',
+            'Beban Lainnya' => 'beban_lainnya',
+            'Depresiasi & Amortisasi' => 'beban_lainnya',
+        ];
+
+        // Fungsi helper push ke Laba Rugi
+        $pushToLabaRugi = function($akun, $total) use (&$labaRugi, $kategoriMap) {
+            $namaKategori = $akun->kategori->nama_kategori;
+            $tipeKategori = $kategoriMap[$namaKategori] ?? null;
+
+            if (!$tipeKategori) return; // abaikan jika bukan Laba Rugi
+
+            $saldoItem = (object)[
+                'nama_akun' => $akun->nama_akun,
+                'saldo' => $total,
+            ];
+
+            $labaRugi[$tipeKategori]->push($saldoItem);
+        };
+
+        // Loop akun yang sudah dijumlahkan totalnya
+        foreach ($addedAkun as $akunId => $total) {
+            $akun = Akun::with('kategori')->find($akunId);
+            if ($akun) {
+                $pushToLabaRugi($akun, $total);
+            }
+        }
+
+        // Hitung total Laba Rugi
+        $totalPendapatan = $labaRugi['pendapatan']->sum('saldo');
+        $totalHpp = $labaRugi['hpp']->sum('saldo');
+        $totalBebanOperasional = $labaRugi['beban_operasional']->sum('saldo');
+        $totalPendapatanLainnya = $labaRugi['pendapatan_lainnya']->sum('saldo');
+        $totalBebanLainnya = $labaRugi['beban_lainnya']->sum('saldo');
+
+        $labaRugi['laba_kotor'] = $totalPendapatan - $totalHpp;
+        $labaRugi['laba_operasional'] = $labaRugi['laba_kotor'] - $totalBebanOperasional;
+        $labaRugi['laba_bersih'] = $labaRugi['laba_operasional'] + $totalPendapatanLainnya - $totalBebanLainnya;
+
+        return view('keuangan.labarugi', [
+            'activeMenu' => 'laporan',
+            'active' => 'labarugi',
+            'logs' => $logs,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'labaRugi' => $labaRugi
+        ]);
+    }
+
+    
 }

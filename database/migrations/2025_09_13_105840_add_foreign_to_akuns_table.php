@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('akuns', function (Blueprint $table) {
-            $table->string('kode_akun')->unique();
+            $table->string('kode_akun')->unique()->nullable();
             $table->foreignId('kategori_id')->constrained('kategori_akuns')->onDelete('cascade');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('akuns', function (Blueprint $table) {
-            $table->string('kode_akun')->unique();
+            $table->string('kode_akun')->unique()->nullable();
             $table->foreignId('kategori_id')->constrained('kategori_akuns')->onDelete('cascade');
         });
     }

@@ -1,5 +1,5 @@
 @extends('layout.main')
-@section('title', 'Data Akun')
+@section('title', 'Laporan Neraca Saldo')
 @section('container')
 
 

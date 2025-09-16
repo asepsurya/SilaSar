@@ -134,8 +134,9 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     Route::get('/keuangan/delete/{id}', [KeuanganController::class, 'keuanganDelete'])->name('keuangan.delete');
     Route::get('/keuangan/export/pdf', [KeuanganController::class, 'keuanganPDF'])->name('keuangan.pdf');
     Route::get('/history/cetak-pdf/{id_rekening}', [KeuanganController::class, 'cetakHistoryPDF'])->name('history.cetak-pdf');
-    Route::get('/neraca', [KeuanganController::class, 'neraca'])->name('neraca');
+    Route::get('/neraca', [KeuanganController::class, 'neraca'])->name('laporan.neraca');
     Route::get('/neracasaldo', [KeuanganController::class, 'neracaSaldo'])->name('laporan.neraca_saldo');
+    Route::get('/labarugi', [KeuanganController::class, 'labarugi'])->name('laporan.labarugi');
 
     // ------------------------------------------------
     // Route Akun dan Rekening

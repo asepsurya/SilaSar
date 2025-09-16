@@ -15,4 +15,9 @@ class Keuangan extends Model
     public function rekening(){
         return $this->belongsTo('App\Models\Rekening','id_rekening','id');
     }
+
+    public function akunSecond()
+    {
+        return $this->belongsTo(Akun::class, 'id_akun_second'); // <- ini wajib
+    }
 }
