@@ -110,7 +110,10 @@
                     <p class="text-xs text-black/40 dark:text-white/40">&copy; {{ date('Y') }} {{ config('app.name') }}</p>
                     <ul class="flex items-center text-black/40 dark:text-white/40 text-xs gap-5">
                         <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="" width="120"></li>
-                        <li> <img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded pe-5" width="110"></li>
+                        <li> 
+                             <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130" class="block dark:hidden">
+                                <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130" class="hidden dark:block">
+                            </li>
                     </ul>
                 </footer>
                 </div>

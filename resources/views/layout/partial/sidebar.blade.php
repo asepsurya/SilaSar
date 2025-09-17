@@ -161,8 +161,8 @@
                     class="sub-menu flex flex-col gap-1 text-black dark:text-white/80">
 
                     <li>
-                        <a href="{{ route('dashboard') }}"
-                           class="{{ $active === 'transaksi' ? 'active' : '' }}">
+                        <a href="{{ route('laporan.transaksi') }}"
+                           class="{{ $active === 'laporan_transaksi' ? 'active' : '' }}">
                            Transaksi
                         </a>
                     </li>
@@ -216,6 +216,8 @@
                             class="{{ $active === 'produk' ? 'active' : '' }}">Data Produk</a></li>
                     <li><a href="{{ route('produk.category') }}"
                             class="{{ $active === 'category' ? 'active' : '' }}">Kategori</a></li>
+                    <li><a href="{{ route('produk.category') }}"
+                            class="{{ $active === 'category' ? 'active' : '' }}">Persediaan</a></li>
                 </ul>
             </li>
 

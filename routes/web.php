@@ -77,6 +77,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::post('/produk/category', [ProdukController::class, 'createCategory'])->name('category.add');
         Route::post('/produk/category/update', [ProdukController::class, 'updateCategory'])->name('category.update');
         Route::get('/produk/category/delete/{id}', [ProdukController::class, 'deleteCategory'])->name('category.delete');
+        Route::get('/category/list', [ProdukController::class, 'list'])->name('category.list');
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
         // ------------------------------------------------
@@ -134,9 +135,10 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     Route::get('/keuangan/delete/{id}', [KeuanganController::class, 'keuanganDelete'])->name('keuangan.delete');
     Route::get('/keuangan/export/pdf', [KeuanganController::class, 'keuanganPDF'])->name('keuangan.pdf');
     Route::get('/history/cetak-pdf/{id_rekening}', [KeuanganController::class, 'cetakHistoryPDF'])->name('history.cetak-pdf');
-    Route::get('/neraca', [KeuanganController::class, 'neraca'])->name('laporan.neraca');
-    Route::get('/neracasaldo', [KeuanganController::class, 'neracaSaldo'])->name('laporan.neraca_saldo');
-    Route::get('/labarugi', [KeuanganController::class, 'labarugi'])->name('laporan.labarugi');
+    Route::get('/laporan/neraca', [KeuanganController::class, 'neraca'])->name('laporan.neraca');
+    Route::get('/laporan/neracasaldo', [KeuanganController::class, 'neracaSaldo'])->name('laporan.neraca_saldo');
+    Route::get('/laporan/labarugi', [KeuanganController::class, 'labarugi'])->name('laporan.labarugi');
+    Route::get('/laporan/transaksi', [KeuanganController::class, 'laptransaksi'])->name('laporan.transaksi');
 
     // ------------------------------------------------
     // Route Akun dan Rekening

@@ -32,34 +32,38 @@ class KeuanganController extends Controller
             $tahun = date('Y');
         }
 
-        $transaksi = Keuangan::with(['akun', 'rekening'])
-        ->where('auth', auth()->id())
-        ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
-        ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-        ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') desc") // urut berdasarkan tanggal
-        ->orderBy('id', 'desc') // jika tanggal sama, urut berdasarkan id terbaru
-        ->simplePaginate(31);
+      
+            $sort = request('sort', 'desc');
+            $from = request('from');
+            $to = request('to');
+            $bulan = request('bulan', date('m'));
+            $tahun = request('tahun', date('Y'));
 
-        $currentDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1);
+            $query = Keuangan::with(['akun','rekening'])
+                ->where('auth', auth()->id());
 
-        // Ambil parameter sort dan filter tanggal dari request
-        $sort = request('sort', 'desc');
-        $from = request('from');
-        $to = request('to');
-
-        // Jika ada filter tanggal, lakukan filter
-        if ($from && $to) {
-            try {
-            $fromDate = \Carbon\Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
-            $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
-            $transaksi = $transaksi->filter(function($item) use ($fromDate, $toDate) {
-                $itemDate = \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal);
-                return $itemDate->between($fromDate, $toDate);
-            });
-            } catch (\Exception $e) {
-            // Jika format salah, tampilkan semua
+            // Filter bulan & tahun jika ada
+            if ($bulan && $tahun) {
+                $query->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+                    ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
             }
-        }
+
+            // Filter dari tanggal - sampai tanggal jika ada
+            if ($from && $to) {
+                try {
+                    $fromDate = Carbon::createFromFormat('d/m/Y', $from)->format('Y-m-d');
+                    $toDate = Carbon::createFromFormat('d/m/Y', $to)->format('Y-m-d');
+                    $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+                } catch (\Exception $e) {
+                    // abaikan jika format salah
+                }
+            }
+
+            // Urutkan dan paginasi
+            $transaksi = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') $sort")
+                ->orderBy('id', 'desc')
+                ->simplePaginate(31)
+                ->appends(request()->query());
         $akun = Akun::with('kategori')->get();
 
         $akunJs = $akun->map(function ($a) {
@@ -76,10 +80,11 @@ class KeuanganController extends Controller
         return view('keuangan.index',[
             'activeMenu' => 'keuangan',
             'active' => 'keuangan',
-        ],compact('logs','rekening','akun','transaksi','currentDate','tahun','bulan','akunJs'));
+        ],compact('logs','rekening','akun','transaksi','tahun','bulan','akunJs'));
     }
 
     public function IndexAkun(){
+      
         $akun = Akun::all();
         $kategori = KategoriAkun::all();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
@@ -90,34 +95,63 @@ class KeuanganController extends Controller
     }
 
     public function akunCreate(request $request){
-        $request->validate([
-            'nama_akun' => 'required|string|max:255',
-            'jenis_akun' => 'required|in:pemasukan,pengeluaran',
+        
+       $request->validate([
+            'nama_akun'   => 'required|string|max:255',
+            'jenis_akun'  => 'required',
+            'kode_akun'   => 'required',
+            'kategori_id' => 'required',
         ]);
 
+        // Merge field baru dengan tanda "-"
+        $request->merge([
+            'kode_akun' => $request->id . '-' . $request->kode_akun,
+        ]);
+
+        // Simpan data
         $akun = Akun::create($request->all());
-        activity('ikm')->performedOn($akun)->causedBy(auth()->user())->log('Menambahkan Akun Baru ' . $request->akun);
+
+        // Log aktivitas
+        activity('ikm')
+            ->performedOn($akun)
+            ->causedBy(auth()->user())
+            ->log('Menambahkan Akun Baru ' . $request->nama_akun);
+
+        // Redirect
         return redirect()->back()->with("success", "Data has been saved successfully!");
+
     }
 
     public function akunUpdate(request $request){
         $request->validate([
-            'nama_akun' => 'required|string|max:255',
-            'jenis_akun' => 'required|in:pemasukan,pengeluaran',
+            'nama_akun'   => 'required|string|max:255',
+            'jenis_akun'  => 'required',
+            'kode_akun'   => 'required',
+            'kategori_id' => 'required',
+            'id'          => 'required|numeric'
         ]);
 
-        $akun = Akun::findOrFail($request->id);
+        // Gabungkan id dan kode_akun menjadi satu
+        $gabunganKode = $request->id . '-' . $request->kode_akun;
+
+        // Cari data akun yang mau diupdate
+        $akun = Akun::findOrFail($request->akun_id);
+
+        // Update data
         $akun->update([
-            'nama_akun' => $request->nama_akun,
-            'jenis_akun' => $request->jenis_akun,
+            'nama_akun'   => $request->nama_akun,
+            'jenis_akun'  => $request->jenis_akun,
+            'kode_akun'   => $gabunganKode,
+            'kategori_id' => $request->kategori_id,
         ]);
 
+        // Log aktivitas
         activity('ikm')
             ->performedOn($akun)
             ->causedBy(auth()->user())
-            ->log('Mengupdate Akun ' . $request->nama_akun);
+            ->log('Mengubah Akun ' . $request->nama_akun);
 
-        return redirect()->back()->with("success", "Data has been saved successfully!");
+        return redirect()->back()->with('success', 'Data has been updated successfully!');
     }
 
     public function akunDelete($id){
@@ -547,46 +581,56 @@ class KeuanganController extends Controller
 
 
     public function keuanganPDF(Request $request)
-{
-    // Base query
-    $keuangan = Keuangan::where('auth', auth()->user()->id);
+    {
 
-   if ($request->filled('from') && $request->filled('to')) {
-    try {
-        $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
-        $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
+      $query = Keuangan::with(['akun', 'rekening'])
+        ->where('auth', auth()->id());
 
-        $keuangan->whereRaw("
-            STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
-        ", [$from, $to]);
+        $periodeText = 'Semua Periode';
 
+        // === Filter by from-to ===
+        if ($request->filled('from') && $request->filled('to')) {
+            try {
+                $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
+                $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
 
-        $periode = "{$request->from} s.d. {$request->to}";
-    } catch (\Exception $e) {
-        $periode = 'Semua Data';
+                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$from, $to]);
+
+                $periodeText = "{$request->from} s.d. {$request->to}";
+                $periodeSlug = str_replace(['/', '\\'], '-', $request->from) . '_sd_' . str_replace(['/', '\\'], '-', $request->to);
+            } catch (\Exception $e) {
+                $periodeSlug = 'semua-periode';
+            }
+        }
+        // === Filter by bulan/tahun ===
+        elseif ($request->filled('bulan') && $request->filled('tahun')) {
+            $bulan = (int)$request->bulan;
+            $tahun = (int)$request->tahun;
+
+            $query->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+                ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            $periodeText = Carbon::createFromDate($tahun, $bulan)->translatedFormat('F Y');
+            $periodeSlug = "{$bulan}-{$tahun}";
+        } else {
+            $periodeSlug = 'semua-periode';
+        }
+
+        // Ambil data
+        $data = [
+            'keuangan' => $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get(),
+            'periode' => $periodeText,
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
+
+        // Pastikan nama file tidak mengandung karakter ilegal
+        $safeFile = preg_replace('/[\/\\\\]/', '-', $periodeSlug);
+        $filename = "laporan-keuangan-{$safeFile}.pdf";
+
+        return $pdf->download($filename);
     }
-} else {
-    $periode = 'Semua Data';
-}
-
-
-    // Ambil data keuangan
-    $data = [
-        'keuangan' => $keuangan->with('akun')->orderBy('tanggal', 'asc')->get(),
-        'periode' => $periode
-    ];
-
-    // Buat dan kirim PDF
-    $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
-
-    $periode = $request->filled('from') && $request->filled('to')
-    ? str_replace('/', '-', $request->from) . '_sd_' . str_replace('/', '-', $request->to)
-    : 'semua-periode';
-
-    $filename = "laporan-keuangan-{$periode}.pdf";
-
-    return $pdf->download($filename);
-}
  public function kelenderIndex(){
         $data = Keuangan::where('auth',auth()->user()->id)->get();
          $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
@@ -810,6 +854,24 @@ public function neraca()
             'labaRugi' => $labaRugi
         ]);
     }
+    
+    public function laptransaksi(Request $request)
+    {
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
 
+        // Ambil transaksi bulan & tahun tersebut
+        $transaksi = Keuangan::with(['akun', 'akunSecond', 'rekening'])
+            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+            ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")
+            ->get();
+
+        return view('keuangan.transaksi',[
+            'activeMenu' => 'laporan',
+            'active' => 'laporan_transaksi',
+            'logs' => Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get()
+        ],compact('transaksi','bulan','tahun'));
+    }
 
 }

@@ -14,6 +14,7 @@
             }
         }
     </style>
+    
     <div class="px-2 py-1 mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold">Produk Saya <span class="px-1 bg-lightgreen-100 text-xs text-black rounded ml-1">{{ $produk->count() }}</span></h2>
         <a href="{{ route('index.create.produk') }}" class="px-2 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" >
@@ -25,7 +26,7 @@
             class="form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;"
             required="" data-listener-added_87712baf="true">
     </div>
-
+    
     <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
         <div class="table-responsive">
             <table class="w-full border-collapse text-sm table-auto" id="produkTable">

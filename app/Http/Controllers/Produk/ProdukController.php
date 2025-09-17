@@ -176,4 +176,8 @@ class ProdukController extends Controller
         $produk->delete();
         return redirect()->route('index.produk')->with("success", "Data has been deleted successfully!");
     }
+      public function list()
+    {
+        return response()->json(CategoryProduct::orderBy('id', 'desc')->get());
+    }
 }
