@@ -55,7 +55,7 @@
         }
 
         .login-container {
-            max-width: 320px;
+            max-width: 400px;
             background: #fff;
             margin: -60px auto 0;
             padding: 30px 25px;
@@ -289,11 +289,11 @@
         <div class="flex items-start space-x-2">
             <div>
                 <strong class="font-semibold">Error!</strong>
-               
+
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
-                
+
             </div>
             <button onclick="document.getElementById('toast-error').remove()"
                 class="ml-2 text-white hover:text-gray-200 text-xs">
@@ -354,7 +354,7 @@
         </footer>
 
     </div>
- 
+
     <!-- Scripts -->
     <script>
        function showLoading(formType = 'desktop') {

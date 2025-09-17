@@ -7,6 +7,7 @@ use App\Models\App;
 use App\Models\Akun;
 use App\Models\Keuangan;
 use App\Models\Rekening;
+use App\Models\KategoriAkun;
 use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -80,11 +81,12 @@ class KeuanganController extends Controller
 
     public function IndexAkun(){
         $akun = Akun::all();
+        $kategori = KategoriAkun::all();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('keuangan.akun',[
             'activeMenu' => 'akun',
             'active' => 'akun',
-        ],compact('logs','akun'));
+        ],compact('logs','akun','kategori'));
     }
 
     public function akunCreate(request $request){
@@ -313,7 +315,7 @@ class KeuanganController extends Controller
     }
 
     public function keuanganUpdate(Request $request){
-       
+
         $request->validate([
             'tanggal' => 'required',
             'deskripsi' => 'required|string',
@@ -712,7 +714,7 @@ public function neraca()
     ],compact('data','bulan','tahun'));
 
     }
-  
+
     public function labarugi(Request $request)
     {
         // Ambil logs aktivitas terakhir
@@ -809,5 +811,5 @@ public function neraca()
         ]);
     }
 
-    
+
 }

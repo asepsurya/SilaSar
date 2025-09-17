@@ -77,7 +77,7 @@
         }
 
         .login-container {
-            max-width: 320px;
+            max-width: 400px;
             background: #fff;
             margin: -60px auto 0;
             padding: 30px 25px;

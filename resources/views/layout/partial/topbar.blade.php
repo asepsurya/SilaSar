@@ -157,7 +157,7 @@
                                                 <input type="hidden" name="id" value="{{ auth()->user()->id }}">
                                                 <input :type="showPassword ? 'text' : 'password'"  placeholder="Masukan Password Baru" name="password"
                                                     class="w-full border px-3 py-2 rounded pr-10 focus:outline-none focus:ring focus:border-blue-300" />
-                                               
+
                                                     <button type="button" @click="showPassword = !showPassword"
                                                     class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
                                                     tabindex="-1">
@@ -170,7 +170,7 @@
                                                             stroke-width="2"
                                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.07.238-.152.47-.244.696M15 12a3 3 0 01-6 0m9.75 5.25L4.5 4.5" />
                                                     </svg>
-                                                    
+
                                                     <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg"
                                                         class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                                         stroke="currentColor">
@@ -179,7 +179,7 @@
                                                             d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.24-3.67M9.88 9.88a3 3 0 104.24 4.24M6.12 6.12l11.76 11.76" />
                                                     </svg>
                                                 </button>
-                                                
+
                                             </div>
                                              <small>*) Pastikan Password yang anda masukan sudah benar.</small>
                                         </div>
@@ -202,8 +202,8 @@
                     </li>
 
                     <li class="h-px bg-black/5 block my-1"></li>
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}">
+                    <li class="p-3">
+                        <form method="POST" action="{{ route('logout') }}" class="flex items-center">
                             @csrf
                             <button type="submit"
                                 class="text-black dark:text-white flex items-center w-full text-left">

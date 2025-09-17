@@ -24,11 +24,11 @@
     z-index: 0;
   }
 }
- 
+
 
 
 </style>
-<nav class="sidebar fixed top-0 bottom-0 left-0  bg-white dark:bg-gray-900 w-[212px] border-r dark:border-white/10 transition-all duration-300" id="sidebar">
+<nav class="sidebar fixed top-0 bottom-0 z-40 flex-none w-[212px] border-r border-black/10 dark:border-white/10 transition-all duration-300" id="sidebar">
   <!-- sidebar content -->
     <div class="bg-white dark:bg-black h-full">
         <!-- Start Logo -->
@@ -166,7 +166,7 @@
                            Transaksi
                         </a>
                     </li>
-          
+
                     <li>
                         <a href="{{ route('laporan.neraca') }}"
                            class="{{ $active === 'neraca' ? 'active' : '' }}">
@@ -185,7 +185,7 @@
                            Laba Rugi
                         </a>
                     </li>
-               
+
                 </ul>
             </li>
 
