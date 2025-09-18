@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Produk;
 
+use App\Models\Akun;
 use App\Models\Produk;
+use App\Models\StokLog;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
 use App\Http\Controllers\Controller;
@@ -71,17 +73,21 @@ class ProdukController extends Controller
     {
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $category = CategoryProduct::all();
+        $akun = Akun::with('kategori')->get();
         return view('produk.action.add_produk', [
             'activeMenu' => 'produk',
             'active' => 'add_produk',
-        ],compact('category','logs'));
+        ],compact('category','logs','akun'));
     }
 
     public function store(Request $request)
     {
+       
         $request->validate([
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric',
+            'harga_jual' => 'required|numeric',
+            'satuan' => 'required',
             'stok' => 'required|integer',
             'deskripsi' => 'nullable|string',
             'kategori' => 'required|string',
@@ -98,6 +104,7 @@ class ProdukController extends Controller
             'kode_produk' => $request->kode_produk ?? 'PRD-' . uniqid(),
             'nama_produk' => $request->nama_produk,
             'harga' => $request->harga,
+            'harga_jual' => $request->harga_jual,
             'stok' => $request->stok,
             'deskripsi' => $request->deskripsi,
             'berat' => $request->berat ?? 0,
@@ -106,6 +113,11 @@ class ProdukController extends Controller
             'kategori' => $request->kategori,
             'satuan' => $request->satuan,
             'gambar' => $gambarPath,
+            'hpp_id' => $request->hpp_id,
+            'pendapatan_id' => $request->pendapatan_id,
+            'pendapatan_lainnya_id' => $request->pendapatan_lainnya_id,
+            'persediaan_id'=> $request->persediaan_id,
+            'beban_non_inventory_id'=> $request->beban_non_inventory_id,
         ]);
         activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Menambahkan Produk Baru '.$request->nama_produk);
         return back()->with("success", "Data has been saved successfully!");
@@ -115,10 +127,11 @@ class ProdukController extends Controller
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $produk = Produk::where('id', $id)->get();
         $category = CategoryProduct::all();
+         $akun = Akun::with('kategori')->get();
         return view('produk.action.update_produk', [
             'activeMenu' => 'produk',
             'active' => 'produk',
-        ], compact('produk', 'category','logs','id'));
+        ], compact('produk', 'category','logs','id','akun'));
     }
 
     
@@ -127,6 +140,8 @@ class ProdukController extends Controller
         $request->validate([
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric',
+            'harga_jual' => 'required|numeric',
+            'satuan' => 'required',
             'stok' => 'required|integer',
             'deskripsi' => 'nullable|string',
             'kategori' => 'required|string',
@@ -149,15 +164,24 @@ class ProdukController extends Controller
     
         // Update data produk
         $produk->update([
+             'kode_produk' => $request->kode_produk ?? 'PRD-' . uniqid(),
             'nama_produk' => $request->nama_produk,
             'harga' => $request->harga,
+            'harga_jual' => $request->harga_jual,
             'stok' => $request->stok,
             'deskripsi' => $request->deskripsi,
-            'berat' => $request->berat ?? $produk->berat,
+            'berat' => $request->berat ?? 0,
             'auth' => auth()->user()->id,
-            'status' => $request->status ?? $produk->status,
+            'status' => $request->status,
             'kategori' => $request->kategori,
-            'gambar' => $produk->gambar, // gunakan yang sudah diset (baru atau lama)
+            'satuan' => $request->satuan,
+            'gambar' => $produk->gambar,
+            'hpp_id' => $request->hpp_id,
+            'pendapatan_id' => $request->pendapatan_id,
+            'pendapatan_lainnya_id' => $request->pendapatan_lainnya_id,
+            'persediaan_id'=> $request->persediaan_id,
+            'beban_non_inventory_id'=> $request->beban_non_inventory_id,
+           
         ]);
     
         return back()->with("success", "Data has been updated successfully!");
@@ -179,5 +203,15 @@ class ProdukController extends Controller
       public function list()
     {
         return response()->json(CategoryProduct::orderBy('id', 'desc')->get());
+    }
+
+    public function manajemenStok()
+    {
+         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        $stokLogs = StokLog::latest()->paginate(50);
+        return view('produk.management_stok',[
+              'activeMenu' => 'produk',
+            'active' => 'produk',
+        ],compact('stokLogs','logs'));
     }
 }

@@ -62,7 +62,7 @@
     </div>
 </div>
 {{-- ---------------------------------------------------------------- --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-7 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mb-4">
     <div class="bg-lightblue-100 rounded-2xl p-6">
         <p class="text-sm font-semibold text-black mb-2">Jumlah Mitra</p>
         <div class="flex items-center justify-between">
@@ -102,7 +102,7 @@
             <p class="text-sm font-semibold">Daftar Mitra dan Toko</p>
             <p class="text-xs text-black/60 dark:text-white/60">Berikut adalah daftar mitra dan toko yang telah terdaftar di sistem.</p>
         </div>
-        <div class="overflow-auto">
+        <div class="overflow-auto" >
             <table id="myTable" class="whitespace-nowrap table-hover table-bordered w-full"></table>
         </div>
     </div>

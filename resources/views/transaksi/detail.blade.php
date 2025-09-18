@@ -334,7 +334,7 @@
 
                                         <div class=" border-gray-300 rounded overflow-hidden">
                                             <!-- Header Table -->
-                                            <table class="min-w-full border-b border-gray-300">
+                                            <table class="max-h-[100px] overflow-y-auto" style="max-height: 200px;">
                                                 <thead class="bg-gray-100">
                                                     <tr>
                                                         <th class="px-3 py-2 border text-center w-12">
@@ -343,34 +343,30 @@
                                                         </th>
                                                         <th class="px-3 py-2 border ">Kode</th>
                                                         <th class="py-2 border ">Nama</th>
+                                                        <th class="py-2 border ">Stok</th>
                                                     </tr>
                                                 </thead>
-                                            </table>
-
-                                            <!-- Body Table dengan scroll -->
-                                            <div class="max-h-[100px] overflow-y-auto" style="max-height: 200px;">
-                                                <table class="min-w-full">
-                                                    <tbody>
+                                                 <tbody>
                                                         @foreach ($penawaran as $produk)
                                                             <tr class="hover:bg-gray-50">
                                                                 <td class="px-3 py-2 border text-center w-12">
                                                                     <input type="checkbox" name="kode_produk[]"
-                                                                        value="{{ $produk->produk->kode_produk }}">
+                                                                        value="{{ $produk->produk->kode_produk ?? '' }}">
                                                                 </td>
                                                                 <td class="px-5 py-2 border w-32">
-                                                                    {{ $produk->produk->kode_produk }}
+                                                                    {{ $produk->produk->kode_produk ?? '' }}
                                                                 </td>
                                                                 <td class="px-3 py-2 border w-[300px]">
-                                                                    {{ $produk->produk->nama_produk }}
+                                                                    {{ $produk->produk->nama_produk ?? '' }}
+                                                                </td>
+                                                                <td class="px-3 py-2 border w-[300px]">
+                                                                    {{ $produk->produk->stok ?? ''}}
                                                                 </td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
-                                                </table>
-                                            </div>
+                                            </table>       
                                         </div>
-
-
                                         <button type="button" style="margin-top: 20px;"
                                             onclick="updateKodeTransaksi('{{ $transaksi->kode_transaksi }}','{{ $mitra->kode_mitra }}')"
                                             class="w-full inline-flex items-center px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow">
@@ -499,7 +495,7 @@
                                                         onclick="closeProductDetail('{{ $row->produk->kode_produk }}')">
                                                         &times;
                                                     </button>
-                                                    <h3 class="text-lg font-bold mb-3">Detail Produk Penawran</h3>
+                                                    <h3 class="text-lg font-bold mb-3">Detail Produk Penawaran</h3>
                                                     <div class="">
                                                         <div>
                                                             <table
@@ -526,6 +522,14 @@
                                                                             Harga Hasil Penawaran</td>
                                                                         <td class="border border-gray-300 px-3 py-2">Rp.
                                                                             {{ number_format($row->penawaran->harga ?? 0, 0, ',', '.') }}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td
+                                                                            class="border border-gray-300 px-3 py-2 font-semibold">
+                                                                            Stok Saat ini</td>
+                                                                        <td class="border border-gray-300 px-3 py-2">
+                                                                             <b>( {{ $row->produk->stok }} )</b> Pcs
                                                                         </td>
                                                                     </tr>
                                                                     <!-- Tambahkan detail lain sesuai kebutuhan -->

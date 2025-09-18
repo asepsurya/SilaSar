@@ -78,6 +78,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::post('/produk/category/update', [ProdukController::class, 'updateCategory'])->name('category.update');
         Route::get('/produk/category/delete/{id}', [ProdukController::class, 'deleteCategory'])->name('category.delete');
         Route::get('/category/list', [ProdukController::class, 'list'])->name('category.list');
+        Route::get('/management/stok', [ProdukController::class, 'manajemenStok'])->name('manajemenStok');
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
         // ------------------------------------------------

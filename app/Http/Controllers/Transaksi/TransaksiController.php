@@ -6,6 +6,7 @@ use App\Models\Mitra;
 use App\Models\Produk;
 use App\Models\Dokumen;
 use App\Models\Regency;
+use App\Models\StokLog;
 use App\Models\Penawaran;
 use App\Models\Transaksi;
 use App\Models\Itemdokumen;
@@ -61,7 +62,7 @@ class TransaksiController extends Controller
             'causer_id' => auth()->user()->id,
             'log_name' => 'ikm'
         ])->latest()->take(10)->get();
-        $penawaran = Penawaran::where('kode_mitra', $id_mitra)->with('produk')->get();
+        $penawaran = Penawaran::with('produk')->where('kode_mitra', $id_mitra)->with('produk')->get();
         $product = TransaksiProduct::where('kode_mitra', $id_mitra)->with('produk')->get();
 
         return view('transaksi.detail', [
@@ -97,9 +98,12 @@ class TransaksiController extends Controller
                     'barang_retur'    => 0,
                     'total'           => 0,
                 ]);
+
+             
             }
         }
 
+       
         // Catat aktivitas
         activity('ikm')
             ->causedBy(auth()->user())
@@ -124,46 +128,86 @@ class TransaksiController extends Controller
             'total' => 'required',
         ]);
 
-        $kode_mitra = $request->kode_mitra;
+       $kode_mitra = $request->kode_mitra;
         $transaksi = Transaksi::where('kode_transaksi', $request->nomor_transaksi)->firstOrFail();
 
-        $transaksi->diskon = str_replace(['.', ','], '',  $request->discount ?? '0') ;
-        $transaksi->ongkir = str_replace(['.', ','], '', $request->ongkir ?? '0') ;
+        $transaksi->diskon = str_replace(['.', ','], '',  $request->discount ?? '0');
+        $transaksi->ongkir = str_replace(['.', ','], '', $request->ongkir ?? '0');
         $transaksi->tanggal_pembayaran = $request->tanggal_bayar ?? $transaksi->tanggal_pembayaran;
-        $transaksi->total = str_replace(['.', ','], '', $request->grand_total); // Remove dots and commas before saving
+        $transaksi->total = str_replace(['.', ','], '', $request->grand_total);
         $transaksi->status_bayar = $request->status_bayar;
         $transaksi->auth = auth()->user()->id;
 
-        // foreach ($request->kode_produk as $index => $kode_produk) {
-        //     $penawaran = Penawaran::where('kode_mitra', $kode_mitra)
-        //     ->where('kode_produk', $kode_produk)
-        //     ->first();
-
-        //     if ($penawaran) {
-        //     $penawaran->barang_keluar = $request->barang_keluar[$index] ?? $penawaran->barang_keluar;
-        //     $penawaran->barang_terjual = $request->barang_terjual[$index] ?? $penawaran->barang_terjual;
-        //     $penawaran->barang_retur = $request->barang_retur[$index] ?? $penawaran->barang_retur;
-        //     $penawaran->total = str_replace(['.', ','], '', $request->harga[$index] ?? $penawaran->total); // Remove dots and commas before saving
-        //     $penawaran->update();
-        //     }
-        // }
         foreach ($request->kode_produk as $index => $kode_produk) {
-            TransaksiProduct::updateOrCreate(
+
+            $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
+            $barangReturBaru  = $request->barang_retur[$index] ?? 0;
+
+            // ambil data lama (jika ada)
+            $existing = TransaksiProduct::where([
+                'kode_produk'    => $kode_produk,
+                'kode_transaksi' => $transaksi->kode_transaksi,
+                'kode_mitra'     => $kode_mitra,
+            ])->first();
+
+            $transaksiProduct = TransaksiProduct::updateOrCreate(
                 [
                     'kode_produk'    => $kode_produk,
                     'kode_transaksi' => $transaksi->kode_transaksi,
                     'kode_mitra'     => $kode_mitra,
                 ],
                 [
-                    'barang_keluar'  => $request->barang_keluar[$index] ?? 0,
+                    'barang_keluar'  => $barangKeluarBaru,
                     'barang_terjual' => $request->barang_terjual[$index] ?? 0,
-                    'barang_retur'   => $request->barang_retur[$index] ?? 0,
+                    'barang_retur'   => $barangReturBaru,
                     'total'          => str_replace(['.', ','], '', $request->harga[$index] ?? 0),
                 ]
             );
+
+            // hitung selisih supaya tidak dobel
+            $barangKeluarLama = $existing->barang_keluar ?? 0;
+            $barangReturLama  = $existing->barang_retur ?? 0;
+
+            $selisihKeluar = $barangKeluarBaru - $barangKeluarLama;
+            $selisihRetur  = $barangReturBaru - $barangReturLama;
+
+            // stok berkurang karena barang keluar
+            if ($selisihKeluar != 0) {
+                Produk::where('kode_produk', $kode_produk)
+                    ->decrement('stok', $selisihKeluar);
+                
+                StokLog::create([
+                    'kode_produk' => $kode_produk,
+                    'tipe'        => 'masuk',
+                    'jumlah'      => $selisihRetur,
+                    'sumber'      => 'retur',
+                    'referensi'   => $transaksi->kode_transaksi,
+                    'auth'        => auth()->id(),
+                    'keterangan'  => 'Barang retur dari mitra '.$kode_mitra
+                ]);
+
+            }
+
+            // stok bertambah karena retur
+            if ($selisihRetur != 0) {
+                Produk::where('kode_produk', $kode_produk)
+                    ->increment('stok', $selisihRetur);
+    
+                StokLog::create([
+                    'kode_produk' => $kode_produk,
+                    'tipe'        => 'masuk',
+                    'jumlah'      => $selisihRetur,
+                    'sumber'      => 'retur',
+                    'referensi'   => $transaksi->kode_transaksi,
+                    'auth'        => auth()->id(),
+                    'keterangan'  => 'Barang retur dari mitra '.$kode_mitra
+                ]);
+
+            }
         }
 
         $transaksi->update();
+
 
         activity('ikm')
             ->causedBy(auth()->user())

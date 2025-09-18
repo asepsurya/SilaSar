@@ -333,7 +333,7 @@
                                    </button>
 
                                    
-                                    <select class="select2 text-sm w-full " onchange="updateHarga(this)" name="kode_produk[]">
+                                    <select class="select2 text-sm w-full " onchange="updateHarga(this)" name="kode_produk[]" required>
                                         <option value="">Pilih Produk</option>
                                         @foreach ($produk as $item)
                                             <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga }}"
@@ -491,7 +491,7 @@
             // Di contoh ini, saya copy langsung dari blade, kamu bisa sesuaikan kalau produk dinamis
 
             const options = `@foreach ($produk as $item)
-                <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga }}">{{ $item->nama_produk }}</option>
+                <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga_jual }}">{{ $item->nama_produk }}</option>
             @endforeach`;
 
             div.innerHTML = `
@@ -502,7 +502,7 @@
                             m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z"></path>
                         </svg>
                     </button>
-                    <select class="select2 w-60" onchange="updateHarga(this)" name="kode_produk[]">
+                    <select class="select2 w-60" onchange="updateHarga(this)" name="kode_produk[]" required>
                         <option value="">Pilih Produk</option>
                         ${options}
                     </select>

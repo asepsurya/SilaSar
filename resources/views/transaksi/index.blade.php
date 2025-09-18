@@ -102,7 +102,7 @@
     </div>
 </div>
 {{-- ---------------------------------------------------------------- --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 mb-4">
     <div class="bg-lightblue-100 rounded-2xl p-6">
         <p class="text-sm font-semibold text-black mb-2">Total Transaksi</p>
         <div class="flex items-center justify-between">

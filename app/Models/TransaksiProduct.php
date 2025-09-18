@@ -13,4 +13,6 @@ class TransaksiProduct extends Model
     public function produk(){
         return $this->belongsTo('App\Models\Produk','kode_produk','kode_produk');
     } 
+
+
 }
