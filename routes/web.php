@@ -79,6 +79,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/produk/category/delete/{id}', [ProdukController::class, 'deleteCategory'])->name('category.delete');
         Route::get('/category/list', [ProdukController::class, 'list'])->name('category.list');
         Route::get('/management/stok', [ProdukController::class, 'manajemenStok'])->name('manajemenStok');
+        Route::post('/management/stok', [ProdukController::class, 'manajemenStokcreate'])->name('manajemenStok.create');
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
         // ------------------------------------------------

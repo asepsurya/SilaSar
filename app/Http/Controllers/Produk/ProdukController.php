@@ -6,6 +6,7 @@ use App\Models\Akun;
 use App\Models\Produk;
 use App\Models\StokLog;
 use Illuminate\Http\Request;
+use App\Models\StokTransaksi;
 use App\Models\CategoryProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -207,11 +208,71 @@ class ProdukController extends Controller
 
     public function manajemenStok()
     {
+        $produk = Produk::where('auth', auth()->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
          $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $stokLogs = StokLog::latest()->paginate(50);
         return view('produk.management_stok',[
               'activeMenu' => 'produk',
             'active' => 'produk',
-        ],compact('stokLogs','logs'));
+        ],compact('stokLogs','logs','produk'));
+    }
+
+    public function manajemenStokcreate(Request $request)
+    {
+        // $request->validate([
+        //     'no_transaksi' => 'required|unique:stok_transaksis,no_transaksi',
+        //     'tanggal' => 'required|date',
+        //     'items' => 'required|array|min:1',
+        // ]);
+         $transaksi = StokTransaksi::create([
+            'no_transaksi' => $request->no_transaksi,
+            'tanggal' => $request->tanggal,
+            'deskripsi' => $request->deskripsi,
+            'subtotal' => $request->subtotal,
+            'potongan' => $request->potongan,
+            'pajak' => $request->pajak,
+            'total_akhir' => $request->total_akhir,
+        ]);
+         foreach ($request->items as $item) {
+            $transaksi->items()->create([
+                'kode_produk' => $item['kode_produk'],
+                'nama_produk' => $item['nama_produk'],
+                'jumlah' => $item['jumlah'],
+                'satuan' => $item['satuan'],
+                'harga' => $item['harga'],
+                'pot' => $item['pot'] ?? 0,
+                'total' => ($item['jumlah'] * $item['harga']) * (1 - ($item['pot'] ?? 0)/100),
+            ]);
+        }
+
+        $produk = Produk::findOrFail($request->produk_id);
+        $originalStok = $produk->stok;
+
+        if ($request->jenis === 'in') {
+            $produk->stok += $request->jumlah;
+        } elseif ($request->jenis === 'out') {
+            if ($produk->stok < $request->jumlah) {
+                return back()->with("error", "Stok tidak mencukupi untuk pengurangan!");
+            }
+            $produk->stok -= $request->jumlah;
+        }
+
+        $produk->save();
+
+        StokLog::create([
+            'produk_id' => $produk->id,
+            'jumlah' => $request->jumlah,
+            'jenis' => $request->jenis,
+            'keterangan' => $request->keterangan,
+            'stok_sebelumnya' => $originalStok,
+            'stok_sesudah' => $produk->stok,
+            'auth' => auth()->user()->id,
+        ]);
+
+        activity('ikm')->causedBy(auth()->user())->log('Manajemen Stok Produk '.$produk->nama_produk.' Jenis: '.$request->jenis.' Jumlah: '.$request->jumlah);
+
+        return back()->with("success", "Stok telah diperbarui!");
     }
 }

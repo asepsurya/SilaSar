@@ -416,30 +416,33 @@
                             {{-- -----------Data -------------------------- --}}
                         </div>
                         <table id="productTable"
-                            class="min-w-full border bg-white border-gray-300 rounded-lg shadow-sm dark:bg-transparent">
+                            class="min-w-full border bg-white border-gray-300 dark:border-white/10 rounded-lg shadow-sm dark:bg-transparent">
                             <thead class="bg-gray-100 dark:bg-transparent">
                                 <tr>
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-10 text-center">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-10 text-center">
                                     </th>
 
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-10 text-center">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-10 text-center">
                                         #</th>
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-1/3">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-1/3">
                                         Nama Produk</th>
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-1/3 text-center">
+                                       Harga</th>
+                                    <th
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
                                         Barang Keluar</th>
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
                                         Barang Terjual</th>
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
                                         Barang Retur</th>
                                     <th
-                                        class="border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
+                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
                                         Total</th>
                                 </tr>
                             </thead>
@@ -459,7 +462,7 @@
                                         $totalSemua += $total;
                                     @endphp
                                     <tr class="hover:bg-gray-50 dark:hover:bg-black">
-                                        <td class="border border-gray-300 px-3 py-2 text-center" width="1%">
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center" width="1%">
                                             <button type="button"
                                                 onclick="hapusItem('{{ $transaksi->kode_transaksi }}','{{ $row->produk->kode_produk }}')"
                                                 style="color:red;">
@@ -470,8 +473,8 @@
                                                 </svg>
                                             </button>
                                         </td>
-                                        <td class="border border-gray-300 px-3 py-2 text-center">{{ $no++ }}</td>
-                                        <td class="border border-gray-300 px-3 py-2">
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">{{ $no++ }}</td>
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
                                             <button type="button"
                                                 class="form-input w-full bg-gray-50 dark:bg-gray-800 border-gray-300 rounded-md text-left cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900"
                                                 onclick="showProductDetail('{{ $row->produk->kode_produk }}')"
@@ -503,32 +506,32 @@
                                                                 <tbody>
                                                                     <tr>
                                                                         <td
-                                                                            class="border border-gray-300 px-3 py-2 font-semibold">
+                                                                            class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
                                                                             Kode Produk</td>
-                                                                        <td class="border border-gray-300 px-3 py-2">
+                                                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
                                                                             {{ $row->produk->kode_produk }}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td
-                                                                            class="border border-gray-300 px-3 py-2 font-semibold">
+                                                                            class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
                                                                             Nama Produk</td>
-                                                                        <td class="border border-gray-300 px-3 py-2">
+                                                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
                                                                             {{ $row->produk->nama_produk ?? '-' }}</td>
                                                                     </tr>
 
                                                                     <tr>
                                                                         <td
-                                                                            class="border border-gray-300 px-3 py-2 font-semibold">
+                                                                            class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
                                                                             Harga Hasil Penawaran</td>
-                                                                        <td class="border border-gray-300 px-3 py-2">Rp.
+                                                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2">Rp.
                                                                             {{ number_format($row->penawaran->harga ?? 0, 0, ',', '.') }}
                                                                         </td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td
-                                                                            class="border border-gray-300 px-3 py-2 font-semibold">
+                                                                            class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
                                                                             Stok Saat ini</td>
-                                                                        <td class="border border-gray-300 px-3 py-2">
+                                                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
                                                                              <b>( {{ $row->produk->stok }} )</b> Pcs
                                                                         </td>
                                                                     </tr>
@@ -557,24 +560,30 @@
                                             </script>
 
                                         </td>
-                                        <td class="border border-gray-300 px-3 py-2 text-center">
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                            <input type="text" name="barang_keluar[]"
+                                                class="form-input w-20 text-center border-gray-300 rounded-md barang-keluar-input"
+                                                value="Rp. {{ number_format($harga ?? 0, 0, ',', '.') }}" data-index="{{ $index }}"
+                                                data-harga="{{ $harga }}" disabled>
+                                        </td>
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <input type="number" name="barang_keluar[]"
                                                 class="form-input w-20 text-center border-gray-300 rounded-md barang-keluar-input"
                                                 value="{{ $barang_keluar }}" data-index="{{ $index }}"
                                                 data-harga="{{ $harga }}">
                                         </td>
-                                        <td class="border border-gray-300 px-3 py-2 text-center">
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <input type="number" name="barang_terjual[]"
                                                 class="form-input w-20 text-center border-gray-300 rounded-md barang-terjual-input"
                                                 value="{{ $barang_terjual }}" data-index="{{ $index }}">
 
                                         </td>
-                                        <td class="border border-gray-300 px-3 py-2 text-center">
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <input type="number" name="barang_retur[]"
                                                 class="form-input w-20 text-center border-gray-300 rounded-md barang-retur-input"
                                                 value="{{ $barang_retur }}" data-index="{{ $index }}">
                                         </td>
-                                        <td class="border border-gray-300 px-3 py-2 text-center">
+                                        <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <div class="flex items-center justify-center">
                                                 <span class="mr-1">Rp.</span>
                                                 <input type="text" name="harga[]"
@@ -594,11 +603,11 @@
 
                                 <!-- Ongkir -->
                                 <tr>
-                                    <td class="border border-gray-300 px-3 py-2" colspan="5"></td>
-                                    <td class="border border-gray-300 px-3 py-2 font-semibold text-right">
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
                                         Ongkir
                                     </td>
-                                    <td class="border border-gray-300 px-3 py-2 text-center">
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                         <div class="flex items-center justify-center">
                                             <span class="mr-1">Rp.</span>
                                             <input type="text" name="ongkir" id="ongkir-input"
@@ -609,9 +618,9 @@
                                 </tr>
                                 <!-- Total -->
                                 <tr>
-                                    <td class="border border-gray-300 px-3 py-2" colspan="5"></td>
-                                    <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Total</td>
-                                    <td class="border border-gray-300 px-3 py-2 text-center">
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Total</td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                         <div class="flex items-center justify-center">
                                             <span class="mr-1">Rp.</span>
                                             <input type="text" name="total" id="total-input"
@@ -623,9 +632,9 @@
                                 </tr>
                                 <!-- Discount -->
                                 <tr>
-                                    <td class="border border-gray-300 px-3 py-2" colspan="5"></td>
-                                    <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Discount</td>
-                                    <td class="border border-gray-300 px-3 py-2 text-center">
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Discount</td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                         <div class="flex items-center justify-center">
                                             <span class="mr-1">Rp.</span>
                                             <input type="text" name="discount" id="discount-input"
@@ -636,9 +645,9 @@
                                 </tr>
                                 <!-- Grand Total -->
                                 <tr>
-                                    <td class="border border-gray-300 px-3 py-2" colspan="5"></td>
-                                    <td class="border border-gray-300 px-3 py-2 font-bold text-right">Grand Total</td>
-                                    <td class="border border-gray-300 px-3 py-2 text-center font-bold">
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-bold text-right">Grand Total</td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center font-bold">
                                         <div class="flex items-center justify-center">
                                             <span class="mr-1">Rp.</span>
                                             <input type="text" name="grand_total" id="grand-total-input"
@@ -650,9 +659,9 @@
                                 </tr>
                             </tbody>
                             <tr>
-                                <td class="border border-gray-300 px-3 py-2" colspan="5"></td>
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Status Bayar</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Status Bayar</td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <select name="status_bayar" id="status-bayar-input"
                                         class="form-input w-full text-center border-gray-300 rounded-md">
                                         <option value="Belum Bayar"
@@ -665,9 +674,9 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="border border-gray-300 px-3 py-2" colspan="5"></td>
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Tanggal Bayar</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Tanggal Bayar</td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <input type="date" name="tanggal_bayar" id="tanggal-bayar-input"
                                         class="form-input w-full text-center border-gray-300 rounded-md"
                                         value="{{ old('tanggal_bayar', $transaksi->tanggal_pembayaran ?? '') }}">
