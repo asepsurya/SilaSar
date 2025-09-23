@@ -192,7 +192,7 @@
 
             <h2 class="pl-3 my-2 text-black/60 dark:text-white/40 text-sm"><span>Administrasi</span></h2>
 
-            <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['add_produk', 'produk', 'category']) ? 'true' : 'false' }} }">
+            <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['add_produk', 'produk', 'category','satuan']) ? 'true' : 'false' }} }">
                 <a href="javascript:;" class="nav-link group text-black dark:text-white" :class="{ 'active': open }"
                     @click="open = !open">
                     <div class="text-black/50 dark:text-white/20 w-4 h-4 flex items-center justify-center transition-transform duration-300"
@@ -216,12 +216,21 @@
                             class="{{ $active === 'produk' ? 'active' : '' }}">Data Produk</a></li>
                     <li><a href="{{ route('produk.category') }}"
                             class="{{ $active === 'category' ? 'active' : '' }}">Kategori</a></li>
-                    <li><a href="{{ route('produk.category') }}"
-                            class="{{ $active === 'category' ? 'active' : '' }}">Persediaan</a></li>
+                   
+                    <li><a href="{{ route('satuan.index') }}"
+                            class="{{ $active === 'satuan' ? 'active' : '' }}">Satuan</a></li>
                 </ul>
             </li>
 
             {{-- Data Mitra --}}
+            <li class="menu nav-item">
+                <a href="{{ route('manajemenStok.index') }}" class="{{ $active === 'persediaan' ? 'active' : '' }}">
+                    <div class="flex pl-5 items-center">
+                        <x-icon name="stok" class="text-gray-600" />
+                        <span class="pl-1 text-black dark:text-white">Manajemen Stok</span>
+                    </div>
+                </a>
+            </li>
             <li class="menu nav-item">
                 <a href="{{ route('index.mitra') }}" class="{{ $active === 'mitra' ? 'active' : '' }}">
                     <div class="flex pl-5 items-center">

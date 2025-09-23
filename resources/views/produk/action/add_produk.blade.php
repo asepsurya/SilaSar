@@ -385,9 +385,21 @@
                     <!-- Stok -->
                     <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Stok Produk <span style="color: red">*</span></label>
-                        <input type="number" name="stok" placeholder="Stok Produk" class="form-input" value="1" />
+                        <div class="flex items-center">
+                            <input type="number" name="stok" placeholder="Stok Produk" class="form-input" value="1" />
+                            <select name="satuan_id" style="width:100px;" class="satuan-select form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
 
+
+                                @foreach($satuans as $satuan)
+                                <option value="{{ $satuan->id }}">{{ $satuan->nama }}</option>
+                                @endforeach
+
+                            </select>
+
+                        </div>
                     </div>
+
+
                     <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
                             Harga Poko <span style="color: red">*</span>

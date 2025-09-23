@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Produk;
 
 use App\Models\Akun;
 use App\Models\Produk;
+use App\Models\Satuan;
 use App\Models\StokLog;
+use App\Models\StokItem;
 use Illuminate\Http\Request;
 use App\Models\StokTransaksi;
+use Illuminate\Support\Carbon;
 use App\Models\CategoryProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -75,10 +78,11 @@ class ProdukController extends Controller
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $category = CategoryProduct::all();
         $akun = Akun::with('kategori')->get();
+        $satuans = Satuan::all();
         return view('produk.action.add_produk', [
             'activeMenu' => 'produk',
             'active' => 'add_produk',
-        ],compact('category','logs','akun'));
+        ],compact('category','logs','akun','satuans'));
     }
 
     public function store(Request $request)
@@ -113,6 +117,7 @@ class ProdukController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'satuan' => $request->satuan,
+            'satuan_id' => $request->satuan_id,
             'gambar' => $gambarPath,
             'hpp_id' => $request->hpp_id,
             'pendapatan_id' => $request->pendapatan_id,
@@ -128,11 +133,12 @@ class ProdukController extends Controller
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $produk = Produk::where('id', $id)->get();
         $category = CategoryProduct::all();
-         $akun = Akun::with('kategori')->get();
+        $akun = Akun::with('kategori')->get();
+        $satuans = Satuan::all();
         return view('produk.action.update_produk', [
             'activeMenu' => 'produk',
             'active' => 'produk',
-        ], compact('produk', 'category','logs','id','akun'));
+        ], compact('produk', 'category','logs','id','akun','satuans'));
     }
 
     
@@ -176,6 +182,7 @@ class ProdukController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'satuan' => $request->satuan,
+            'satuan_id' => $request->satuan_id,
             'gambar' => $produk->gambar,
             'hpp_id' => $request->hpp_id,
             'pendapatan_id' => $request->pendapatan_id,
@@ -211,68 +218,256 @@ class ProdukController extends Controller
         $produk = Produk::where('auth', auth()->user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
-         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        $stokLogs = StokLog::latest()->paginate(50);
-        return view('produk.management_stok',[
-              'activeMenu' => 'produk',
+            $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+
+            // ambil bulan & tahun sekarang
+            $bulanTahun = Carbon::now()->format('my'); // 0925
+
+            // ambil transaksi terakhir untuk generate nomor urut
+            $lastTransaksi = StokTransaksi::whereMonth('created_at', Carbon::now()->month)
+                            ->whereYear('created_at', Carbon::now()->year)
+                            ->orderBy('id', 'desc')
+                            ->first();
+
+            $nomor = 1; // default
+
+            if($lastTransaksi) {
+                // ambil 4 digit pertama sebelum slash
+                $lastNo = intval(substr($lastTransaksi->no_transaksi, 0, 4));
+                $nomor = $lastNo + 1;
+            }
+
+            $noTransaksi = str_pad($nomor, 4, '0', STR_PAD_LEFT) . "/BL/LTM/" . $bulanTahun;
+              $satuans = Satuan::all();
+        return view('persediaan.add_stok',[
+            'activeMenu' => 'produk',
             'active' => 'produk',
-        ],compact('stokLogs','logs','produk'));
+        ],compact('logs','produk','noTransaksi','satuans'));
+    }
+    
+    private function unformatRupiah($value)
+    {
+        return (int) preg_replace('/[^\d]/', '', $value);
     }
 
     public function manajemenStokcreate(Request $request)
-    {
-        // $request->validate([
-        //     'no_transaksi' => 'required|unique:stok_transaksis,no_transaksi',
-        //     'tanggal' => 'required|date',
-        //     'items' => 'required|array|min:1',
-        // ]);
-         $transaksi = StokTransaksi::create([
-            'no_transaksi' => $request->no_transaksi,
-            'tanggal' => $request->tanggal,
-            'deskripsi' => $request->deskripsi,
-            'subtotal' => $request->subtotal,
-            'potongan' => $request->potongan,
-            'pajak' => $request->pajak,
-            'total_akhir' => $request->total_akhir,
-        ]);
-         foreach ($request->items as $item) {
-            $transaksi->items()->create([
-                'kode_produk' => $item['kode_produk'],
-                'nama_produk' => $item['nama_produk'],
-                'jumlah' => $item['jumlah'],
-                'satuan' => $item['satuan'],
-                'harga' => $item['harga'],
-                'pot' => $item['pot'] ?? 0,
-                'total' => ($item['jumlah'] * $item['harga']) * (1 - ($item['pot'] ?? 0)/100),
+        {
+             // validasi utama transaksi
+            $validated = $request->validate([
+            
+                'tanggal'      => 'required|date_format:Y-m-d',
+                'deskripsi'    => 'nullable|string|max:255',
+                'subtotal'     => 'required',
+                'potongan'     => 'nullable',
+                'pajak'        => 'nullable',
+                'total_akhir'  => 'required',
+                'items'        => 'required|array|min:1', // wajib ada minimal 1 item
+            ], [
+                'no_transaksi.required' => 'Nomor transaksi wajib diisi!',
+                'no_transaksi.unique'   => 'Nomor transaksi sudah digunakan!',
+                'tanggal.required'      => 'Tanggal wajib diisi!',
+                'items.required'        => 'Minimal harus ada 1 produk!',
             ]);
-        }
 
-        $produk = Produk::findOrFail($request->produk_id);
-        $originalStok = $produk->stok;
-
-        if ($request->jenis === 'in') {
-            $produk->stok += $request->jumlah;
-        } elseif ($request->jenis === 'out') {
-            if ($produk->stok < $request->jumlah) {
-                return back()->with("error", "Stok tidak mencukupi untuk pengurangan!");
+            // validasi tiap item
+            foreach ($request->items as $index => $item) {
+                $request->validate([
+                    "items.$index.kode_produk" => 'required|string|exists:produks,kode_produk',
+                    "items.$index.jumlah"      => 'required|numeric|min:1',
+                    "items.$index.harga"       => 'required|numeric|min:0',
+                    "items.$index.satuan"      => 'required|exists:satuans,id',
+                ], [
+                    "items.$index.kode_produk.required" => "Kode produk pada item #".($index+1)." wajib diisi",
+                    "items.$index.kode_produk.exists"   => "Kode produk pada item #".($index+1)." tidak valid",
+                    "items.$index.jumlah.required"      => "Jumlah pada item #".($index+1)." wajib diisi",
+                    "items.$index.jumlah.numeric"       => "Jumlah pada item #".($index+1)." harus angka",
+                    "items.$index.harga.required"       => "Harga pada item #".($index+1)." wajib diisi",
+                    "items.$index.harga.numeric"        => "Harga pada item #".($index+1)." harus angka",
+                    "items.$index.satuan.required"      => "Satuan pada item #".($index+1)." wajib dipilih",
+                    "items.$index.satuan.exists"        => "Satuan pada item #".($index+1)." tidak valid",
+                ]);
             }
-            $produk->stok -= $request->jumlah;
+
+           // parsing angka dari format rupiah
+            $subtotal   = $this->unformatRupiah($request->subtotal);
+            $potongan   = $this->unformatRupiah($request->potongan);
+            $pajak      = $this->unformatRupiah($request->pajak);
+            $totalAkhir = $this->unformatRupiah($request->total_akhir);
+
+            // buat / update transaksi
+            $transaksi = StokTransaksi::updateOrCreate(
+                ['no_transaksi' => $request->no_transaksi],
+                [
+                    'tanggal'     => $request->tanggal,
+                    'deskripsi'   => $request->deskripsi,
+                    'subtotal'    => $subtotal,
+                    'potongan'    => $potongan,
+                    'pajak'       => $pajak,
+                    'total_akhir' => $totalAkhir,
+                    'auth'        => auth()->id(),
+                ]
+            );
+
+            // ambil item lama keyed by kode_produk
+            $oldItems = $transaksi->items()->get()->keyBy('kode_produk');
+
+            foreach ($request->items as $item) {
+                if (empty($item['kode_produk'])) continue;
+
+                $kodeProduk = $item['kode_produk'];
+                $jumlahBaru = intval($item['jumlah'] ?? 0);
+                $harga      = $item['harga'];
+                $pot        = intval($item['pot'] ?? 0);
+
+                // cek item lama
+                $oldItem = $oldItems[$kodeProduk] ?? null;
+                $jumlahLama = $oldItem->jumlah ?? 0;
+
+                // hitung selisih stok
+                $selisih = $jumlahBaru - $jumlahLama;
+
+                // update atau create item stok
+                if ($oldItem) {
+                    $oldItem->update([
+                        'nama_produk' => $item['nama_produk'] ?? $oldItem->nama_produk,
+                        'jumlah'      => $jumlahBaru,
+                        'satuan'      => $item['satuan'] ?? $oldItem->satuan,
+                        'harga'       => $harga,
+                        'pot'         => $pot,
+                        'total'       => $jumlahBaru * $this->unformatRupiah($harga) * (1 - ($pot/100)),
+                    ]);
+                } else {
+                    $transaksi->items()->create([
+                        'kode_produk' => $kodeProduk,
+                        'nama_produk' => $item['nama_produk'] ?? '',
+                        'jumlah'      => $jumlahBaru,
+                        'satuan'      => $item['satuan'] ?? '',
+                        'harga'       => $harga,
+                        'pot'         => $pot,
+                        'total'       => $jumlahBaru * $this->unformatRupiah($harga) * (1 - ($pot/100)),
+                    ]);
+                }
+
+                // update stok produk sesuai selisih
+                $produk = Produk::where('kode_produk', $kodeProduk)->firstOrFail();
+
+                if ($selisih < 0 && $produk->stok < abs($selisih)) {
+                    return back()->with("error", "Stok produk {$produk->nama_produk} tidak mencukupi!");
+                }
+
+                $produk->stok += $selisih;
+
+                // update satuan & harga jika berubah
+                if (!empty($item['satuan'])) {
+                    $produk->satuan_id = $item['satuan'];
+                    $produk->harga_jual = $item['harga'];
+                }
+
+                $produk->save();
+
+                activity('ikm')
+                    ->causedBy(auth()->user())
+                    ->log("Manajemen Stok Produk {$produk->nama_produk} Jumlah lama: {$jumlahLama}, Jumlah baru: {$jumlahBaru}, Selisih: {$selisih}");
+            }
+
+            return back()->with("success", "Stok berhasil disimpan/diperbarui!");
+
         }
 
-        $produk->save();
+    public function manajemenStokIndex(){
+        $stok = StokTransaksi::where('auth',auth()->id())->get();
+        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        
+        return view('persediaan.index',[
+              'activeMenu' => 'produk',
+            'active' => 'persediaan',
+        ],compact('logs','stok'));
+    }
+    public function manajemenStokUpdate($id){
+         $produk = Produk::where('auth', auth()->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $satuans = Satuan::all();
+        $transaksi = StokTransaksi::with('items')->findOrFail($id);
+        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
 
-        StokLog::create([
-            'produk_id' => $produk->id,
-            'jumlah' => $request->jumlah,
-            'jenis' => $request->jenis,
-            'keterangan' => $request->keterangan,
-            'stok_sebelumnya' => $originalStok,
-            'stok_sesudah' => $produk->stok,
-            'auth' => auth()->user()->id,
+        return view('persediaan.edit_stok',[
+            'activeMenu' => 'produk',
+            'active' => 'persediaan',
+        ],compact('logs','transaksi','produk','satuans'));
+    }
+
+    public function satuan(){
+         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        $satuans = Satuan::all();
+         return view('persediaan.satuan',[
+              'activeMenu' => 'produk',
+            'active' => 'satuan',
+        ],compact('logs','satuans'));
+    }
+    public function satuanAdd(request $request ){
+         $request->validate([
+            'nama' => 'required|unique:satuans',
         ]);
 
-        activity('ikm')->causedBy(auth()->user())->log('Manajemen Stok Produk '.$produk->nama_produk.' Jenis: '.$request->jenis.' Jumlah: '.$request->jumlah);
+        Satuan::create($request->all());
+         return back()->with("success", "Data Berhasil disimpan");
+    }
+    public function satuanUpdate(request $request){
+        $request->validate([
+            'nama' => 'required|unique:satuans',
+        ]);
 
-        return back()->with("success", "Stok telah diperbarui!");
+        Satuan::where('id',$request->id)->update(['nama'=>$request->nama]);
+        return back()->with("success", "Data Berhasil diupdate");
+    }
+    public function satuanDelete($id){
+          Satuan::with('satuan')->where('id',$id)->delete();
+          return back()->with("success", "Data Berhasil dihapus");
+    }
+    public function manajemenStokDelete($id){
+     $stok = StokItem::find($id);
+
+        if ($stok) {
+            $produk = Produk::where('kode_produk', $stok->kode_produk)->first();
+
+            if ($produk) {
+                // kurangi stok sesuai jumlah di stok_items
+                if ($produk->stok >= $stok->jumlah) {
+                    $produk->stok -= $stok->jumlah;
+                } else {
+                    $produk->stok = 0; // jaga-jaga biar tidak minus
+                }
+                $produk->save();
+            }
+
+            // hapus item stok
+            $stok->delete();
+
+            return back()->with("success", "Data Berhasil dihapus");
+        }
+
+        return back()->with("error", "Data tidak ditemukan!");
+    }
+    public function manajemenStokDeleteItem($id){
+        $trans = StokTransaksi::with('items')->find($id);
+
+        if ($trans) {
+            foreach ($trans->items as $stok) {
+                $produk = Produk::where('kode_produk', $stok->kode_produk)->first();
+
+                if ($produk) {
+                    $produk->stok = max(0, $produk->stok - $stok->jumlah);
+                    $produk->save();
+                }
+
+                $stok->delete();
+            }
+
+            $trans->delete();
+            return back()->with("success", "Transaksi stok berhasil dihapus");
+        }
+
+        return back()->with("error", "Transaksi stok tidak ditemukan!");
     }
 }

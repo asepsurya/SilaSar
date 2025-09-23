@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('potongan', 15, 2)->default(0);
             $table->decimal('pajak', 5, 2)->default(0);
             $table->decimal('total_akhir', 15, 2)->default(0);
+            $table->string('auth');
             $table->timestamps();
         });
     }

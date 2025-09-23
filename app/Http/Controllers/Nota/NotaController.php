@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Nota;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Dokumen;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Spatie\Activitylog\Models\Activity;
@@ -21,5 +23,15 @@ class NotaController extends Controller
     public function notaDelete ($id){
          Dokumen::where('id',$id)->delete();
          return redirect()->back();
+    }
+
+    public function nota2($id){
+ // Data contoh untuk Blade
+         $transaksi = Transaksi::where('kode_transaksi', $id)->first();
+
+    $pdf = Pdf::loadView('report.sample', compact('transaksi'))
+              ->setPaper('a4', 'portrait');
+
+    return $pdf->download('invoice.pdf');
     }
 }

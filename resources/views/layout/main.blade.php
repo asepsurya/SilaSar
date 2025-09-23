@@ -126,16 +126,7 @@
         <!-- Start Right Sidebar -->
         @include('layout.partial.rightsidebar')
         <!-- End Right Sidebar -->
-    </div>
-        <div x-data="{ open: {{ session('error_modal') ? 'true' : 'false' }} }" 
-        x-show="open" 
-        class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-        <div class="bg-white p-4 rounded shadow-lg w-1/2 max-h-[80vh] overflow-auto">
-            <h2 class="text-lg font-bold mb-2 text-red-600">Error</h2>
-            <p>{{ session('error_modal') }}</p>
-            <button @click="open = false" class="mt-2 px-3 py-1 bg-red-500 text-white rounded">Close</button>
-        </div>
-    </div>
+ 
     <!-- All javascirpt -->
     <!-- Alpine js -->
     <script src="{{ asset('assets/js/alpine-collaspe.min.js') }}"></script>

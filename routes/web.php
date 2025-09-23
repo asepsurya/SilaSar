@@ -78,8 +78,19 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::post('/produk/category/update', [ProdukController::class, 'updateCategory'])->name('category.update');
         Route::get('/produk/category/delete/{id}', [ProdukController::class, 'deleteCategory'])->name('category.delete');
         Route::get('/category/list', [ProdukController::class, 'list'])->name('category.list');
-        Route::get('/management/stok', [ProdukController::class, 'manajemenStok'])->name('manajemenStok');
-        Route::post('/management/stok', [ProdukController::class, 'manajemenStokcreate'])->name('manajemenStok.create');
+        Route::get('/satuan', [ProdukController::class, 'satuan'])->name('satuan.index');
+        Route::post('/satuan/add', [ProdukController::class, 'satuanAdd'])->name('satuan.add');
+        Route::post('/satuan/update', [ProdukController::class, 'satuanUpdate'])->name('satuan.update');
+        Route::get('/satuan/delete/{id}', [ProdukController::class, 'satuanDelete'])->name('satuan.delete');
+        Route::get('/management/stok/add', [ProdukController::class, 'manajemenStok'])->name('manajemenStok');
+        Route::post('/management/stok/add', [ProdukController::class, 'manajemenStokcreate'])->name('manajemenStok.create');
+        Route::get('/management/stok', [ProdukController::class, 'manajemenStokIndex'])->name('manajemenStok.index');
+        Route::get('/management/stok/update/{id}', [ProdukController::class, 'manajemenStokUpdate'])->name('manajemenStok.update');
+        Route::get('/management/stok/delete/{id}', [ProdukController::class, 'manajemenStokDelete'])->name('manajemenStok.delete');
+        Route::get('/management/stok/transaksi/delete/{id}', [ProdukController::class, 'manajemenStokDeleteItem'])->name('manajemenStok.deleteItem');
+
+        
+
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
         // ------------------------------------------------
@@ -110,6 +121,8 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/transaksi/delete/{id}', [TransaksiController::class, 'itemDelete'])->name('transaksi.item.delete');
         Route::get('/nota', [NotaController::class, 'nota'])->name('nota.index');
         Route::get('/nota/delete/{id}', [NotaController::class, 'notaDelete'])->name('nota.delete');
+
+        Route::get('/nota2/{id}', [NotaController::class, 'nota2'])->name('nota');
     });
 
     Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');

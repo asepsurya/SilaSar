@@ -68,13 +68,13 @@
                                         <div><strong>Created at:</strong> {{ $item->created_at->format('d M Y') }}</div>
                                         {{-- <div><strong>Status:</strong>{{ $item->status }}({{ $item->stok }} pcs)</div> --}}
                                         <div><strong>Amount:</strong> Rp{{ number_format($item->harga, 0, ',', '.') }}</div>
-                                        <div><strong>Stok:</strong> ({{$item->stok}}) pcs</div>
+                                        <div><strong>Stok:</strong> ({{$item->stok}}) {{ $item->satuanObj->nama }}</div>
                                     </div>
                                 </div>
                             </td>
 
                             <!-- Kolom desktop (disembunyikan di mobile) -->
-                            <td class="py-4  font-normal mobile lg:table-cell">{{ $item->kode_produk }} <b>Stok ({{$item->stok}}) pcs</b></td>
+                            <td class="py-4  font-normal mobile lg:table-cell">{{ $item->kode_produk }} <b>Stok ({{$item->stok}}) {{ $item->satuanObj->nama }}</b></td>
                             {{-- <td class="py-4 mobile lg:table-cell">
                                 <span class="inline-block rounded px-2 py-0.5 text-xs font-semibold">{{ $item->status }} ({{ $item->stok }} pcs)</span>
                             </td> --}}
