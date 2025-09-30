@@ -260,12 +260,20 @@
                     </div>
                 </a>
             </li>
+            <li class="menu nav-item">
+                <a class="nav-link group {{ $active === 'laporan_penjualan' ? 'active' : '' }}" href="{{ route('laporan.penjualan') }}">
+                    <div class="flex pl-5 items-center">
+                        <x-icon name="penjualan" class="text-gray-600" />
+                        <span class="pl-1 text-black dark:text-white">Laporan Penjualan</span>
+                    </div>
+                </a>
+            </li>
 
 
 
             {{-- Data IKM --}}
             @if (auth()->check() && auth()->user()->role === 'admin' || auth()->user()->role === 'superadmin')
-               <h2 class="pl-3 my-2 text-black/60 dark:text-white/40 text-sm"><span>Master Data</span></h2>
+               {{-- <h2 class="pl-3 my-2 text-black/60 dark:text-white/40 text-sm"><span>Master Data</span></h2> --}}
                 <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['ikm', 'ikm_create', 'ikm_update']) ? 'true' : 'false' }} }">
                     <a href="javascript:;" class="nav-link group text-black dark:text-white"
                         :class="{ 'active': open }" @click="open = !open">

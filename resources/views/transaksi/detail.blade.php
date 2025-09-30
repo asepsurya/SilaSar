@@ -135,7 +135,7 @@
                         </label>
                         <input type="date" id="tanggal_transaksi"
                             class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
-                            name="tanggal_transaksi" value="{{ $mitra->tanggal_transaksi ?? date('Y-m-d') }}" required
+                            name="tanggal_transaksi" value="{{ $transaksi->tanggal_transaksi  }}" required
                             style="appearance: none; -webkit-appearance: none; background:  url('data:image/svg+xml;utf8,<svg fill=\'%236B7280\' height=\'20\' viewBox=\'0 0 20 20\' width=\'20\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7.293 9.293a1 1 0 011.414 0L10 10.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z\'/></svg>') no-repeat right 0.75rem center/1.5em 1.5em; padding-right: 2.5rem;" />
                     </div>
                 </div>
@@ -335,31 +335,31 @@
                                         <div class=" border-gray-300 rounded overflow-hidden">
                                             <!-- Header Table -->
                                             <table class="max-h-[100px] overflow-y-auto" style="max-height: 200px;">
-                                                <thead class="bg-gray-100">
+                                                <thead class="bg-gray-100 dark:bg-black">
                                                     <tr>
-                                                        <th class="px-3 py-2 border text-center w-12">
+                                                        <th class="px-3 py-2 border  dark:border-white/10 text-center w-12">
                                                             <input type="checkbox" id="check-all"
                                                                 onclick="toggleCheckAll(this)">
                                                         </th>
-                                                        <th class="px-3 py-2 border ">Kode</th>
-                                                        <th class="py-2 border ">Nama</th>
-                                                        <th class="py-2 border ">Stok</th>
+                                                        <th class="px-3 py-2 border  dark:border-white/10 ">Kode</th>
+                                                        <th class="py-2 border  dark:border-white/10 ">Nama</th>
+                                                        <th class="py-2 border  dark:border-white/10 ">Stok</th>
                                                     </tr>
                                                 </thead>
                                                  <tbody>
                                                         @foreach ($penawaran as $produk)
                                                             <tr class="hover:bg-gray-50">
-                                                                <td class="px-3 py-2 border text-center w-12">
+                                                                <td class="px-3 py-2 border  dark:border-white/10 text-center w-12">
                                                                     <input type="checkbox" name="kode_produk[]"
                                                                         value="{{ $produk->produk->kode_produk ?? '' }}">
                                                                 </td>
-                                                                <td class="px-5 py-2 border w-32">
+                                                                <td class="px-5 py-2 border  dark:border-white/10 w-32">
                                                                     {{ $produk->produk->kode_produk ?? '' }}
                                                                 </td>
-                                                                <td class="px-3 py-2 border w-[300px]">
+                                                                <td class="px-3 py-2 border  dark:border-white/10 w-[300px]">
                                                                     {{ $produk->produk->nama_produk ?? '' }}
                                                                 </td>
-                                                                <td class="px-3 py-2 border w-[300px]">
+                                                                <td class="px-3 py-2 border  dark:border-white/10 w-[300px]">
                                                                     {{ $produk->produk->stok ?? ''}}
                                                                 </td>
                                                             </tr>
@@ -562,7 +562,7 @@
                                         </td>
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <input type="text" name="barang_keluar[]"
-                                                class="form-input w-20 text-center border-gray-300 rounded-md barang-keluar-input"
+                                                class="form-input w-20 text-center border-gray-300 rounded-md "
                                                 value="Rp. {{ number_format($harga ?? 0, 0, ',', '.') }}" data-index="{{ $index }}"
                                                 data-harga="{{ $harga }}" disabled>
                                         </td>
@@ -882,7 +882,7 @@
                                 @endphp
 
                                 <!-- Item Produk Mobile -->
-                                <div class="flex items-center justify-between border rounded-lg p-3 bg-white shadow-sm">
+                                <div class="flex items-center justify-between border rounded-lg p-3 bg-white dark:bg-black shadow-sm dark:border-white/10">
                                     <!-- Kiri: Hapus + Nama Produk -->
                                     <div class="flex items-center gap-3">
                                         <!-- Tombol Hapus -->
@@ -906,7 +906,7 @@
                                     </div>
 
                                     <!-- Kanan: Harga -->
-                                    <p class="text-sm text-gray-700 font-medium totalku"  data-index="{{ $myindex }}">
+                                    <p class="text-sm  font-medium totalku"  data-index="{{ $myindex }}">
                                         Rp.{{ number_format($total_mobile ?? 0, 0, ',', '.') }}
                                     </p>
                                 </div>
@@ -916,7 +916,7 @@
                                 <div id="modal-detail2-{{ $row->produk->kode_produk }}"
                                     class="fixed inset-0 z-40 hidden overflow-y-auto bg-black/40 flex items-center justify-center">
 
-                                    <div class="relative bg-white w-11/12 max-w-sm mx-auto rounded-lg shadow-lg p-5 z-10 space-y-3 animate-fadeIn">
+                                    <div class="relative bg-white dark:bg-black dark:border-white/10 w-11/12 max-w-sm mx-auto rounded-lg shadow-lg p-5 z-10 space-y-3 animate-fadeIn">
                                         <!-- Header Modal -->
                                         <div class="flex justify-between items-center mb-3">
                                             <h3 class="text-lg font-bold">Detail Produk</h3>
@@ -1019,14 +1019,14 @@
 
                     <div class="md:hidden">
 
-                        <table class="w-full mt-6 border-collapse border border-gray-300">
+                        <table class="w-full mt-6 border-collapse border border-gray-300  dark:border-white/10">
                             <!-- Ongkir -->
                             <tr>
 
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
                                     Ongkir
                                 </td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <div class="flex items-center justify-center">
                                         <span class="mr-1">Rp.</span>
                                         <input type="text" name="ongkir" id="ongkir-input-mobile" class="form-input w-24 text-right border-gray-300 rounded-md" value="{{ $transaksi->ongkir ?? '0' }}">
@@ -1036,8 +1036,8 @@
                             <!-- Total -->
                             <tr>
 
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Total</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Total</td>
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <div class="flex items-center justify-center">
                                         <span class="mr-1">Rp.</span>
                                         <input type="text" name="total" id="total-input-mobile" class="form-input w-24 text-right border-gray-300 rounded-md" value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}" readonly>
@@ -1047,8 +1047,8 @@
                             <!-- Discount -->
                             <tr>
 
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Discount</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Discount</td>
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <div class="flex items-center justify-center">
                                         <span class="mr-1">Rp.</span>
                                         <input type="text" name="discount" id="discount-input-mobile" class="form-input w-24 text-right border-gray-300 rounded-md" value="{{ number_format($transaksi->diskon, 0, ',', '.') }}">
@@ -1058,8 +1058,8 @@
                             <!-- Grand Total -->
                             <tr>
 
-                                <td class="border border-gray-300 px-3 py-2 font-bold text-right">Grand Total</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center font-bold">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-bold text-right">Grand Total</td>
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center font-bold">
                                     <div class="flex items-center justify-center">
                                         <span class="mr-1">Rp.</span>
                                         <input type="text" name="grand_total" id="grand-total-input-mobile" class="form-input w-24 text-right border-gray-300 rounded-md font-bold" value="{{ $transaksi->total ?? number_format($totalSemua_mobile, 0, ',', '.') }}" readonly>
@@ -1067,8 +1067,8 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Status Bayar</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Status Bayar</td>
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <select name="status_bayar" id="status-bayar-input-mobile" class="form-input w-full text-center border-gray-300 rounded-md">
                                         <option value="Belum Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Belum Bayar' ? 'selected' : '' }}>
                                             Belum Bayar</option>
@@ -1078,8 +1078,8 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="border border-gray-300 px-3 py-2 font-semibold text-right">Tanggal Bayar</td>
-                                <td class="border border-gray-300 px-3 py-2 text-center">
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Tanggal Bayar</td>
+                                <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                     <input type="date" name="tanggal_bayar" id="tanggal-bayar-input-mobile" class="form-input w-full text-center border-gray-300 rounded-md" value="{{ old('tanggal_bayar', $transaksi->tanggal_pembayaran ?? '') }}">
                                 </td>
                             </tr>
@@ -1220,7 +1220,7 @@
         <div class="md:hidden mt-4">
 
             <select id="action-selector"
-                class="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200 bg-white">
+                class="form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
                 <option selected disabled>-- Cetak Nota --</option>
 
                 @php
@@ -1566,6 +1566,26 @@
             });
         }
     </script>
+    @if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: "{{ session('error') }}",
+    });
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: "{{ session('success') }}",
+    });
+</script>
+@endif
+
     {{-- <script>
         function updateKodeTransaksi(kodeTransaksi, kodeMitra) {
             const selectedCheckboxes = document.querySelectorAll('input[name="kode_produk[]"]:checked');

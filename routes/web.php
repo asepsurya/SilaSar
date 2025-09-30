@@ -10,6 +10,7 @@ use App\Http\Controllers\Mitra\MitraController;
 use App\Http\Controllers\Auth\registerController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Region\RegionController;
+use App\Http\Controllers\Laporan\LaporanController;
 use App\Http\Controllers\Keuangan\HistoryController;
 use App\Http\Controllers\Keuangan\KeuanganController;
 use App\Http\Controllers\Transaksi\TransaksiController;
@@ -108,6 +109,15 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::post('/hapus-produk-transaksi', [TransaksiController::class, 'hapusProduk'])->name('transaksi.hapus-produk');
         Route::get('/transaksi/destory/{id}', [TransaksiController::class, 'hapusTransksi'])->name('hapusTransksi');
 
+
+        Route::get('/laporan/penjualan', [TransaksiController::class, 'laporanTransaksi'])->name('laporan.penjualan');
+        Route::get('/laporan/konsinyasi/{id}', [LaporanController::class, 'laporankionsinyasi'])->name('laporan.konsinyasi');
+        Route::get('/laporan/invoice/{id}', [LaporanController::class, 'laporaninvoice'])->name('laporan.invoice');
+        Route::get('/laporan/kwitansi/{id}', [LaporanController::class, 'laporankwitansi'])->name('laporan.kwitansi');
+        Route::get('/laporan/labarugi', [LaporanController::class, 'laporanlabarugi'])->name('laporan.kwitansi');
+        Route::get('/laporan/pdf', [TransaksiController::class, 'exportPDF'])->name('laporan.exportPDF');
+
+
         // ------------------------------------------------
         // Route Nota
         // ------------------------------------------------
@@ -123,6 +133,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/nota/delete/{id}', [NotaController::class, 'notaDelete'])->name('nota.delete');
 
         Route::get('/nota2/{id}', [NotaController::class, 'nota2'])->name('nota');
+        
     });
 
     Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');

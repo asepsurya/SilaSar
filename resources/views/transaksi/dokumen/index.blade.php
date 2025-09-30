@@ -18,35 +18,35 @@
                  display: none !important;
             }
               @page {
-    size: A4 portrait; /* atau landscape */
-    margin: 0;         /* hilangkan margin bawaan */
-  }
+                size: A4 portrait; /* atau landscape */
+                margin: 0;         /* hilangkan margin bawaan */
+            }
 
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
 
-  #print-area {
-    width: 100%;
-    height: auto;
-    transform: scale(1);          /* pastikan tidak mengecil */
-    transform-origin: top left;   /* scaling mulai dari kiri atas */
-  }
+            #print-area {
+                width: 100%;
+                height: auto;
+                transform: scale(1);          /* pastikan tidak mengecil */
+                transform-origin: top left;   /* scaling mulai dari kiri atas */
+            }
 
 
-  html, body {
-  width: 100% !important;
-  height: 100% !important;
-  overflow: visible !important;
-}
-        }
-        @media screen and (max-width: 768px) {
-              #include-content{
-                  transform: scale(0.7); /* perkecil biar muat layar */ transform-origin: top center;
-              }
-      }
-    }
+            html, body {
+            width: 100% !important;
+            height: 100% !important;
+            overflow: visible !important;
+            }
+                    }
+                    @media screen and (max-width: 768px) {
+                        #include-content{
+                            transform: scale(0.7); /* perkecil biar muat layar */ transform-origin: top center;
+                        }
+                }
+                
     </style>
 </head>
 
@@ -65,21 +65,42 @@
            
             {{-- <button class="bg-blue-600 text-xs px-2 py-1 rounded">+ Create</button> --}}
         </div>
-        <div class="flex items-center space-x-3">
-            <button onclick="printArea()"><i data-lucide="printer" class="w-5 h-5 text-white"></i></button>
+       <div class="flex items-center space-x-2">
+    <!-- Tombol Print Area -->
+    <button onclick="printArea()" class="p-2 rounded">
+        <i data-lucide="printer" class="w-5 h-5 text-white"></i>
+    </button>
 
-            <script>
-                function printArea() {
-                    const printContents = document.getElementById("print-area").innerHTML;
-                    const originalContents = document.body.innerHTML;
+    <!-- Tombol PDF -->
+    <button onclick="printPDF(this)" data-type="{{ request('type') }}" class="p-2 rounded">
+        <i data-lucide="file-down" class="w-5 h-5"></i>
+    </button>
+</div>
 
-                    document.body.innerHTML = printContents;
-                    window.print();
-                    document.body.innerHTML = originalContents;
-                }
-            </script>
-           
-        </div>
+<script>
+function printPDF(button) {
+    // Ambil type dari data attribute tombol
+    const type = button.getAttribute('data-type'); 
+    const id = '{{ $transaksi->id }}'; // ID transaksi
+
+    // Mapping route berdasarkan type
+    const routes = {
+        konsinyasi: `/laporan/konsinyasi/{{ $id }}`,
+        invoice: `/laporan/invoice/{{ $id }}`,
+        kwitansi: `/laporan/kwitansi/{{ $id }}`,
+    };
+
+    if (!routes[type]) {
+        console.error('Jenis laporan tidak valid:', type);
+        return;
+    }
+
+    // Buka PDF di tab baru
+    window.open(routes[type], "_blank");
+}
+</script>
+
+
     </div>
 
     <div class="flex flex-1 overflow-hidden">

@@ -11,7 +11,10 @@ use App\Models\Penawaran;
 use App\Models\Transaksi;
 use App\Models\Itemdokumen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\TransaksiProduct;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Validator;
@@ -102,7 +105,6 @@ class TransaksiController extends Controller
              
             }
         }
-
        
         // Catat aktivitas
         activity('ikm')
@@ -130,7 +132,7 @@ class TransaksiController extends Controller
 
        $kode_mitra = $request->kode_mitra;
         $transaksi = Transaksi::where('kode_transaksi', $request->nomor_transaksi)->firstOrFail();
-
+        $transaksi->tanggal_transaksi = $request->tanggal_transaksi;
         $transaksi->diskon = str_replace(['.', ','], '',  $request->discount ?? '0');
         $transaksi->ongkir = str_replace(['.', ','], '', $request->ongkir ?? '0');
         $transaksi->tanggal_pembayaran = $request->tanggal_bayar ?? $transaksi->tanggal_pembayaran;
@@ -138,73 +140,82 @@ class TransaksiController extends Controller
         $transaksi->status_bayar = $request->status_bayar;
         $transaksi->auth = auth()->user()->id;
 
-        foreach ($request->kode_produk as $index => $kode_produk) {
+       foreach ($request->kode_produk as $index => $kode_produk) {
 
-            $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
-            $barangReturBaru  = $request->barang_retur[$index] ?? 0;
+                $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
+                $barangReturBaru  = $request->barang_retur[$index] ?? 0;
 
-            // ambil data lama (jika ada)
-            $existing = TransaksiProduct::where([
-                'kode_produk'    => $kode_produk,
-                'kode_transaksi' => $transaksi->kode_transaksi,
-                'kode_mitra'     => $kode_mitra,
-            ])->first();
+                // Cek stok produk
+                $produk = Produk::where('kode_produk', $kode_produk)->first();
+                if (!$produk) {
+                    return redirect()->back()->with("error", "Produk $kode_produk tidak ditemukan.");
+                }
 
-            $transaksiProduct = TransaksiProduct::updateOrCreate(
-                [
+                // ambil data lama (jika ada)
+                $existing = TransaksiProduct::where([
                     'kode_produk'    => $kode_produk,
                     'kode_transaksi' => $transaksi->kode_transaksi,
                     'kode_mitra'     => $kode_mitra,
-                ],
-                [
-                    'barang_keluar'  => $barangKeluarBaru,
-                    'barang_terjual' => $request->barang_terjual[$index] ?? 0,
-                    'barang_retur'   => $barangReturBaru,
-                    'total'          => str_replace(['.', ','], '', $request->harga[$index] ?? 0),
-                ]
-            );
+                ])->first();
 
-            // hitung selisih supaya tidak dobel
-            $barangKeluarLama = $existing->barang_keluar ?? 0;
-            $barangReturLama  = $existing->barang_retur ?? 0;
+                $barangKeluarLama = $existing->barang_keluar ?? 0;
+                $barangReturLama  = $existing->barang_retur ?? 0;
 
-            $selisihKeluar = $barangKeluarBaru - $barangKeluarLama;
-            $selisihRetur  = $barangReturBaru - $barangReturLama;
+                $selisihKeluar = $barangKeluarBaru - $barangKeluarLama;
+                $selisihRetur  = $barangReturBaru - $barangReturLama;
 
-            // stok berkurang karena barang keluar
-            if ($selisihKeluar != 0) {
-                Produk::where('kode_produk', $kode_produk)
-                    ->decrement('stok', $selisihKeluar);
-                
-                StokLog::create([
-                    'kode_produk' => $kode_produk,
-                    'tipe'        => 'masuk',
-                    'jumlah'      => $selisihRetur,
-                    'sumber'      => 'retur',
-                    'referensi'   => $transaksi->kode_transaksi,
-                    'auth'        => auth()->id(),
-                    'keterangan'  => 'Barang retur dari mitra '.$kode_mitra
-                ]);
+                // ❗️Cek stok cukup atau tidak
+                if ($selisihKeluar > 0 && $produk->stok < $selisihKeluar) {
+                    return redirect()->back()->with("error", "Stok produk {$produk->nama_produk} tidak mencukupi! Silahkan Cek kembali Stok yang tersedia");
+                }
 
+                // Update transaksi_product
+                $transaksiProduct = TransaksiProduct::updateOrCreate(
+                    [
+                        'kode_produk'    => $kode_produk,
+                        'kode_transaksi' => $transaksi->kode_transaksi,
+                        'kode_mitra'     => $kode_mitra,
+                    ],
+                    [
+                        'barang_keluar'  => $barangKeluarBaru,
+                        'barang_terjual' => $request->barang_terjual[$index] ?? 0,
+                        'barang_retur'   => $barangReturBaru,
+                        'total'          => str_replace(['.', ','], '', $request->harga[$index] ?? 0),
+                    ]
+                );
+
+                // Update stok
+                if ($selisihKeluar != 0) {
+                    Produk::where('kode_produk', $kode_produk)
+                        ->decrement('stok', $selisihKeluar);
+
+                    StokLog::create([
+                        'kode_produk' => $kode_produk,
+                        'tipe'        => 'keluar',
+                        'jumlah'      => $selisihKeluar,
+                        'sumber'      => 'transaksi',
+                        'referensi'   => $transaksi->kode_transaksi,
+                        'auth'        => auth()->id(),
+                        'keterangan'  => 'Barang keluar untuk mitra ' . $kode_mitra
+                    ]);
+                }
+
+                if ($selisihRetur != 0) {
+                    Produk::where('kode_produk', $kode_produk)
+                        ->increment('stok', $selisihRetur);
+
+                    StokLog::create([
+                        'kode_produk' => $kode_produk,
+                        'tipe'        => 'masuk',
+                        'jumlah'      => $selisihRetur,
+                        'sumber'      => 'retur',
+                        'referensi'   => $transaksi->kode_transaksi,
+                        'auth'        => auth()->id(),
+                        'keterangan'  => 'Barang retur dari mitra ' . $kode_mitra
+                    ]);
+                }
             }
 
-            // stok bertambah karena retur
-            if ($selisihRetur != 0) {
-                Produk::where('kode_produk', $kode_produk)
-                    ->increment('stok', $selisihRetur);
-    
-                StokLog::create([
-                    'kode_produk' => $kode_produk,
-                    'tipe'        => 'masuk',
-                    'jumlah'      => $selisihRetur,
-                    'sumber'      => 'retur',
-                    'referensi'   => $transaksi->kode_transaksi,
-                    'auth'        => auth()->id(),
-                    'keterangan'  => 'Barang retur dari mitra '.$kode_mitra
-                ]);
-
-            }
-        }
 
         $transaksi->update();
 
@@ -382,6 +393,98 @@ class TransaksiController extends Controller
         Transaksi::where('kode_transaksi',$id)->delete();
         TransaksiProduct::where('kode_transaksi',$id)->delete();
         return redirect()->route('transaksi.index')->with("success", "Data has been deleted successfully!");
+    }
+
+    public function laporanTransaksi(){
+        $awal = request('awal');
+        $akhir = request('akhir');
+      $laporan = DB::table('transaksis as t')
+            ->join('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+            ->join('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+            ->join('satuans as s', 'p.satuan_id', '=', 's.id')
+            ->join('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.kode_transaksi',
+                't.tanggal_transaksi',
+                't.kode_mitra',
+                'm.nama_mitra as nama_pelanggan',
+                'm.alamat_mitra as alamat',
+                'tp.kode_produk',
+                'p.nama_produk',
+                'tp.barang_keluar',
+                'tp.barang_retur',
+                'tp.barang_terjual as jumlah',
+                's.nama as satuan',   // ✅ ambil dari tabel satuans
+                'p.harga',
+                DB::raw('(tp.barang_terjual * p.harga) as total')
+            )
+            ->when(request('awal') && request('akhir'), function ($query) {
+                $query->whereBetween('t.tanggal_transaksi', [request('awal'), request('akhir')]);
+            })
+            ->get();
+
+
+
+        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
+        $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
+
+
+         $logs = Activity::where([
+            'causer_id' => auth()->user()->id,
+            'log_name' => 'ikm'
+        ])->latest()->take(10)->get();
+
+        return view('report.laporanTransaksi', [
+            'activeMenu' => 'laporan_penjualan',
+            'active' => 'laporan_penjualan',
+        ], compact('laporan', 'logs','awal','akhir'));
+    }
+    
+       public function exportPDF()
+    {
+        $awal = request('awal');
+        $akhir = request('akhir');
+          $laporan = DB::table('transaksis as t')
+            ->join('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+            ->join('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+            ->join('satuans as s', 'p.satuan_id', '=', 's.id')
+            ->join('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.kode_transaksi',
+                't.tanggal_transaksi',
+                't.kode_mitra',
+                'm.nama_mitra as nama_pelanggan',
+                'm.alamat_mitra as alamat',
+                'tp.kode_produk',
+                'p.nama_produk',
+                'tp.barang_keluar',
+                'tp.barang_retur',
+                'tp.barang_terjual as jumlah',
+                's.nama as satuan',   // ✅ ambil dari tabel satuans
+                'p.harga',
+                DB::raw('(tp.barang_terjual * p.harga) as total')
+            )
+            ->when(request('awal') && request('akhir'), function ($query) {
+                $query->whereBetween('t.tanggal_transaksi', [request('awal'), request('akhir')]);
+            })
+            ->get();
+
+
+
+        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
+        $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
+        
+        $pdf = Pdf::loadView('report.transaksi', [
+            'laporan' => $laporan,
+            'awal' => $awal,
+            'akhir' => $akhir
+        ])->setPaper('a4', 'portrait');
+
+                    
+            $random = rand(1000, 9999);
+            $namaFile = 'laporan-penjualan-detail-' . Carbon::now()->format('Ymd_His') . '-' . $random . '.pdf';
+
+            return $pdf->download($namaFile);
     }
 
 

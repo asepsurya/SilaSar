@@ -18,7 +18,7 @@
             {{-- Filter Bulan & Tahun berdempetan --}}
             <form method="GET" class="flex gap-0 items-center">
                 <select name="bulan" style="width: 200px;"
-                    class="form-input w-36 border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                    class="form-select w-36 border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
                     onchange="this.form.submit()">
                     @foreach(range(1, 12) as $b)
                     <option value="{{ $b }}" {{ $b==$bulan ? 'selected' : '' }}>

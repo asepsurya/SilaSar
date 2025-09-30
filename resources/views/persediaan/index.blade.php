@@ -34,7 +34,7 @@
                         <td>{{ $no++ }}</td>
                         <td>{{ $item->tanggal }}</td>
                         <td>{{ $item->no_transaksi }}</td>
-                        <td class="text-left">{{ $item->deskripsi }}</td>
+                        <td class="text-left">{{ $item->deskripsi ?? '-' }}</td>
                         <td>{{ $item->created_at }}</td>
                         <td>{{ $item->updated_at }}</td>
                         <td>
@@ -68,7 +68,7 @@
                     </a>
                 </div>
                 <p class="text-xs text-gray-500">Tanggal: {{ $item->tanggal }}</p>
-                <p class="text-xs text-gray-500">Catatan: {{ $item->deskripsi }}</p>
+                <p class="text-xs text-gray-500">Catatan: {{ $item->deskripsi ?? '-'}}</p>
                 <p class="text-xs text-gray-500">Dibuat: {{ $item->created_at }}</p>
                 <p class="text-xs text-gray-500">Update: {{ $item->updated_at }}</p>
                 <a href="{{ route('manajemenStok.update',$item->id ) }}"

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\TransaksiProduct;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaksi extends Model
@@ -23,4 +24,10 @@ class Transaksi extends Model
     public function penawaran2(){
         return $this->belongsTo('App\Models\Penawaran','kode_mitra','kode_mitra');
     }
+
+    public function items()
+    {
+        return $this->hasMany(TransaksiProduct::class, 'kode_transaksi', 'kode_transaksi');
+    }
+
 }

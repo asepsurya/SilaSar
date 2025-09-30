@@ -9,86 +9,213 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<style>
-    body{
-        font-family: 'Roboto', sans-serif;
-    }
-    h1, h2, h3 {
-        font-family: 'Poppins', sans-serif;
-    }
-    .kop-surat {
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #000;
+        }
+        h1, h2, h3 {
+            font-weight: bold;
+        }
+        .kop-surat {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .garis-atas {
+            border: 2px solid black;
+            margin: 0;
+        }
+        .garis-bawah {
+            border: 1px solid black;
+            margin: 2px 0 10px 0;
+        }
+        .address {
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-bordered th, .table-bordered td {
+            border: 1px solid black;
+            padding: 4px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .signature-box {
+            height: 150px;
+            text-align: center;
+            vertical-align: bottom;
+        }
+        .stamp {
+            position: absolute;
+            width: 120px;
+            opacity: 0.7;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .ttd {
+            position: absolute;
+            width: 120px;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .relative {
+            position: relative;
+            height: 120px;
+            margin-top: 10px;
+        }
+        @page {
+            size: A4;
+            margin: 2.54cm;
+        }
+          .address, .address p {
+            font-size: 11px;
+            font-weight: normal;   /* jangan bold */
+            line-height: 1.4;      /* atur jarak antar baris */
+            margin: 0;             /* hilangkan margin default <p> */
+            padding: 0;
+        }
+            .table-bordered {
         width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Hanya garis horizontal */
+     .table-bordered {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* penting biar width bekerja */
+    }
+
+    /* Hanya garis horizontal */
+    .table-bordered th,
+    .table-bordered td {
+        padding: 6px 8px;
+        font-size: 12px;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        border-left: none;
+        border-right: none;
+    }
+
+    /* Header abu-abu */
+    .table-bordered thead th {
+        background-color: #f2f2f2;
+        font-weight: bold;
         text-align: center;
-        margin-bottom: 10px;
     }
 
-    .garis-atas {
-        border: 2px solid black;
-        margin: 0;
-    }
+    /* Atur kolom fixed */
+    .col-no { width: 30px; }
+    .col-qty { width: 40px; }
+    .col-unit { width: 40px; }
+    .col-empty { width: 40px; }
+    .col-harga { width: 100px; }
+    .col-empty2 { width: 40px; }
+    .col-subtotal { width: 110px; }
 
-    .garis-bawah {
-        border: 1px solid black;
-        margin: 2px 0 10px 0;
-    }
-
-    .address {
+    /* Nama Barang fleksibel + wrap */
+    .col-nama {
         word-wrap: break-word;
-        /* Optionally add a max width for better control */
-        max-width: 300px;
-        /* Or whatever max-width you want */
+        word-break: break-word;
     }
 
+    /* Rata teks */
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
     @page {
-        size: A4;
-        margin: 2.54cm;
+        margin: 100px 40px 100px 40px; /* margin atas kanan bawah kiri */
     }
-</style>
+    footer {
+        position: fixed;
+        bottom: -60px; 
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 11px;
+        color: #666;
+    }
+
+    .pagenum:before {
+        content: counter(page);
+    }
+    body {
+        font-family: 'DejaVu Sans', sans-serif;
+        line-height: 1.4;
+    }
+
+    h1, h2, h3 {
+        font-family: 'DejaVu Sans', sans-serif;
+        font-weight: bold;
+    }
+
+  
+    </style>
 
 <head>
 
 <body>
     <div class="max-w-[900px] mx-auto p-6 text-black">
-        <div class="flex justify-between items-center mb-2">
-            <div style="width: 90px; height: 90px; ">
-                 @php
-                        $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id);
-                        $nama = $perusahaan->nama_perusahaan ?? 'Perusahaan tidak ditemukan';
-                        $logo = $perusahaan->logo ? asset('storage/' . $perusahaan->logo) : asset('assets/default_logo.png');
-                @endphp
-                <img alt="logo" class="w-full h-auto" src="{{ $logo }}"  />
-            </div>
-
-            <div class="text-right">
-                <h1 class="text-2xl font-normal mb-5"><b>NOTA KONSINYASI</b></h1>
-                <table class="border border-gray-400 text-sm w-[320px] mx-auto text-black">
-                    <thead>
-                        <tr class="bg-gray-300 text-center text-xs font-semibold">
-                            <th class="border border-gray-400 px-2 py-1">Nomor Nota</th>
-                            <th class="border border-gray-400 px-2 py-1">Tanggal Transaksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="text-center text-xs font-bold">
-                            <td class="border border-gray-400 px-2 py-1">{{ $transaksi->kode_transaksi }}</td>
-                            <td class="border border-gray-400 px-2 py-1">
-                                {{ \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('d-M-y') }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-          @php
-                $alamat = ($perusahaan->alamat) . ', ' .
-                        'Kelurahan/Desa ' . ucwords(strtolower($perusahaan->desa->name)) . ', ' .
-                        'Kecamatan ' . ucwords(strtolower($perusahaan->kecamatan->name)) . ', ' .
-                        'Kota/Kab. ' . ucwords(strtolower( $perusahaan->kota->name));
+      <div class="flex justify-between items-start mb-4">
+    <!-- Logo & Alamat Perusahaan -->
+    <div class="flex flex-col" style="width: 50%;">
+        <div style="width: 90px; height: 90px;" class="mb-2">
+            @php
+                $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id);
+                $logo = $perusahaan->logo ? asset('storage/' . $perusahaan->logo) : asset('assets/default_logo.png');
             @endphp
-        <div class="mb-1 text-[11px] leading-[13px]">
-            <p class="address">{{ $alamat }}</p>
-            <p>P. {{ auth()->user()->perusahaanUser->telp_perusahaan }}</p>
-            <p>E. {{ auth()->user()->perusahaanUser->email }}</p>
+            <img alt="logo" class="w-full h-auto" src="{{ $logo }}" />
         </div>
+
+        @php
+            $alamat = ($perusahaan->alamat ?? '') . ', ' .
+                      'Kelurahan/Desa ' . ($perusahaan->desa->name ?? '-') . ', ' .
+                      'Kecamatan ' . ($perusahaan->kecamatan->name ?? '-') . ', ' .
+                      'Kota/Kab. ' . ($perusahaan->kota->name ?? '-');
+        @endphp
+
+        <div class="text-[11px] leading-[13px]">
+            <p class="address">{{ $alamat }}</p>
+            <p>P. {{ auth()->user()->perusahaanUser->telp_perusahaan ?? '-' }}</p>
+            <p>E. {{ auth()->user()->perusahaanUser->email ?? '-' }}</p>
+        </div>
+    </div>
+    
+    <!-- Judul & Info Nota -->
+    <div class="text-right" style="width: 50%;">
+        <h1 class="text-2xl font-bold mb-3">NOTA KONSINYASI</h1>
+
+        <table class="border border-gray-400 text-sm w-full mx-auto text-black">
+            <thead>
+                <tr class="bg-gray-300 text-center text-xs font-semibold">
+                    <th class="border border-gray-400 px-2 py-1">Nomor Nota</th>
+                    <th class="border border-gray-400 px-2 py-1">Tanggal Transaksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="text-center text-xs font-bold">
+                    <td class="border border-gray-400 px-2 py-1">{{ $transaksi->kode_transaksi }}</td>
+                    <td class="border border-gray-400 px-2 py-1">
+                        {{ \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('d-M-y') }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
         <div class="mt-2">
             <hr class="garis-atas">
             <hr class="garis-bawah">
@@ -111,7 +238,7 @@
                 <div class="flex-1 font-normal">{{ $transaksi->mitra->no_telp_mitra }}</div>
             </div>
         </div>
-        <table class="w-full border-collapse border border-black text-[12px] leading-[14px] mb-2">
+        <table class="table-bordered w-full border-collapse border border-black text-[12px] leading-[14px] mb-2">
             <thead>
                 <tr class="border border-black bg-white">
                     <th class="border-collapse px-1 text-center w-[30px] font-semibold">No</th>
