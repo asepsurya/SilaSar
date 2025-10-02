@@ -30,6 +30,7 @@
                 <input type="number" name="tahun" value="{{ $tahun }}" placeholder="Tahun"
                     class="form-input w-24 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
                     onchange="this.form.submit()">
+                    <a href="{{ route('laporan.labarugipdf') }}" class="btn ms-3 m-5"> Cetak PDF</a>
             </form>
         </div>
 
