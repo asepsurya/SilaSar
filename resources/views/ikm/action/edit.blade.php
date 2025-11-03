@@ -4,6 +4,7 @@
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    
 @endsection
 @section('container')
     <style>
@@ -90,11 +91,10 @@
 
             
         }
-        .tab-button.active {
-            background-color: #3b82f6; /* bg-blue-500 */
-            color: white;
-            border-color: #3b82f6;
-        }
+         .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+       
     </style>
     <script>
         document.getElementById('rightSidebar').addEventListener('click', function() {
@@ -131,33 +131,59 @@
     </script>
      @if (auth()->user()->role == 'admin' || auth()->user()->role == 'superadmin')
     <!-- Wrapper scrollable -->
-    <div class="w-full overflow-x-auto no-scrollbar border-b bg-white dark:text-black dark:bg-white/5" >
-        <div class="flex space-x-2 px-2  mt-1 min-w-max scrolling-wrapper" >
+    <div class="w-full overflow-x-auto no-scrollbar  bg-white dark:text-black dark:bg-black" >
+        <div class="flex space-x-2 px-2  mt-1 min-w-max scrolling-wrapper no-scrollbar mb-2" >
            
-            <button class="tab-button px-4 py-2 flex-shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-gray-100 text-sm hover:bg-gray-200 transition" onclick="changeTab(0)">
+            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md  border-gray-300 bg-gray-100 text-sm dark:bg-white/5 dark:border-black/10 dark:text-white  hover:bg-gray-200 transition" onclick="changeTab(0)">
                 Detail IKM
             </button>
-            <button class="tab-button px-4 py-2 flex-shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-gray-100 text-sm hover:bg-gray-200 transition" onclick="changeTab(1)">
+            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(1)">
                 Data Mitra
             </button>
-            <button class="tab-button px-4 py-2 flex-shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-gray-100 text-sm hover:bg-gray-200 transition" onclick="changeTab(2)">
+            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(2)">
                 Data Produk
             </button>
-            <button class="tab-button px-4 py-2 flex-shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-gray-100 text-sm hover:bg-gray-200 transition" onclick="changeTab(3)">
+            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(3)">
                 Riwayat Transaksi
             </button>
-            <button class="tab-button px-4 py-2 flex-shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-gray-100 text-sm hover:bg-gray-200 transition" onclick="changeTab(4)">
+            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(4)">
                 Laporan Keuangan
             </button>
-            <button class="tab-button px-4 py-2 flex-shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-gray-100 text-sm hover:bg-gray-200 transition" onclick="changeTab(5)">
+            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(5)">
                 Log Aktivitas
             </button>
            
         </div>
     </div>
+    <script>
+    function changeTab(index) {
+        // Hapus semua tab aktif
+        document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active-tab');
+        btn.classList.add('bg-gray-100');
+        btn.classList.remove('bg-white');
+        });
+
+        // Tambahkan ke tab aktif
+        const activeBtn = document.querySelectorAll('.tab-button')[index];
+        activeBtn.classList.add('active-tab', 'bg-white');
+        activeBtn.classList.remove('bg-gray-100');
+
+        // Simpan index tab di localStorage agar tetap aktif setelah reload
+        localStorage.setItem('activeTab', index);
+    }
+
+    // Saat halaman diload, aktifkan tab yang terakhir diklik
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTab = localStorage.getItem('activeTab');
+        if (savedTab !== null) {
+        changeTab(parseInt(savedTab));
+        }
+    });
+    </script>
      @endif
     <div class="bg-lightwhite dark:bg-white/5 dark:border-black/10 p-6">
-        <div class="flex items-start justify-between gap-2 mb-[2px]">
+        <div class="flex items-start justify-between gap-2 ">
             <div>
                 <h2 class="text-lg font-semibold mb-3">{{ $ikm->nama }}</h2>
                 <div class="flex flex-wrap gap-4 items-center mb-4">
@@ -751,7 +777,108 @@
     </div>
 <div id="tab-content-4" class="tab-content hidden p-4">
     <p class="text-sm font-semibold mb-3 text-black/40 dark:text-white/40">Catatan Keuangan</p>
+    @php
+    // Ambil parameter sort dan filter tanggal dari request
+    $sort = request('sort', 'desc');
+    $from = request('from');
+    $to = request('to');
+
+    // Filter transaksi berdasarkan rentang tanggal jika ada
+    $filteredTransaksi = $transaksi;
+    if ($from && $to) {
+    try {
+        $fromDate = \Carbon\Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
+        $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
+        $filteredTransaksi = $filteredTransaksi->filter(function ($item) use ($fromDate, $toDate) {
+        $itemDate = \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal);
+    return $itemDate->between($fromDate, $toDate);
+    });
+    } catch (\Exception $e) {
+    // Jika format salah, tampilkan semua
+    }
+    }
+
+    // Urutkan transaksi berdasarkan tanggal sesuai sort
+    $filteredTransaksi =
+    $sort === 'asc' ? $filteredTransaksi->sortBy(function ($item) {
+        return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
+    }) : $filteredTransaksi->sortByDesc(function ($item) {
+        return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
+    });
+    @endphp
+
+
+
     <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
+         <div class="flex flex-wrap md:flex-row gap-2 items-start w-full md:w-auto">
+   
+            <!-- Filter -->
+            <div x-data="{ openFilter: false }" class="relative shrink-0 mb-3">
+                <button type="button"
+                        @click="openFilter = !openFilter"
+                        class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-auto">
+                    <i class="fas fa-filter"></i>
+                    <span class="hidden sm:inline">Filter</span>
+                </button>
+
+                <!-- Dropdown Filter -->
+                <div x-show="openFilter"
+                    @click.away="openFilter = false"
+                    x-transition
+                    class="absolute z-50 mt-2 left-0 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg shadow-lg p-4 min-w-[320px] max-w-[90vw]">
+                    <form method="GET" id="filterForm" class="flex flex-col gap-3">
+                        <h3 class="font-semibold text-sm">Filter Transaksi</h3>
+
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm w-16">Dari:</label>
+                            <input type="text" name="from" id="from_date"
+                                value="{{ $from }}"
+                                class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
+                                placeholder="dd/mm/yyyy" autocomplete="off">
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm w-16">Sampai:</label>
+                            <input type="text" name="to" id="to_date"
+                                value="{{ $to }}"
+                                class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
+                                placeholder="dd/mm/yyyy" autocomplete="off">
+
+                        </div>
+                        <input type="text" name="ip" value="{{ $id }}" hidden>      
+                        <div class="flex gap-2 mt-3">
+                            <button type="submit"
+                                    class="submitBtn flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition w-full">
+                                <span class="btn-text">Terapkan</span>
+                                <span class="btn-spinner hidden animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                            </button>
+
+                            <a href="{{ route('index.keuangan') }}"
+                            class="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition w-full text-center">
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pilih Bulan -->
+            <form method="GET" class="shrink-0 w-auto">
+                <input type="month"
+                    name="periode"
+                    value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
+                    onchange="this.form.submit()"
+                    class="bg-white dark:bg-black form-input py-2.5 px-4 w-auto text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5">
+                    <input type="text" name="ip" value="{{ $id }}" hidden>
+                </form>
+                <a  href="{{ route('keuangan.pdf', request()->query()) }}" target="_blank" type="button"
+                        @click="openFilter = !openFilter"
+                        class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-auto">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="hidden sm:inline">Filter</span>
+            </a>
+        </div>
+        
         <div class="table-responsive">
             @if($keuangan->isEmpty())
                 <div class="text-center py-6 text-gray-400">
@@ -817,17 +944,18 @@
 
     <div id="tab-content-5" class="tab-content hidden p-4">
         <p class="text-sm font-semibold mb-3 text-black/40 dark:text-white/40">Log Aktivitas Pengguna</p>
-        <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md">
+        <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
+            <div class="bg-white dark:bg-black p-5 rounded-md border border-black/10 dark:border-white/10 max-h-[400px] overflow-y-auto">
             @foreach ($Ikmlogs as $log)
-                <div class="flex gap-3 items-start mb-5 text-sm text-gray-700 dark:text-gray-300">
+                <div class="flex gap-3 items-start  text-sm text-gray-700 dark:text-gray-300 mb-3 border-b dark:border-white/10 border-black/10 pb-3">
                     <div class="h-6 w-6 flex-none p-1 text-black bg-lightblue-100 rounded-lg">
                         <x-icon name="users" class="text-gray-600" />
                     </div>
                     <div class="flex-1">
-                        <p class="mb-2 text-sm text-gray-900 dark:text-white">
+                        <p class=" text-sm text-gray-900 dark:text-white">
                             {{ $log->description }} oleh <strong>{{ $log->causer->name ?? 'Sistem' }}</strong>
                         </p>
-                        <p class="text-xs dark:text-gray-400 text-gray-500">
+                        <p class="text-xs dark:text-gray-400 text-gray-500 mb-3">
                             {{ $log->created_at->diffForHumans() }}
                         </p>
                     </div>
@@ -837,6 +965,7 @@
                 @if ($Ikmlogs->count() === 0)
                     <p class="text-gray-500 dark:text-gray-400">Tidak ada aktivitas terbaru.</p>
                 @endif
+            </div>
             </div>
         </div>
     </div>
@@ -889,7 +1018,20 @@
             </div>
         </div>
     </div>
+     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+    <script>
+        // Inisialisasi Flatpickr dengan lokal Indonesia
+        flatpickr("#from_date", {
+            locale: "id",
+            dateFormat: "d/m/Y",
+        });
 
+        flatpickr("#to_date", {
+            locale: "id",
+            dateFormat: "d/m/Y",
+        });
+    </script>
     <script>
         const imageInput = document.getElementById('image-input');
         const preview = document.getElementById('preview');
@@ -1165,5 +1307,33 @@
         //     changeTab(savedIndex);
         // });
     </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const activeTabIndex = localStorage.getItem('activeTabIndex') || 0;
+
+    // Fungsi ubah tab
+    function changeTab(index) {
+        tabButtons.forEach((btn, i) => {
+            btn.classList.toggle('bg-blue-600', i === index);
+            btn.classList.toggle('text-white', i === index);
+        });
+        tabContents.forEach((content, i) => {
+            content.classList.toggle('hidden', i !== index);
+        });
+
+        localStorage.setItem('activeTabIndex', index);
+    }
+
+    // Pasang event klik ke semua tombol tab
+    tabButtons.forEach((btn, i) => {
+        btn.addEventListener('click', () => changeTab(i));
+    });
+
+    // Saat halaman pertama kali dimuat → buka tab terakhir yang disimpan
+    changeTab(parseInt(activeTabIndex));
+});
+</script>
 
 @endsection

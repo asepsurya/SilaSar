@@ -28,11 +28,20 @@ class IndoRegionVillageSeeder extends Seeder
         $villages = RawDataGetter::getVillages();
 
         // Insert Data with Chunk
-        DB::transaction(function() use($villages) {
+        DB::transaction(function () use ($villages) {
             $collection = collect($villages);
             $parts = $collection->chunk(1000);
+        
             foreach ($parts as $subset) {
-                DB::table('villages')->insert($subset->toArray());
+                foreach ($subset as $village) {
+                    DB::table('villages')->updateOrInsert(
+                        ['id' => $village['id']], // kolom unik
+                        [
+                            'district_id' => $village['district_id'],
+                            'name' => $village['name'],
+                        ]
+                    );
+                }
             }
         });
     }

@@ -79,6 +79,15 @@
                     <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-black dark:bg-white"></span>
                 </span>
             </button>
+                @if (auth()->user()->role === 'gold')
+                    <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightyellow text-black">Gold</div>
+                    @elseif (auth()->user()->role === 'platinum')
+                    <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightblue-200 text-black">Platinum</div>
+                    @elseif (auth()->user()->role === 'admin')
+                    <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-indigo-300 text-black">Admin</div>
+                    @elseif (auth()->user()->role === 'superadmin')
+                    <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightgreen-100 text-black">Superadmin</div>
+                    @endif
             <div class="profile" x-data="dropdown" @click.outside="open = false">
                 <button type="button" class="flex items-center gap-1.5 xl:gap-0" @click="toggle()">
                     <img class="h-7 w-7 rounded-full xl:mr-2"
@@ -120,6 +129,8 @@
                     </li>
 
                     <li class="h-px bg-black/5 block my-1"></li>
+
+                 
                     <li>
                         <a href="{{ route('ikm.update', auth()->user()->ikm->id) }}" class="flex items-center">
                             <x-icon name="user-rounded" class="" />

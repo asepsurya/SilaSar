@@ -275,7 +275,7 @@ class ProdukController extends Controller
                     "items.$index.kode_produk" => 'required|string|exists:produks,kode_produk',
                     "items.$index.jumlah"      => 'required|numeric|min:1',
                     "items.$index.harga"       => 'required|numeric|min:0',
-                    "items.$index.satuan"      => 'required|exists:satuans,id',
+                    "items.$index.satuan_id"      => 'required|exists:satuans,id',
                 ], [
                     "items.$index.kode_produk.required" => "Kode produk pada item #".($index+1)." wajib diisi",
                     "items.$index.kode_produk.exists"   => "Kode produk pada item #".($index+1)." tidak valid",
@@ -369,8 +369,11 @@ class ProdukController extends Controller
                     ->causedBy(auth()->user())
                     ->log("Manajemen Stok Produk {$produk->nama_produk} Jumlah lama: {$jumlahLama}, Jumlah baru: {$jumlahBaru}, Selisih: {$selisih}");
             }
+          return redirect()
+            ->route('manajemenStok.update', $transaksi->id)
+            ->with('success', 'Stok berhasil disimpan/diperbarui!');
 
-            return back()->with("success", "Stok berhasil disimpan/diperbarui!");
+         
 
         }
 

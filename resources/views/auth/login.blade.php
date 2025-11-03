@@ -185,7 +185,8 @@
 <body class="bg-white min-h-screen">
 
     <!-- DESKTOP LOGIN -->
-    <main class="dekstop flex flex-col md:flex-row min-h-screen overflow-hidden bg-cover bg-center bg-[url('{{ asset('assets/bg2.png') }}')] md:bg-none">
+    <main class="flex flex-col md:flex-row min-h-screen overflow-hidden bg-cover bg-center bg-[url('{{ asset('assets/bg2.png') }}')] md:bg-none">
+        
         <!-- Right Form Section -->
         <section class="flex items-center min-h-screen w-full md:w-1/2 px-6 py-12 md:px-16">
             <div class="flex-grow">
@@ -196,7 +197,7 @@
 
                 <!-- Heading -->
                 <h1 class="text-[#0f172a] text-3xl font-semibold mb-2">Masuk ke Akun Anda</h1>
-                <p class="text-[#334155] mb-8 text-base">Selamat datang! Silakan masukkan detail Anda.</p>
+                <p class="text-[#334155] mb-8 text-base text-sm">Selamat datang! Silakan masukkan detail Anda.</p>
 
                 <!-- Error Alert -->
                 @if ($errors->any())
@@ -235,13 +236,14 @@
 
                     <!-- Forgot Password -->
                     <div class="flex justify-between mb-8 text-sm text-[#475569]">
+                        <div></div>
                         <a href="{{ route('passReset') }}" class="text-blue-600 hover:underline">Lupa Password..?</a>
                     </div>
 
                     <!-- Submit Button -->
-                    <button id="submit-btn-desktop" type="submit"  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center">
-                        <span id="btn-spinner-desktop" class="hidden mr-2"><i class="fas fa-spinner fa-spin"></i></span>
-                        <span id="btn-text-desktop">Masuk</span>
+                    <button id="submit-btn" type="submit"  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center">
+                        <span id="btn-spinner" class="hidden mr-2"><i class="fas fa-spinner fa-spin"></i></span>
+                        <span id="btn-text">Masuk</span>
                     </button>
                 </form>
 
@@ -250,11 +252,14 @@
                     Belum memiliki akun?
                     <a href="/register" class="text-blue-600 font-semibold hover:underline">Mendaftar</a>
                 </p>
-                <footer class="mt-auto p-7 flex flex-wrap items-center justify-center sm:justify-between gap-3 ">
+               <footer class="hidden md:flex mt-auto p-7 flex-wrap items-center justify-center sm:justify-between gap-3">
                     <p class="text-xs text-black">&copy; {{ date('Y') }} {{ config('app.name') }}</p>
-                    <ul class="flex items-center text-black/40 text-xs gap-5"> {{-- <li><img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded" width="110"></li> --}} <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="BI Logo" width="120"></li>
+                    <ul class="flex items-center text-black/40 text-xs gap-5">
+                        {{-- <li><img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded" width="110"></li> --}}
+                        <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="BI Logo" width="120"></li>
                     </ul>
                 </footer>
+
             </div>
 
         </section>
@@ -266,108 +271,16 @@
         </section>
 
     </main>
-
-    <!-- MOBILE LOGIN -->
-    <div class="mobile-login">
-        <div class="header" style="text-align: center;">
-            <center>
-                <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="Logo" width="200" style="margin-bottom: 15px;">
-            </center>
-        </div>
-
-
-        <div class="login-container">
-            <h2>Masuk ke akun Anda</h2>
-            <p>Selamat datang, silakan masukkan detail akun Anda untuk melanjutkan.</p>
-
-
-            <form method="POST" action="/login" onsubmit="showLoading('mobile')">
-                @csrf
-                @if ($errors->any())
-    <div id="toast-error"
-        class="fixed top-4 right-4 z-50 bg-red-500 text-white px-3 py-2 rounded-md shadow-md text-sm max-w-xs animate-fade-in-down">
-        <div class="flex items-start space-x-2">
-            <div>
-                <strong class="font-semibold">Error!</strong>
-
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-
-            </div>
-            <button onclick="document.getElementById('toast-error').remove()"
-                class="ml-2 text-white hover:text-gray-200 text-xs">
-                ✖
-            </button>
-        </div>
-    </div>
-
     <script>
-        // Auto hide setelah 4 detik
-        setTimeout(() => {
-            document.getElementById('toast-error')?.remove();
-        }, 4000);
-    </script>
-@endif
-
-                <div class="input-group">
-                    <input type="email" name="email" placeholder="Your Email Address" required>
-                    <i class="fas fa-user"></i>
-                </div>
-
-                <div class="input-group">
-                    <input type="password" name="password" placeholder="Password" required>
-                    <i class="fas fa-lock"></i>
-                </div>
-
-                <div class="options">
-                    <label>
-                        <input type="checkbox" id="rememberMe"> Simpan login
-                    </label>
-                    <a href="{{ route('passReset') }}">Lupa Password?</a>
-                </div>
-
-                <button id="submit-btn-mobile" type="submit"  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center">
-                    <span id="btn-spinner-mobile" class="hidden mr-2"><i class="fas fa-spinner fa-spin"></i></span>
-                    <span id="btn-text-mobile">Masuk</span>
-                </button>
-
-                <div class="create-account">
-                    <a href="/register">Mendaftar</a>
-                </div>
-
-            </form>
-        </div>
-        <footer class="mt-auto p-7 flex items-center justify-between">
-            <!-- Kiri -->
-            <p class="text-xs text-black">
-                &copy; {{ date('Y') }} {{ config('app.name') }}
-            </p>
-
-            <!-- Kanan -->
-            <ul class="flex items-center gap-5">
-                {{-- <li><img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded" width="110"></li> --}}
-                <li>
-                    <img src="{{ asset('assets/BI_Logo.png') }}" alt="BI Logo" width="120">
-                </li>
-            </ul>
-        </footer>
-
-    </div>
-
-    <!-- Scripts -->
-    <script>
-       function showLoading(formType = 'desktop') {
-            const btn = document.getElementById(`submit-btn-${formType}`);
-            const text = document.getElementById(`btn-text-${formType}`);
-            const spinner = document.getElementById(`btn-spinner-${formType}`);
-
+        function showLoading() {
+            const btn = document.getElementById('submit-btn');
+            const text = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
             text.textContent = 'Memproses...';
             spinner.classList.remove('hidden');
             btn.disabled = true;
             btn.classList.add('opacity-70', 'cursor-not-allowed');
         }
-
 
         function togglePasswordVisibility(id) {
             const input = document.getElementById(id);
@@ -377,8 +290,6 @@
             icon.classList.toggle('fa-eye', !isPassword);
             icon.classList.toggle('fa-eye-slash', isPassword);
         }
-
     </script>
-
 </body>
 </html>

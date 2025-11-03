@@ -108,54 +108,58 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ambil data JSON dari blade (pastikan $data dikirim dari controller)
     const rawData = @json($data);
 
-    function fetchEvents(tahun, bulan) {
-        const events = rawData
-            .filter(item => {
-                const [day, mon, yr] = item.tanggal.split('/');
-                return mon === bulan && yr === tahun;
-            })
-            .reduce((acc, item) => {
-                let group = acc.find(g => g.tanggal === item.tanggal);
-                if (!group) {
-                    group = { tanggal: item.tanggal, detail: [] };
-                    acc.push(group);
-                }
-                group.detail.push({
-                    tipe: item.tipe,
-                    total: item.total,
-                    deskripsi: item.deskripsi
-                });
-                return acc;
-            }, [])
-            .map(item => {
-                let pemasukan = 0;
-                let pengeluaran = 0;
+   function fetchEvents(tahun, bulan) {
+    // Pastikan tahun & bulan dalam format string dua digit
+    const tahunStr = String(tahun);
+    const bulanStr = String(bulan).padStart(2, '0');
 
-                item.detail.forEach(d => {
-                    if (d.tipe === 'pemasukan') pemasukan += Number(d.total);
-                    else if (d.tipe === 'pengeluaran') pengeluaran += Number(d.total);
-                });
+    const events = rawData
+        .filter(item => {
+            const [day, mon, yr] = item.tanggal.split('/');
+            return mon.padStart(2, '0') === bulanStr && yr === tahunStr;
+        })
+        .reduce((acc, item) => {
+            let group = acc.find(g => g.tanggal === item.tanggal);
+            if (!group) {
+                group = { tanggal: item.tanggal, detail: [] };
+                acc.push(group);
+            }
+            group.detail.push({
+                tipe: item.tipe,
+                total: item.total,
+                deskripsi: item.deskripsi
+            });
+            return acc;
+        }, [])
+        .map(item => {
+            let pemasukan = 0;
+            let pengeluaran = 0;
 
-                const balance = pemasukan - pengeluaran;
-
-                let title = '';
-                if (pemasukan > 0) title += `Masuk : Rp.${pemasukan.toLocaleString()}\n`;
-                if (pengeluaran > 0) title += `Keluar : Rp.${pengeluaran.toLocaleString()}\n`;
-                title += `Balance : Rp.${balance.toLocaleString()}`;
-
-                const [day, mon, yr] = item.tanggal.split('/');
-                return {
-                    title: title.trim(),
-                    start: `${yr}-${mon.padStart(2, '0')}-${day.padStart(2, '0')}`,
-                    tanggal: item.tanggal,
-                    detail: item.detail,
-                    balance: balance, // Optional: bisa dipakai untuk tooltip, dsb
-                    allDay: true
-                };
+            item.detail.forEach(d => {
+                if (d.tipe === 'pemasukan') pemasukan += Number(d.total);
+                else if (d.tipe === 'pengeluaran') pengeluaran += Number(d.total);
             });
 
-        return Promise.resolve(events);
-    }
+            const balance = pemasukan - pengeluaran;
+
+            let title = '';
+            if (pemasukan > 0) title += `Masuk : Rp.${pemasukan.toLocaleString()}\n`;
+            if (pengeluaran > 0) title += `Keluar : Rp.${pengeluaran.toLocaleString()}\n`;
+            title += `Balance : Rp.${balance.toLocaleString()}`;
+
+            const [day, mon, yr] = item.tanggal.split('/');
+            return {
+                title: title.trim(),
+                start: `${yr}-${mon.padStart(2, '0')}-${day.padStart(2, '0')}`,
+                tanggal: item.tanggal,
+                detail: item.detail,
+                balance: balance,
+                allDay: true
+            };
+        });
+
+    return Promise.resolve(events);
+}
 
 
     function loadCalendar() {

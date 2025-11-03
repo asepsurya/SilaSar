@@ -28,6 +28,14 @@ class IndoRegionRegencySeeder extends Seeder
         $regencies = RawDataGetter::getRegencies();
 
         // Insert Data to Database
-        DB::table('regencies')->insert($regencies);
+       foreach ($regencies as $regency) {
+            DB::table('regencies')->updateOrInsert(
+                ['id' => $regency['id']], // kolom unik, biasanya ID atau kode
+                [
+                    'province_id' => $regency['province_id'],
+                    'name' => $regency['name'],
+                ]
+            );
+        }
     }
 }

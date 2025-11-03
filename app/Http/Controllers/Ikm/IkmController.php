@@ -27,21 +27,12 @@ class IkmController extends Controller
         $foto = $item->foto ? asset('storage/' . $item->foto) : asset('assets/images/byewind-avatar.png');
         return [
              '<a href="' . route("ikm.update", $item->id) . '" class="flex items-center space-x-2 text-blue-600 hover:underline">
-                <img  class="object-cover w-6 h-6 rounded-full object-cover ring-2 ring-white dark:ring-black" src="' . $foto . '" alt="Foto" loading="lazy">
+                <img  class="object-cover w-6 h-6 rounded-full  ring-2 ring-white dark:ring-black" src="' . $foto . '" alt="Foto" loading="lazy">
                 <span class="akun-nama">' . e($item->nama) . '</span>
             </a>',
             '<div ><a href="https://wa.me/' . preg_replace('/[^0-9]/', '', (substr($item->telp, 0, 1) === '0' ? '+62' . substr($item->telp, 1) : $item->telp)) . '" target="_blank" class="inline-flex items-center  py-1 rounded-full  hover:bg-green-600">' .($item->telp ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</a></div>',
             '<div class="mobile">' . ($item->email ?? '<span class="text-gray-500">Tidak Diketahui</span>') .'</div>',
-            '<div>
-                <a href="https://wa.me/' . preg_replace('/[^0-9]/', '', (substr($item->telp, 0, 1) === '0' ? '+62' . substr($item->telp, 1) : $item->telp)) . '" 
-                    target="_blank" 
-                    class="inline-flex items-center justify-center w-8 h-8 border border-green-600 text-green-600 rounded-full hover:bg-green-600 transition"
-                    title="Chat WhatsApp">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-4 h-4" viewBox="0 0 24 24">
-                            <path d="M20.52 3.48A11.92 11.92 0 0 0 12 .03C5.4.03.2 5.23.2 11.83a11.92 11.92 0 0 0 1.64 6.01L.03 24l6.27-1.64a11.84 11.84 0 0 0 6.01 1.64h.05c6.6 0 11.8-5.2 11.8-11.8 0-3.15-1.22-6.12-3.64-8.55Zm-8.67 17.9h-.04a9.9 9.9 0 0 1-5.04-1.39l-.36-.21-3.72.97.99-3.63-.23-.37a9.89 9.89 0 0 1-1.52-5.32C2.93 6.26 7.3 1.9 12.02 1.9c2.64 0 5.11 1.03 6.98 2.9a9.86 9.86 0 0 1-6.15 16.58ZM17 14.93c-.28-.14-1.65-.81-1.91-.9-.26-.1-.45-.14-.63.14-.19.28-.72.9-.88 1.09-.16.18-.32.2-.6.07-.28-.14-1.17-.43-2.23-1.37a8.4 8.4 0 0 1-1.55-1.93c-.16-.28-.02-.43.12-.56.13-.13.28-.32.43-.48.14-.16.19-.28.29-.46.1-.18.05-.35-.02-.49-.08-.14-.63-1.52-.86-2.08-.23-.55-.46-.48-.63-.49h-.54c-.18 0-.46.07-.7.35-.24.28-.93.91-.93 2.22 0 1.3.95 2.55 1.09 2.73.13.18 1.87 2.85 4.53 4a15.1 15.1 0 0 0 1.45.53c.61.19 1.16.17 1.6.1.49-.07 1.65-.67 1.89-1.31.23-.64.23-1.2.16-1.32-.06-.12-.25-.19-.53-.32Z"/>
-                        </svg>
-                </a>
-            </div>',
+           
             '<form action="' . route('ikm.updateRole', $item->id) . '" method="POST">
               ' . csrf_field() . '
               <select name="role" onchange="this.form.submit()" id="role"
@@ -76,38 +67,53 @@ class IkmController extends Controller
       $user->update(['role' => $request->role]);
       return redirect()->back()->with('success', 'Role berhasil diperbarui.');
   }
+
+  public function keaktifan()
+  { 
+    $bulan = request('bulan', Carbon::now()->month);
+    $tahun = request('tahun', Carbon::now()->year);
+    
+     $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+      return view("ikm.action.keaktifan",[
+          "activeMenu" => "ikm",
+          "active" => "ikm",
+      ],compact("logs","bulan","tahun"));
+  }
   public function getAktifData(Request $request)
   {
         date_default_timezone_set('Asia/Jakarta');
-          // 1. Tentukan periode & durasi hari
-        $periode = $request->periode ?? 'bulanan';
-        $days = match($periode) {
+
+        $periode = $request->input('periode', 'harian');
+       $bulan = (int) $request->input('bulan', Carbon::now()->month);
+        $tahun = (int) $request->input('tahun', Carbon::now()->year);
+
+
+        $days = match ($periode) {
             'harian'   => 1,
             'mingguan' => 7,
             'bulanan'  => 30,
             default    => 7,
         };
 
-        // 2. Ambil semua user & hitung aktivitas
         $users = User::with('ikm')->get();
-        $startDate = Carbon::now()->subDays($days);
 
-        // 3. Hitung total user aktif (unik) berdasarkan aktivitas
-        $aktifUserIds = UserActivity::where('created_at', '>=', $startDate)
+        // Ambil user yang aktif di bulan & tahun yang dipilih
+        $aktifUserIds = UserActivity::whereMonth('created_at', $bulan)
+            ->whereYear('created_at', $tahun)
             ->distinct('user_id')
             ->pluck('user_id');
 
-        $totalUser = $users->count();
+        $totalUser      = $users->count();
         $userAktifCount = $aktifUserIds->count();
-        $tidakAktif = $totalUser - $userAktifCount;
+        $tidakAktif     = $totalUser - $userAktifCount;
 
-        // 4. Format data untuk datatables
-        $data = $users->sortByDesc("created_at")->values()->map(function ($user) use ($days, $startDate) {
+        $data = $users->map(function ($user) use ($bulan, $tahun, $days) {
             $activityCount = UserActivity::where('user_id', $user->id)
-                ->where('created_at', '>=', $startDate)
+                ->whereMonth('created_at', $bulan)
+                ->whereYear('created_at', $tahun)
                 ->count();
 
-            $percentage = min(100, ($activityCount / $days) * 100);
+            $percentage = $days > 0 ? min(100, ($activityCount / $days) * 100) : 0;
 
             $progressBar = '
                 <div class="w-60 bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -119,18 +125,19 @@ class IkmController extends Controller
             return [
                 $user->ikm->nama ?? '-',
                 $progressBar,
+                $user->id,
             ];
-        });
+        })->values();
 
-        // 5. Return response JSON
         return response()->json([
-            'total_user'    => $totalUser,
-            'user_aktif'    => $userAktifCount,
-            'tidakaktif'    => $tidakAktif,
-            'data'          => $data,
-            'periode'      => $periode,
+            'total_user'  => $totalUser,
+            'user_aktif'  => $userAktifCount,
+            'tidakaktif'  => $tidakAktif,
+            'data'        => $data,
+            'periode'     => $periode,
+            'bulan'       => $bulan,
+            'tahun'       => $tahun,
         ]);
-    
   }
 
   public function create()
@@ -186,47 +193,137 @@ class IkmController extends Controller
 
     return redirect()->route("index.ikm")->with("success", "Data has been saved successfully!");
   }
-  public function update($id)
+  public function update( request $request,$id)
   {
-    
-    $ikm = ikm::where("id", $id)->first(); // Pakai first() langsung
-    $user = User::where("phone",$ikm->telp)->first();
-    $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->get();
-
-    $provinsi = Province::all();
-   
-    $mitra = Mitra::where('auth',$user->id)->get();
-    $produk = Produk::where('auth',$user->id)->get();
-    $transaksi = Transaksi::where('auth',$user->id)->with('mitra')->get();
-    $keuangan = Keuangan::where('auth',$user->id)->paginate(10);
-    $Ikmlogs = Activity::where(['causer_id'=>$user->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+      // 🔹 Ambil data IKM
+    $ikm = Ikm::find($id);
     if (!$ikm) {
-      abort(404); // Data tidak ditemukan
+        abort(404);
     }
 
-    // Ambil semua field sebagai array
+    // 🔹 Ambil user berdasarkan nomor telepon IKM
+    $user = User::where("phone", $ikm->telp)->first();
+    if (!$user) {
+        abort(404, 'User tidak ditemukan untuk IKM ini.');
+    }
+
+    // 🔹 Ambil filter dari request
+    $bulan = $request->input('bulan', date('m'));
+    $tahun = $request->input('tahun', date('Y'));
+
+    $from = $request->input('from');
+    $to = $request->input('to');
+
+    // Jika ada filter "periode" dalam format yyyy-mm
+    if ($request->filled('periode')) {
+        [$tahun, $bulan] = explode('-', $request->periode);
+    }
+    
+      if ($from && $to) {
+          try {
+              $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
+              $toDate   = Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
+              // filter query di sini
+          } catch (\Exception $e) {
+              // abaikan kalau format salah
+          }
+      } elseif ($from && !$to) {
+          // hanya dari tanggal, set ke hari yang sama
+          try {
+              $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
+              $toDate   = $fromDate->copy()->endOfDay();
+          } catch (\Exception $e) {}
+      } else {
+          // fallback ke bulan/tahun
+      }
+    // 🔹 Data umum
+    $provinsi = Province::all();
+    $mitra = Mitra::where('auth', $user->id)->get();
+    $produk = Produk::where('auth', $user->id)->get();
+
+    // 🔹 Query dasar
+    $transaksiQuery = Transaksi::where('auth', $user->id)->with('mitra');
+    $keuanganQuery = Keuangan::where('auth', $user->id);
+
+ 
+    // ==============================================================
+    // 🔹 FILTER DATA BERDASARKAN RANGE ATAU BULAN/TAHUN
+    // ==============================================================
+    if ($from && $to) {
+        try {
+            // Format input dari form adalah d/m/Y → ubah ke Carbon
+            $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
+            $toDate = Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
+
+            // Filter keuangan berdasarkan kolom tanggal (string d/m/Y)
+            $keuanganQuery->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [
+                $fromDate->format('Y-m-d'),
+                $toDate->format('Y-m-d')
+            ]);
+
+            // Filter transaksi berdasarkan created_at (datetime)
+            $transaksiQuery->whereBetween('created_at', [$fromDate, $toDate]);
+        } catch (\Exception $e) {
+            // Abaikan error format tanggal
+        }
+    } else {
+        // 🔹 Jika tidak ada filter tanggal, gunakan bulan & tahun
+        $keuanganQuery
+            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+        $transaksiQuery
+            ->whereMonth('created_at', $bulan)
+            ->whereYear('created_at', $tahun);
+    }
+
+    // ==============================================================
+    // 🔹 Eksekusi Query
+    // ==============================================================
+    $transaksi = $transaksiQuery->get();
+    $keuangan = $keuanganQuery->paginate(10);
+
+    // 🔹 Activity logs
+    $Ikmlogs = Activity::where(['causer_id' => $user->id, 'log_name' => 'ikm'])
+        ->latest()
+        ->take(10)
+        ->get();
+
+    $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->get();
+
+    // ==============================================================
+    // 🔹 Hitung kelengkapan data IKM
+    // ==============================================================
     $data = $ikm->toArray();
     unset($data['sosmed'], $data['website']);
-    // Hitung presentase kelengkapan data
-    $totalFields = count($data);
-    $emptyFields = collect($data)
-      ->filter(function ($value) {
-        return empty($value);
-      })
-      ->count();
 
+    $totalFields = count($data);
+    $emptyFields = collect($data)->filter(fn($value) => empty($value))->count();
     $filledFields = $totalFields - $emptyFields;
     $percentage = intval(($filledFields / $totalFields) * 100);
 
-    // Kirim semua data ke view dalam satu array
+    // ==============================================================
+    // 🔹 Return ke view
+    // ==============================================================
     return view("ikm.action.edit", [
-      "activeMenu" => "ikm_update",
-      "active" => "ikm",
-      "ikm" => $ikm,
-      "provinsi" => $provinsi,
-      "percentage" => $percentage,
-      'emptyFields' => $emptyFields
-    ],compact("id","logs","mitra","produk","transaksi","keuangan","Ikmlogs"));
+        "activeMenu" => "ikm_update",
+        "active" => "ikm",
+        "ikm" => $ikm,
+        "provinsi" => $provinsi,
+        "percentage" => $percentage,
+        "emptyFields" => $emptyFields,
+        "id" => $id,
+        "logs" => $logs,
+        "mitra" => $mitra,
+        "produk" => $produk,
+        "transaksi" => $transaksi,
+        "keuangan" => $keuangan,
+        "Ikmlogs" => $Ikmlogs,
+        "tahun" => $tahun,
+        "bulan" => $bulan,
+        "from" => $from,
+        "to" => $to,
+    ]);
   }
 
     public function updateFoto(Request $request)

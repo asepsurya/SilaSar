@@ -18,9 +18,10 @@
     <style>
       body {
             font-family: 'Inter', sans-serif;
-            background-image: url('{{ asset('assets/bg3.jpg') }}');
+            background-color: #f3f1f1;
+            /* background-image: url('{{ asset('assets/bg3.jpg') }}');
             background-size: cover;
-            background-position: center;
+            background-position: center; */
         }
         /* Untuk HP & tablet kecil */
         /* @media (max-width: 768px) {
@@ -182,7 +183,7 @@
     </section>
 </main>
 
-
+.
     <script>
         function generateCaptcha() {
             fetch("{{ route('refreshCaptcha') }}")

@@ -903,7 +903,7 @@
                                                             </label>
                                                             <select name="id_akun" id="" class="akun_debit select-form w-full" style="width:100%;" data-placeholder="Pilih Akun Debit">
                                                                 @foreach ($akun as $a)
-                                                                <option value="{{ $a->id }}" data-kategori="{{ $a->kategori->nama_kategori }}" @selected($item->id_akun == $a->id) >{{ $a->nama_akun }}</option>
+                                                                <option value="{{ $a->id }}" data-kategori="{{ $a->kategori->nama_kategori ??  '1' }}" @selected($item->id_akun == $a->id) >{{ $a->nama_akun }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -916,7 +916,7 @@
                                                             </label>
                                                             <select name="id_akun_second" id="" class="akun_kredit select-form w-full" style="width:100%;" data-placeholder="Pilih Akun Kredit">
                                                                 @foreach ($akun as $a)
-                                                                <option value="{{ $a->id }}" data-kategori="{{ $a->kategori->nama_kategori }}" @selected($item->id_akun_second == $a->id) >{{ $a->nama_akun }}</option>
+                                                                <option value="{{ $a->id }}" data-kategori="{{ $a->kategori->nama_kategori ??  '1' }}" @selected($item->id_akun_second == $a->id) >{{ $a->nama_akun }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>

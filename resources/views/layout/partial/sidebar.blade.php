@@ -160,15 +160,20 @@
                     x-transition
                     class="sub-menu flex flex-col gap-1 text-black dark:text-white/80">
 
+                   @php
+                        $bulan = date('m');
+                        $tahun = date('Y');
+                    @endphp
+
                     <li>
-                        <a href="{{ route('laporan.transaksi') }}"
-                           class="{{ $active === 'laporan_transaksi' ? 'active' : '' }}">
-                           Transaksi
+                        <a href="{{ route('laporan.transaksi') }}?bulan={{ $bulan }}&tahun={{ $tahun }}"
+                        class="{{ $active === 'laporan_transaksi' ? 'active' : '' }}">
+                        Transaksi
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('laporan.neraca') }}"
+                        <a href="{{ route('laporan.neraca') }}?bulan={{ $bulan }}&tahun={{ $tahun }}"
                            class="{{ $active === 'neraca' ? 'active' : '' }}">
                            Neraca
                         </a>

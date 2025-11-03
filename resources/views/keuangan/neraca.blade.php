@@ -6,7 +6,45 @@
     {{-- Header --}}
     <div class="flex justify-between items-center border-b  dark:border-white/10 px-6 py-4">
         <h2 class="text-xl font-bold">Laporan Neraca <span class="text-gray-500">(Dalam Rupiah)</span></h2>
-        <button type="button" class="btn">Exsport Laporan</button>
+  <form id="filterForm" method="GET" class="flex gap-0 items-center">
+    <select name="bulan" id="bulanSelect" style="width: 200px;"
+        class="form-select w-36 border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
+        onchange="this.form.submit()">
+        @foreach(range(1, 12) as $b)
+        <option value="{{ $b }}" {{ $b == $bulan ? 'selected' : '' }}>
+         {{ \Carbon\Carbon::createFromDate(null, (int)$b, 1)->translatedFormat('F') }}
+
+        </option>
+        @endforeach
+    </select>
+
+    <input type="number" id="tahunInput" name="tahun" value="{{ $tahun }}" placeholder="Tahun"
+        class="form-input w-24 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
+        onchange="this.form.submit()">
+
+    <a id="pdfLink" href="{{ route('laporan.neracaPdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+       class="btn ms-3 m-5">Cetak PDF</a>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bulanSelect = document.getElementById('bulanSelect');
+    const tahunInput = document.getElementById('tahunInput');
+    const pdfLink = document.getElementById('pdfLink');
+
+    function updatePdfLink() {
+        const bulan = bulanSelect.value;
+        const tahun = tahunInput.value;
+        pdfLink.href = `{{ route('laporan.neracaPdf') }}?bulan=${bulan}&tahun=${tahun}`;
+    }
+
+    bulanSelect.addEventListener('change', updatePdfLink);
+    tahunInput.addEventListener('change', updatePdfLink);
+});
+</script>
+
+
+
     </div>
 
     {{-- Ringkasan --}}

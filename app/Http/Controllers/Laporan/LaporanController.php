@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Laporan;
 
+use App\Models\Akun;
 use App\Models\Keuangan;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;

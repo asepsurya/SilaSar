@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\Ikm\IkmController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Nota\NotaController;
@@ -135,7 +136,8 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/nota/delete/{id}', [NotaController::class, 'notaDelete'])->name('nota.delete');
 
         Route::get('/nota2/{id}', [NotaController::class, 'nota2'])->name('nota');
-        
+        Route::get('/update', [UpdateController::class, 'index'])->name('update.index');
+         Route::post('/update/run', [UpdateController::class, 'run'])->name('update.run');
     });
 
     Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');
@@ -152,6 +154,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     Route::post('/people/update/action', [IkmController::class, 'updateIkm'])->name('ikm.update.action');
     Route::post('/people/update/foto', [IkmController::class, 'updateFoto'])->name('ikm.update.foto');
     Route::post('/keaktifan', [IkmController::class, 'getAktifData'])->name('getAktifData');
+    Route::get('/people/keaktifan', [IkmController::class, 'keaktifan'])->name('keaktifan.pengguna');
     Route::post('/ikm/{id}/update-role', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
     // ------------------------------------------------
     // Route Keuangan
@@ -164,6 +167,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     Route::get('/keuangan/export/pdf', [KeuanganController::class, 'keuanganPDF'])->name('keuangan.pdf');
     Route::get('/history/cetak-pdf/{id_rekening}', [KeuanganController::class, 'cetakHistoryPDF'])->name('history.cetak-pdf');
     Route::get('/laporan/neraca', [KeuanganController::class, 'neraca'])->name('laporan.neraca');
+    Route::get('/laporan/neraca/pdf', [KeuanganController::class, 'neracapdf'])->name('laporan.neracaPdf');
     Route::get('/laporan/neracasaldo', [KeuanganController::class, 'neracaSaldo'])->name('laporan.neraca_saldo');
     Route::get('/laporan/labarugi', [KeuanganController::class, 'labarugi'])->name('laporan.labarugi');
     Route::get('/laporan/transaksi', [KeuanganController::class, 'laptransaksi'])->name('laporan.transaksi');

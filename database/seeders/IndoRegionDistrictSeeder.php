@@ -28,6 +28,14 @@ class IndoRegionDistrictSeeder extends Seeder
         $districts = RawDataGetter::getDistricts();
 
         // Insert Data to Database
-        DB::table('districts')->insert($districts);
+        foreach ($districts as $district) {
+            DB::table('districts')->updateOrInsert(
+                ['id' => $district['id']], // gunakan kolom unik
+                [
+                    'name' => $district['name'],
+                    'regency_id' => $district['regency_id'],
+                ]
+            );
+        }
     }
 }

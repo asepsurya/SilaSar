@@ -25,45 +25,47 @@ class KeuanganController extends Controller
     public function index(){
         $rekening = Rekening::where('auth', auth()->user()->id)->latest()->get();
 
+        // Ambil parameter request
+        $sort  = request('sort', 'desc');
+        $from  = request('from');
+        $to    = request('to');
+        $bulan = request('bulan', date('m'));
+        $tahun = request('tahun', date('Y'));
+
+        $query = Keuangan::with(['akun', 'rekening'])
+            ->where('auth', auth()->id());
+
         if (request('periode')) {
             [$tahun, $bulan] = explode('-', request('periode'));
         } else {
             $bulan = date('m');
             $tahun = date('Y');
         }
+        // 🔹 Jika ADA filter tanggal (from & to), gunakan range ini
+        if ($from && $to) {
+            try {
+                $fromDate = Carbon::createFromFormat('d/m/Y', $from)->format('Y-m-d');
+                $toDate   = Carbon::createFromFormat('d/m/Y', $to)->format('Y-m-d');
 
-      
-            $sort = request('sort', 'desc');
-            $from = request('from');
-            $to = request('to');
-            $bulan = request('bulan', date('m'));
-            $tahun = request('tahun', date('Y'));
-
-            $query = Keuangan::with(['akun','rekening'])
-                ->where('auth', auth()->id());
-
-            // Filter bulan & tahun jika ada
+                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+            } catch (\Exception $e) {
+                // Abaikan jika format salah
+            }
+        } else {
+            // 🔹 Jika TIDAK ADA filter tanggal, pakai filter bulan & tahun
             if ($bulan && $tahun) {
                 $query->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
                     ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
             }
+        }
 
-            // Filter dari tanggal - sampai tanggal jika ada
-            if ($from && $to) {
-                try {
-                    $fromDate = Carbon::createFromFormat('d/m/Y', $from)->format('Y-m-d');
-                    $toDate = Carbon::createFromFormat('d/m/Y', $to)->format('Y-m-d');
-                    $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
-                } catch (\Exception $e) {
-                    // abaikan jika format salah
-                }
-            }
+        // 🔹 Urutkan dan paginasi
+        $transaksi = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') $sort")
+            ->orderBy('id', 'desc')
+            ->simplePaginate(31)
+            ->appends(request()->query());
 
-            // Urutkan dan paginasi
-            $transaksi = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') $sort")
-                ->orderBy('id', 'desc')
-                ->simplePaginate(31)
-                ->appends(request()->query());
+        // 🔹 Ambil data akun
         $akun = Akun::with('kategori')->get();
 
         $akunJs = $akun->map(function ($a) {
@@ -71,7 +73,7 @@ class KeuanganController extends Controller
                 'id' => $a->id,
                 'text' => $a->kode_akun . ' | ' . $a->nama_akun,
                 'kategori' => $a->kategori->nama_kategori ?? '',
-                'tipe' => $a->kategori->tipe ?? '', // <--- ini penting
+                'tipe' => $a->kategori->tipe ?? '',
             ];
         });
 
@@ -583,10 +585,17 @@ class KeuanganController extends Controller
     public function keuanganPDF(Request $request)
     {
 
+        if(request('ip')){
+            $id_user = request('ip');
+        }else{
+            $id_user = auth()->id();
+        } 
+
       $query = Keuangan::with(['akun', 'rekening'])
-        ->where('auth', auth()->id());
+        ->where('auth', $id_user);
 
         $periodeText = 'Semua Periode';
+        $periodeSlug = 'semua-periode';
 
         // === Filter by from-to ===
         if ($request->filled('from') && $request->filled('to')) {
@@ -602,30 +611,65 @@ class KeuanganController extends Controller
                 $periodeSlug = 'semua-periode';
             }
         }
-        // === Filter by bulan/tahun ===
-        elseif ($request->filled('bulan') && $request->filled('tahun')) {
-            $bulan = (int)$request->bulan;
-            $tahun = (int)$request->tahun;
 
-            $query->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
-                ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+        // === Filter by ?periode=YYYY-MM ===
+       elseif ($request->filled('periode')) {
+            try {
+                [$tahun, $bulan] = explode('-', $request->periode);
+
+                // Pastikan tahun dan bulan valid
+                $tahun = (int) $tahun;
+                $bulan = (int) $bulan;
+
+                // Filter data berdasarkan bulan dan tahun dari kolom 'tanggal' (format d/m/Y)
+                $query->whereRaw("
+                    YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+                    AND MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+                ", [$tahun, $bulan]);
+
+                $periodeText = Carbon::create($tahun, $bulan, 1)->translatedFormat('F Y');
+                $periodeSlug = "{$bulan}-{$tahun}";
+            } catch (\Exception $e) {
+                $periodeSlug = 'semua-periode';
+            }
+        }
+
+
+        // === Filter by bulan & tahun ===
+        elseif ($request->filled('bulan') && $request->filled('tahun')) {
+            $bulan = (int) $request->bulan;
+            $tahun = (int) $request->tahun;
+
+            $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+                ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
 
             $periodeText = Carbon::createFromDate($tahun, $bulan)->translatedFormat('F Y');
             $periodeSlug = "{$bulan}-{$tahun}";
-        } else {
-            $periodeSlug = 'semua-periode';
         }
 
-        // Ambil data
+        // === Ambil data ===
+        $keuangan = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get();
+
+        // === Pastikan tidak semua data ditarik jika ada filter ===
+        if (
+            !$request->filled('from') &&
+            !$request->filled('to') &&
+            !$request->filled('periode') &&
+            !$request->filled('bulan') &&
+            !$request->filled('tahun')
+        ) {
+            $periodeText = 'Semua Periode';
+        }
+
         $data = [
-            'keuangan' => $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get(),
-            'periode' => $periodeText,
+            'keuangan' => $keuangan,
+            'periode'  => $periodeText,
         ];
 
-        // Generate PDF
+        // === Generate PDF ===
         $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
 
-        // Pastikan nama file tidak mengandung karakter ilegal
+        // Pastikan nama file aman
         $safeFile = preg_replace('/[\/\\\\]/', '-', $periodeSlug);
         $filename = "laporan-keuangan-{$safeFile}.pdf";
 
@@ -666,47 +710,55 @@ class KeuanganController extends Controller
 
 public function neraca()
     {
-        // Ambil semua akun beserta total debit & kredit
-    $saldoAkuns = Akun::select(
-        'akuns.id',
-        'akuns.kode_akun',
-        'akuns.nama_akun',
-        'kategori_akuns.nama_kategori',
-        'kategori_akuns.tipe',
-        DB::raw('
-            SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
-        '),
-        DB::raw('
-            SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
-        ')
-    )
-    ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
-    ->leftJoin('keuangans', function($join) {
-        $join->on('keuangans.id_akun','=','akuns.id')
-             ->orOn('keuangans.id_akun_second','=','akuns.id');
-    })
-    ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
-    ->get()
-    ->map(function($row){
-        // Hitung saldo sesuai posisi normal akun
-        if (in_array($row->tipe, ['aset','beban'])) {
-            $row->saldo = $row->total_debit - $row->total_kredit;
-        } else {
-            $row->saldo = $row->total_kredit - $row->total_debit;
-        }
-        return $row;
-    });
+     // Ambil bulan & tahun dari query string, default ke sekarang
+    // Ambil bulan & tahun dari request, default ke bulan & tahun sekarang
+    $bulan = request('bulan', Carbon::now()->month);
+    $tahun = request('tahun', Carbon::now()->year);
 
-    // Bagi menjadi Neraca dan Laba Rugi
+    $saldoAkuns = Akun::select(
+            'akuns.id',
+            'akuns.kode_akun',
+            'akuns.nama_akun',
+            'kategori_akuns.nama_kategori',
+            'kategori_akuns.tipe',
+            DB::raw('
+                SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
+            '),
+            DB::raw('
+                SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
+            ')
+        )
+        ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
+        ->leftJoin('keuangans', function($join) use ($bulan, $tahun) {
+            $join->on(function($q) {
+                    $q->on('keuangans.id_akun','=','akuns.id')
+                    ->orOn('keuangans.id_akun_second','=','akuns.id');
+                })
+                ->whereRaw('MONTH(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                ->whereRaw('YEAR(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$tahun]);
+        })
+        ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
+        ->get()
+        ->map(function($row){
+            // Hitung saldo sesuai posisi normal akun
+            if (in_array($row->tipe, ['aset','beban'])) {
+                $row->saldo = $row->total_debit - $row->total_kredit;
+            } else {
+                $row->saldo = $row->total_kredit - $row->total_debit;
+            }
+            return $row;
+        });
+
+    // Pisahkan Neraca dan Laba Rugi
     $neraca = $saldoAkuns->whereIn('tipe', ['aset','liabilitas','ekuitas'])
-                         ->groupBy('tipe'); // hasil array per tipe
+                        ->groupBy('tipe');
 
     $labaRugi = $saldoAkuns->whereIn('tipe', ['pendapatan','beban'])
-                            ->groupBy('tipe'); // hasil array per tipe
+                        ->groupBy('tipe');
 
-    // Ambil 10 log terbaru pengguna
+    // Ambil log aktivitas terbaru
     $logs = Activity::where([
-                'causer_id'=>auth()->user()->id,
+                'causer_id'=>auth()->id(),
                 'log_name' => 'ikm'
             ])
             ->latest()
@@ -718,10 +770,77 @@ public function neraca()
         'active' => 'neraca',
         'neraca' => $neraca,
         'labaRugi' => $labaRugi,
-        'logs' => $logs
+        'logs' => $logs,
+        'bulan' => $bulan,
+        'tahun' => $tahun,
     ]);
     }
+    public function neracapdf(){
+       // Ambil bulan & tahun dari request, default ke sekarang
+        $bulan = request('bulan', Carbon::now()->month);
+        $tahun = request('tahun', Carbon::now()->year);
 
+        $saldoAkuns = Akun::select(
+            'akuns.id',
+            'akuns.kode_akun',
+            'akuns.nama_akun',
+            'kategori_akuns.nama_kategori',
+            'kategori_akuns.tipe',
+            DB::raw('
+                COALESCE((
+                    SELECT SUM(k.total)
+                    FROM keuangans k
+                    WHERE k.id_akun = akuns.id
+                    AND MONTH(STR_TO_DATE(k.tanggal, "%d/%m/%Y")) = '.$bulan.'
+                    AND YEAR(STR_TO_DATE(k.tanggal, "%d/%m/%Y")) = '.$tahun.'
+                ), 0) AS total_debit
+            '),
+            DB::raw('
+                COALESCE((
+                    SELECT SUM(k2.total)
+                    FROM keuangans k2
+                    WHERE k2.id_akun_second = akuns.id
+                    AND MONTH(STR_TO_DATE(k2.tanggal, "%d/%m/%Y")) = '.$bulan.'
+                    AND YEAR(STR_TO_DATE(k2.tanggal, "%d/%m/%Y")) = '.$tahun.'
+                ), 0) AS total_kredit
+            ')
+        )
+        ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
+        ->get()
+        ->map(function($row){
+            if (in_array($row->tipe, ['aset','beban'])) {
+                $row->saldo = $row->total_debit - $row->total_kredit;
+            } else {
+                $row->saldo = $row->total_kredit - $row->total_debit;
+            }
+            return $row;
+        });
+
+        $neraca = $saldoAkuns->whereIn('tipe', ['aset','liabilitas','ekuitas'])->groupBy('tipe');
+        $labaRugi = $saldoAkuns->whereIn('tipe', ['pendapatan','beban'])->groupBy('tipe');
+
+
+            // Ambil log aktivitas terbaru (opsional untuk catatan bawah PDF)
+            $logs = Activity::where([
+                        'causer_id' => auth()->id(),
+                        'log_name'  => 'ikm'
+                    ])
+                    ->latest()
+                    ->take(10)
+                    ->get();
+
+            // Buat PDF
+            $pdf = Pdf::loadView('keuangan.pdf.neracaNew', [
+                'neraca' => $neraca,
+                'labaRugi' => $labaRugi,
+                'logs' => $logs,
+                'bulan' => $bulan,
+                'tahun' => $tahun,
+            ])->setPaper('a4', 'portrait');
+
+            // Output PDF langsung di browser
+            return $pdf->stream("Laporan_Neraca_{$bulan}_{$tahun}.pdf");
+    }
     public function neracaSaldo(request $request)
     {
         $logs = Activity::where([
@@ -733,24 +852,26 @@ public function neraca()
             ->get();
        $bulan = $request->input('bulan', now()->format('m'));
     $tahun = $request->input('tahun', now()->format('Y'));
-
+    $auth = auth()->user()->id;
     $data = DB::table('keuangans')
         ->select(
             'akuns.id',
             'akuns.kode_akun',
             'akuns.nama_akun',
-            DB::raw('SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_debit'),
-            DB::raw('SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_kredit')
+            DB::raw("SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_debit"),
+            DB::raw("SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_kredit")
         )
         ->join('akuns', function ($join) {
             $join->on('keuangans.id_akun', '=', 'akuns.id')
-                 ->orOn('keuangans.id_akun_second', '=', 'akuns.id');
+                ->orOn('keuangans.id_akun_second', '=', 'akuns.id');
         })
         ->whereRaw("STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y') IS NOT NULL")
         ->whereRaw("MONTH(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$bulan])
         ->whereRaw("YEAR(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$tahun])
-        ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun')
+        ->where("keuangans.auth", $auth)
+        ->groupBy('akuns.id', 'akuns.kode_akun', 'akuns.nama_akun')
         ->get();
+
     return view('keuangan.neracasaldo',[
         'activeMenu' => 'laporan',
         'active' => 'neracasaldo',
@@ -769,12 +890,18 @@ public function neraca()
 
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
+      $auth = auth()->id(); // lebih ringkas daripada auth()->user()->id
 
-        // Ambil semua transaksi bulan ini beserta kedua akun
-        $items = Keuangan::with(['akun.kategori', 'akunSecond.kategori'])
-            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
-            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-            ->get();
+    $items = Keuangan::with([
+            'akun.kategori',
+            'akunSecond.kategori'
+        ])
+        ->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') IS NOT NULL")
+        ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+        ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+        ->where('auth', $auth)
+        ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")
+        ->get();
 
         // Inisialisasi array Laba Rugi
         $labaRugi = [
@@ -859,11 +986,12 @@ public function neraca()
     {
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
-
+        $auth = auth()->user()->id;
         // Ambil transaksi bulan & tahun tersebut
         $transaksi = Keuangan::with(['akun', 'akunSecond', 'rekening'])
             ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
             ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+            ->where("auth", $auth)
             ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")
             ->get();
 

@@ -39,9 +39,9 @@
                         <th class="w-6"></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="">
                     @foreach ($produk as $item)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 border-b border-black/10 dark:border-white/10 cursor-pointer transition">
                             <!-- Produk -->
                             <td class="py-4 pl-6 flex items-start gap-3">
                               <a data-fancybox="gallery" data-caption="{{ $item->nama_produk }}" 

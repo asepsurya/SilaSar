@@ -28,6 +28,11 @@ class IndoRegionProvinceSeeder extends Seeder
         $provinces = RawDataGetter::getProvinces();
 
         // Insert Data to Database
-        DB::table('provinces')->insert($provinces);
+       foreach ($provinces as $province) {
+            DB::table('provinces')->updateOrInsert(
+                ['id' => $province['id']], // kolom unik
+                ['name' => $province['name']]
+            );
+        }
     }
 }
