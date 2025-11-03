@@ -629,13 +629,28 @@
         </div>
 
         <!-- Pilih Bulan -->
-        <form method="GET" class="flex-1 md:w-auto">
+       <form method="GET" class="flex flex-row flex-wrap items-center gap-3 w-full">
+            <!-- Input bulan -->
             <input type="month"
-                   name="periode"
-                   value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
-                   onchange="this.form.submit()"
-                   class="bg-white dark:bg-black form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5">
+                name="periode"
+                value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
+                onchange="this.form.submit()"
+                class="flex-1 bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 min-w-[150px]">
+
+            <!-- Select tipe -->
+            <select name="tipe"
+                id="tipe"
+                onchange="this.form.submit()"
+                class="bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 w-auto"
+                style="min-width: 140px;">
+                <option value="" {{ request('tipe') == '' ? 'selected' : '' }}>Semua Tipe</option>
+                <option value="pemasukan" {{ request('tipe') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
+                <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
+            </select>
         </form>
+
+
+       
     </div>
 </div>
 

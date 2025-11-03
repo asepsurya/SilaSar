@@ -870,6 +870,15 @@
                     onchange="this.form.submit()"
                     class="bg-white dark:bg-black form-input py-2.5 px-4 w-auto text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5">
                     <input type="text" name="ip" value="{{ $id }}" hidden>
+                    <select name="tipe"
+                id="tipe"
+                onchange="this.form.submit()"
+                class="bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 w-auto"
+                style="min-width: 140px;">
+                <option value="" {{ request('tipe') == '' ? 'selected' : '' }}>Semua Tipe</option>
+                <option value="pemasukan" {{ request('tipe') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
+                <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
+            </select>
                 </form>
                 <a  href="{{ route('keuangan.pdf', request()->query()) }}" target="_blank" type="button"
                         @click="openFilter = !openFilter"

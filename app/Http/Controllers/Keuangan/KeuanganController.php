@@ -58,7 +58,17 @@ class KeuanganController extends Controller
                     ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
             }
         }
+        // 🔹 Filter tipe transaksi
+        if (request('tipe')) {
+            $query->where('tipe', request('tipe'));
+        }
 
+        if (request('periode')) {
+            [$tahun, $bulan] = explode('-', request('periode'));
+        } else {
+            $bulan = date('m');
+            $tahun = date('Y');
+        }
         // 🔹 Urutkan dan paginasi
         $transaksi = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') $sort")
             ->orderBy('id', 'desc')
@@ -585,95 +595,97 @@ class KeuanganController extends Controller
     public function keuanganPDF(Request $request)
     {
 
-        if(request('ip')){
-            $id_user = request('ip');
-        }else{
-            $id_user = auth()->id();
-        } 
+           // 🔹 Tentukan user (bisa dari ip parameter atau auth)
+    $id_user = $request->filled('ip') ? $request->ip : auth()->id();
 
-      $query = Keuangan::with(['akun', 'rekening'])
+    // 🔹 Mulai query
+    $query = Keuangan::with(['akun', 'rekening'])
         ->where('auth', $id_user);
 
-        $periodeText = 'Semua Periode';
-        $periodeSlug = 'semua-periode';
+    // 🔹 Filter tipe (pemasukan/pengeluaran)
+    $tipe = $request->filled('tipe') ? $request->tipe : null;
+    if ($tipe) {
+        $query->where('tipe', $tipe);
+    }
 
-        // === Filter by from-to ===
-        if ($request->filled('from') && $request->filled('to')) {
-            try {
-                $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
-                $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
+    $periodeText = 'Semua Periode';
+    $periodeSlug = 'semua-periode';
 
-                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$from, $to]);
+    // === Filter by from-to ===
+    if ($request->filled('from') && $request->filled('to')) {
+        try {
+            $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
+            $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
 
-                $periodeText = "{$request->from} s.d. {$request->to}";
-                $periodeSlug = str_replace(['/', '\\'], '-', $request->from) . '_sd_' . str_replace(['/', '\\'], '-', $request->to);
-            } catch (\Exception $e) {
-                $periodeSlug = 'semua-periode';
-            }
+            // Filter tanggal string dd/mm/YYYY
+            $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$from, $to]);
+
+            $periodeText = "{$request->from} s.d. {$request->to}";
+            $periodeSlug = str_replace(['/', '\\'], '-', $request->from) . '_sd_' . str_replace(['/', '\\'], '-', $request->to);
+        } catch (\Exception $e) {
+            $periodeSlug = 'semua-periode';
         }
+    }
 
-        // === Filter by ?periode=YYYY-MM ===
-       elseif ($request->filled('periode')) {
-            try {
-                [$tahun, $bulan] = explode('-', $request->periode);
+    // === Filter by ?periode=YYYY-MM ===
+    elseif ($request->filled('periode')) {
+        try {
+            [$tahun, $bulan] = explode('-', $request->periode);
+            $tahun = (int) $tahun;
+            $bulan = (int) $bulan;
 
-                // Pastikan tahun dan bulan valid
-                $tahun = (int) $tahun;
-                $bulan = (int) $bulan;
+            $query->whereRaw("
+                YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+                AND MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+            ", [$tahun, $bulan]);
 
-                // Filter data berdasarkan bulan dan tahun dari kolom 'tanggal' (format d/m/Y)
-                $query->whereRaw("
-                    YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
-                    AND MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
-                ", [$tahun, $bulan]);
-
-                $periodeText = Carbon::create($tahun, $bulan, 1)->translatedFormat('F Y');
-                $periodeSlug = "{$bulan}-{$tahun}";
-            } catch (\Exception $e) {
-                $periodeSlug = 'semua-periode';
-            }
-        }
-
-
-        // === Filter by bulan & tahun ===
-        elseif ($request->filled('bulan') && $request->filled('tahun')) {
-            $bulan = (int) $request->bulan;
-            $tahun = (int) $request->tahun;
-
-            $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-                ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
-
-            $periodeText = Carbon::createFromDate($tahun, $bulan)->translatedFormat('F Y');
+            $periodeText = Carbon::create($tahun, $bulan, 1)->translatedFormat('F Y');
             $periodeSlug = "{$bulan}-{$tahun}";
+        } catch (\Exception $e) {
+            $periodeSlug = 'semua-periode';
         }
+    }
 
-        // === Ambil data ===
-        $keuangan = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get();
+    // === Filter by bulan & tahun ===
+    elseif ($request->filled('bulan') && $request->filled('tahun')) {
+        $bulan = (int) $request->bulan;
+        $tahun = (int) $request->tahun;
 
-        // === Pastikan tidak semua data ditarik jika ada filter ===
-        if (
-            !$request->filled('from') &&
-            !$request->filled('to') &&
-            !$request->filled('periode') &&
-            !$request->filled('bulan') &&
-            !$request->filled('tahun')
-        ) {
-            $periodeText = 'Semua Periode';
-        }
+        $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+              ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
 
-        $data = [
-            'keuangan' => $keuangan,
-            'periode'  => $periodeText,
-        ];
+        $periodeText = Carbon::createFromDate($tahun, $bulan)->translatedFormat('F Y');
+        $periodeSlug = "{$bulan}-{$tahun}";
+    }
 
-        // === Generate PDF ===
-        $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
+    // 🔹 Ambil data
+    $keuangan = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get();
+   
+    // 🔹 Jika tidak ada filter, tampilkan semua periode
+    if (
+        !$request->filled('from') &&
+        !$request->filled('to') &&
+        !$request->filled('periode') &&
+        !$request->filled('bulan') &&
+        !$request->filled('tahun')
+    ) {
+        $periodeText = 'Semua Periode';
+    }
 
-        // Pastikan nama file aman
-        $safeFile = preg_replace('/[\/\\\\]/', '-', $periodeSlug);
-        $filename = "laporan-keuangan-{$safeFile}.pdf";
+    $data = [
+        'keuangan' => $keuangan,
+        'periode'  => $periodeText,
+    ];
 
-        return $pdf->download($filename);
+    // 🔹 Generate PDF
+    $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
+
+    // 🔹 Nama file aman
+    $safeFile = preg_replace('/[\/\\\\]/', '-', $periodeSlug);
+    $tipeSlug = $tipe ? $tipe : 'semua-tipe';
+    $filename = "laporan-keuangan-{$tipeSlug}-{$safeFile}.pdf";
+
+    return $pdf->download($filename);
     }
  public function kelenderIndex(){
         $data = Keuangan::where('auth',auth()->user()->id)->get();

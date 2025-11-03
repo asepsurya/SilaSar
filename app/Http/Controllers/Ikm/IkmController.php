@@ -125,7 +125,7 @@ class IkmController extends Controller
             return [
                 $user->ikm->nama ?? '-',
                 $progressBar,
-                $user->id,
+                $user->ikm->id,
             ];
         })->values();
 
@@ -218,7 +218,7 @@ class IkmController extends Controller
     if ($request->filled('periode')) {
         [$tahun, $bulan] = explode('-', $request->periode);
     }
-    
+     
       if ($from && $to) {
           try {
               $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
@@ -245,7 +245,9 @@ class IkmController extends Controller
     $transaksiQuery = Transaksi::where('auth', $user->id)->with('mitra');
     $keuanganQuery = Keuangan::where('auth', $user->id);
 
- 
+  if (request('tipe')) {
+            $keuanganQuery->where('tipe', request('tipe'));
+        }
     // ==============================================================
     // 🔹 FILTER DATA BERDASARKAN RANGE ATAU BULAN/TAHUN
     // ==============================================================

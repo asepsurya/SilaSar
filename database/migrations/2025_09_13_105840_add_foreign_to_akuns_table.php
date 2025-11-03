@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::table('akuns', function (Blueprint $table) {
             $table->string('kode_akun')->unique()->nullable();
-            $table->foreignId('kategori_id')->constrained('kategori_akuns')->onDelete('cascade');
+           $table->foreignId('kategori_id')
+      ->nullable()
+      ->constrained('kategori_akuns')
+      ->onDelete('cascade');
+
         });
     }
 
@@ -24,7 +28,11 @@ return new class extends Migration
     {
         Schema::table('akuns', function (Blueprint $table) {
             $table->string('kode_akun')->unique()->nullable();
-            $table->foreignId('kategori_id')->constrained('kategori_akuns')->onDelete('cascade');
+            $table->foreignId('kategori_id')
+      ->nullable()
+      ->constrained('kategori_akuns')
+      ->onDelete('cascade');
+
         });
     }
 };

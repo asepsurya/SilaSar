@@ -295,7 +295,7 @@
                                         <div x-data="modals">
                                             <div style="display:flex;flex-direction:column;line-height:1.3;cursor:pointer" @click="toggle">
                                                 <span style="font-weight:600;margin-bottom:5px;">{{ $data->nama_akun }}</span>
-                                                <span style="font-size:12px;color:#999;">{{ $data->kategori->nama_kategori }}</span>
+                                                <span style="font-size:12px;color:#999;">{{ $data->kategori->nama_kategori ?? 'Tidak terdefinisi' }}</span>
                                             </div>
                                             <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto"
                                              :class="open &amp;&amp; '!block'">
