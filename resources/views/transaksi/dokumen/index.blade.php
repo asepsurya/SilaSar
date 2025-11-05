@@ -108,46 +108,58 @@ function printArea() {
     document.body.innerHTML = originalContents;
 }
 
-function downloadPDF() {
-    const nomorNota = document.getElementById("nomor-nota")?.innerText || "UNKNOWN";
-    const tanggal = new Date().toISOString().slice(0,10).replace(/-/g, "");
-    const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const fileName = `nota_${nomorNota}_${tanggal}_${randomCode}.pdf`;
+  function downloadPDF() {
+            const nomorNota = document.getElementById("nomor-nota")?.innerText || "UNKNOWN";
+            const tanggal = new Date().toISOString().slice(0,10).replace(/-/g, "");
+            const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const fileName = `nota_download_${nomorNota}_${tanggal}_${randomCode}.pdf`;
 
-    const element = document.getElementById("print-area");
+            const element = document.getElementById("print-area");
 
-    const opt = {
-        margin: 0,
-        filename: fileName,
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: {
-            scale: 5,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            removeContainer: true,
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight
-        },
-        jsPDF: {
-            unit: 'mm',
-            format: [210, 297],
-            orientation: 'portrait',
-            compress: true,
-            putOnlyUsedFonts: true,
-            precision: 16
+            // Untuk mobile: pastikan area print di-scale normal sebelum download PDF
+            const includeContent = document.getElementById('include-content');
+            let originalTransform = '';
+            if (window.innerWidth <= 768 && includeContent) {
+                originalTransform = includeContent.style.transform;
+                includeContent.style.transform = 'scale(1)';
+            }
+
+            const opt = {
+                margin: 0,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: {
+                    scale: 5,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    removeContainer: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: [210, 297],
+                    orientation: 'portrait',
+                    compress: true,
+                    putOnlyUsedFonts: true,
+                    precision: 16
+                }
+            };
+
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.documentElement.style.margin = '0';
+            document.documentElement.style.padding = '0';
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Kembalikan scale jika diubah
+                if (window.innerWidth <= 768 && includeContent) {
+                    includeContent.style.transform = originalTransform;
+                }
+            });
         }
-    };
-
-    // Pastikan tidak ada margin body
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    document.documentElement.style.margin = '0';
-    document.documentElement.style.padding = '0';
-
-    html2pdf().set(opt).from(element).save();
-}
 </script>
 
 <!-- CSS untuk PDF Full A4 -->
