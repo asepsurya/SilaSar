@@ -141,12 +141,12 @@
                             Hapus
                         </button>
 
-                        <!-- Tombol Transaksi -->
+                        {{-- <!-- Tombol Transaksi -->
                         <button type="button"
                             onclick="checkTransaction('{{ route('transaksi.detail', $mitra->id) }}')"
                             class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100">
                             Transaksi
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
                 </div>
