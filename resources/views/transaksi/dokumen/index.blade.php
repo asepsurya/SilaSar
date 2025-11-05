@@ -11,15 +11,19 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @media print {
-          .header {
-            display: none !important;
-          }
-            #floatingButton{
-                 display: none !important;
+            .header {
+                display: none !important;
             }
-              @page {
-                size: A4 portrait; /* atau landscape */
-                margin: 0;         /* hilangkan margin bawaan */
+
+            #floatingButton {
+                display: none !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                /* atau landscape */
+                margin: 0;
+                /* hilangkan margin bawaan */
             }
 
             body {
@@ -30,86 +34,131 @@
             #print-area {
                 width: 100%;
                 height: auto;
-                transform: scale(1);          /* pastikan tidak mengecil */
-                transform-origin: top left;   /* scaling mulai dari kiri atas */
+                transform: scale(1);
+                /* pastikan tidak mengecil */
+                transform-origin: top left;
+                /* scaling mulai dari kiri atas */
             }
 
 
-            html, body {
-            width: 100% !important;
-            height: 100% !important;
-            overflow: visible !important;
+            html,
+            body {
+                width: 100% !important;
+                height: 100% !important;
+                overflow: visible !important;
             }
-                    }
-                    @media screen and (max-width: 768px) {
-                        #include-content{
-                            transform: scale(0.7); /* perkecil biar muat layar */ transform-origin: top center;
-                        }
-                }
-                
+        }
+
+        @media screen and (max-width: 768px) {
+            #include-content {
+                transform: scale(0.7);
+                /* perkecil biar muat layar */
+                transform-origin: top center;
+            }
+
+            #floatingButton {
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+
     </style>
+
 </head>
 
-<body class="bg-gray-900 text-white h-screen flex flex-col">
+<body class=" text-white h-screen flex flex-col" style="background-color:#1c1c1c">
 
     <!-- Topbar -->
-    <div class="flex items-center justify-between bg-gray-800 px-4 h-14 header">
-        <div class="flex items-center space-x-3">
-            <button id="menuToggle" class="md:hidden">
-                <i data-lucide="menu" class="w-5 h-5 text-white"></i>
-            </button>
-            <span class="text-sm truncate max-w-[140px] text-gray-300">Nota {{ Request('type') }}{{ $id }}</span>
-            <a href="/transaksi"  class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-800 rounded shadow">
-                ← Kembali
-            </a>
-           
-            {{-- <button class="bg-blue-600 text-xs px-2 py-1 rounded">+ Create</button> --}}
-        </div>
-       <div class="flex items-center space-x-2">
-    <!-- Tombol Print Area -->
-    <button onclick="printArea()" class="p-2 rounded">
-        <i data-lucide="printer" class="w-5 h-5 text-white"></i>
-    </button>
+   <div class="flex items-center justify-between px-4 h-14 header" style="background-color: #2c2b2b;">
+    <div class="flex items-center space-x-3">
+        <!-- Tombol Kembali -->
+        <a href="{{ route('nota.index') }}" 
+           class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-800 rounded shadow">
+            ← Kembali
+        </a>
 
-    <!-- Tombol PDF -->
-    <button onclick="printPDF(this)" data-type="{{ request('type') }}" class="p-2 rounded">
-        <i data-lucide="file-down" class="w-5 h-5"></i>
-    </button>
+        <!-- Judul -->
+        <span class="text-sm truncate max-w-[140px] text-gray-300">
+            Nota {{ Request('type') }} {{ $id ?? '' }}
+        </span>
+    </div>
+
+    <div class="flex items-center space-x-3">
+        <!-- Tombol Print -->
+        <button onclick="printArea()" title="Print Dokumen" class="p-2 rounded hover:bg-gray-700">
+            <i data-lucide="printer" class="w-5 h-5 text-white"></i>
+        </button>
+
+        <!-- Tombol Download PDF -->
+        <button onclick="downloadPDF()" title="Download PDF" class="p-2 rounded hover:bg-gray-700">
+            <i data-lucide="file-down" class="w-5 h-5 text-white"></i>
+        </button>
+    </div>
 </div>
 
+<!-- SCRIPT PRINT DAN PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-function printPDF(button) {
-    // Ambil type dari data attribute tombol
-    const type = button.getAttribute('data-type'); 
-    const id = '{{ $transaksi->id }}'; // ID transaksi
+function printArea() {
+    const printContents = document.getElementById("print-area").innerHTML;
+    const originalContents = document.body.innerHTML;
 
-    // Mapping route berdasarkan type
-    const routes = {
-        konsinyasi: `/laporan/konsinyasi/{{ $id }}`,
-        invoice: `/laporan/invoice/{{ $id }}`,
-        kwitansi: `/laporan/kwitansi/{{ $id }}`,
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
+
+function downloadPDF() {
+    const nomorNota = document.getElementById("nomor-nota")?.innerText || "UNKNOWN";
+    const tanggal = new Date().toISOString().slice(0,10).replace(/-/g, "");
+    const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const fileName = `nota_${nomorNota}_${tanggal}_${randomCode}.pdf`;
+
+    const element = document.getElementById("print-area");
+
+    const opt = {
+        margin: 0,
+        filename: fileName,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: {
+            scale: 5,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            removeContainer: true,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: [210, 297],
+            orientation: 'portrait',
+            compress: true,
+            putOnlyUsedFonts: true,
+            precision: 16
+        }
     };
 
-    if (!routes[type]) {
-        console.error('Jenis laporan tidak valid:', type);
-        return;
-    }
+    // Pastikan tidak ada margin body
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.documentElement.style.margin = '0';
+    document.documentElement.style.padding = '0';
 
-    // Buka PDF di tab baru
-    window.open(routes[type], "_blank");
+    html2pdf().set(opt).from(element).save();
 }
 </script>
 
-
-    </div>
+<!-- CSS untuk PDF Full A4 -->
 
     <div class="flex flex-1 overflow-hidden">
-     
-
+    
         <!-- Workspace -->
-        <div class="flex-1 bg-gray-900 overflow-auto flex items-start justify-center p-4" id="print-area" style="border: none;">
-            <div class="w-full h-[297mm] bg-white shadow-lg border border-gray-600 text-white p-5 "
-                style="width: 210mm;"id="include-content">
+        <div class="flex-1 overflow-auto flex items-start justify-center p-5"
+            style="border: none; " id="print-area">
+            <div class="w-full shadow-lg  text-white p-5" style="background-color:white; width: 210mm; height: 297mm;  min-height: 290mm; /* Default height */
+                height: auto; " class="print-page" id="include-content" >
                 @if(Request::is('transaksi/cetak/konsinyasi*'))
                     @include('transaksi.dokumen.laporan.konsinyasi')
                 @elseif(Request::is('transaksi/cetak/kwitansi*'))
@@ -122,8 +171,8 @@ function printPDF(button) {
         </div>
     </div>
     <!-- Floating Button -->
-    <div class="fixed bottom-10 right-10 flex flex-col items-end space-y-3">
-          <button id="floatingButton" class="bg-gray-700 p-3 rounded-full shadow-lg hover:bg-gray-600 relative">
+    <div class="fixed bottom-10 right-10 flex flex-col items-end space-y-3" id="floatingButton">
+          <button  class="bg-gray-700 p-3 rounded-full shadow-lg hover:bg-gray-600 ">
             <i data-lucide="settings" class="w-6 h-6 text-white"></i>
         </button>
         <div id="floatingMenu"
@@ -231,5 +280,4 @@ function printPDF(button) {
         }
     </style>
 </body>
-
 </html>

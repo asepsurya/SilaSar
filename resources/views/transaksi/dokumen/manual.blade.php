@@ -23,93 +23,145 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.6.1/tinymce.min.js"
         integrity="sha512-bib7srucEhHYYWglYvGY+EQb0JAAW0qSOXpkPTMgCgW8eLtswHA/K4TKyD4+FiXcRHcy8z7boYxk0HTACCTFMQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
         <style>
-          #print-area {
-    width: 100%;
-    height: auto;
-    transform: scale(1);          /* pastikan tidak mengecil */
-    transform-origin: top center;   /* scaling mulai dari kiri atas */
-  }
-         @media screen and (max-width: 768px) {
-              #include-content{
-                  transform: scale(0.7); /* perkecil biar muat layar */ transform-origin: top center;
-              }
-      }
+            #print-area {
+                width: 100%;
+                height: auto;
+                transform: scale(1);
+                /* pastikan tidak mengecil */
+                transform-origin: top center;
+                /* scaling mulai dari kiri atas */
+            }
+
+            @media screen and (max-width: 768px) {
+                #include-content {
+                    transform: scale(0.7);
+                    /* perkecil biar muat layar */
+                    transform-origin: top center;
+                }
+                #floatingButton {
+                    bottom: 10px;
+                    right: 10px;
+                }
+            }
+
             /* Gaya default untuk halaman */
             body {
-                background-color: rgb(17, 24, 39); /* Warna latar belakang default */
+                background-color: #1c1c1c;
+                /* Warna latar belakang default */
                 color: white;
                 font-family: Arial, sans-serif;
             }
 
             /* Gaya khusus saat mencetak */
             @media print {
-                 #floatingButton{
-                     display: none !important;
+                #floatingButton {
+                    display: none !important;
                 }
-                 .header{
-                     display: none !important;
+
+                .header {
+                    display: none !important;
                 }
+
                 body {
-                    background-color: white; /* Latar belakang menjadi putih saat mencetak */
-                    color: black; /* Teks menjadi hitam */
+                    background-color: white;
+                    /* Latar belakang menjadi putih saat mencetak */
+                    color: black;
+                    /* Teks menjadi hitam */
                 }
 
                 /* Menentukan ukuran halaman menjadi A4 */
                 @page {
-                    size: A4; /* Ukuran A4 */
-                    margin: 10mm; /* Margin halaman A4 */
+                    size: A4;
+                    /* Ukuran A4 */
+                    margin: 10mm;
+                    /* Margin halaman A4 */
                 }
 
                 /* Area print yang memuat konten */
                 #print-area {
-                    width: 100%; /* Lebar penuh untuk area print */
-                 
+                    width: 100%;
+                    /* Lebar penuh untuk area print */
+
                     overflow: visible;
                 }
 
                 /* Konten utama yang akan mengalir ke bawah */
                 .print-page {
-                    width: 100%; /* Lebar penuh konten */
-                    height: auto; /* Tinggi otomatis agar mengalir */
-                    min-height: 297mm; /* Menetapkan ukuran minimum halaman A4 */
-                    page-break-after: always; /* Halaman baru setelah setiap konten besar */
+                    width: 100%;
+                    /* Lebar penuh konten */
+                    height: auto;
+                    /* Tinggi otomatis agar mengalir */
+                    min-height: 297mm;
+                    /* Menetapkan ukuran minimum halaman A4 */
+                    page-break-after: always;
+                    /* Halaman baru setelah setiap konten besar */
                 }
 
                 /* Menghindari pemisahan elemen besar seperti tabel atau gambar */
                 .content {
-                    page-break-inside: avoid; /* Hindari pemisahan konten besar */
+                    page-break-inside: avoid;
+                    /* Hindari pemisahan konten besar */
                 }
 
                 /* Sembunyikan elemen-elemen tertentu saat print */
                 .no-print {
                     display: none;
                 }
+
+                #print-area {
+                    border: none !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                }
+
+                /* Saat dicetak atau diubah ke PDF */
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                    }
+
+                    #print-area {
+                        border: none !important;
+                        margin: 0;
+                        padding: 0;
+                        width: 210mm;
+                        /* A4 width */
+                        min-height: 290mm;
+                        /* A4 height */
+                    }
+                }
             }
+
         </style>
-
-
-
 </head>
-
 <body class=" text-white h-screen flex flex-col" >
-
     <!-- Topbar -->
-    <div class="flex items-center justify-between bg-gray-800 px-4 h-14 header">
+    <div class="flex items-center justify-between  px-4 h-14 header" style="background-color: #2c2b2b;">
         <div class="flex items-center space-x-3">
-            <button id="menuToggle" class="md:hidden">
+            {{-- <button id="menuToggle" class="md:hidden">
                 <i data-lucide="menu" class="w-5 h-5 text-white"></i>
-            </button>
-            <span class="text-sm truncate max-w-[140px] text-gray-300">Buat Dokument Baru</span>
-             <a href="{{ route('nota.index') }}"  class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-800 rounded shadow">
+            </button> --}}
+            <a href="{{ route('nota.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-800 rounded shadow">
                 ← Kembali
             </a>
-       
+            <span class="text-sm truncate max-w-[140px] text-gray-300">Buat Dokumen Baru</span>
+            
         </div>
+
         <div class="flex items-center space-x-3">
-           
-            <button onclick="printArea()"><i data-lucide="printer" class="w-5 h-5 text-white"></i></button>
+
+            <!-- Tombol Print -->
+            <button onclick="printArea()" title="Print Dokumen">
+                <i data-lucide="printer" class="w-5 h-5 text-white"></i>
+            </button>
+
+            <!-- Tombol Download PDF -->
+            <button onclick="downloadPDF()" title="Download PDF">
+                <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
+            </button>
 
             <script>
                 function printArea() {
@@ -120,8 +172,52 @@
                     window.print();
                     document.body.innerHTML = originalContents;
                 }
+
+        function downloadPDF() {
+                const nomorNota = document.getElementById("nomor-nota")?.innerText || "UNKNOWN";
+                const tanggal = new Date().toISOString().slice(0,10).replace(/-/g, "");
+                const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+                const fileName = `nota_download_${nomorNota}_${tanggal}_${randomCode}.pdf`;
+
+                const element = document.getElementById("print-area");
+
+                const opt = {
+                    margin: 0, // 🔹 tanpa margin PDF
+                    filename: fileName,
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: {
+                        scale: 5, // 🔹 super tajam
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        removeContainer: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: [210, 297], // A4
+                        orientation: 'portrait',
+                        compress: true,
+                        putOnlyUsedFonts: true,
+                        precision: 16 // 🔹 resolusi tinggi
+                    }
+                };
+
+                // Pastikan body tidak menambah margin
+                document.body.style.margin = '0';
+                document.body.style.padding = '0';
+                document.documentElement.style.margin = '0';
+                document.documentElement.style.padding = '0';
+
+                html2pdf().set(opt).from(element).save();
+            }
+            
             </script>
 
+            <!-- Library html2pdf.js -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         </div>
     </div>
 
@@ -129,15 +225,15 @@
         <!-- Workspace -->
         <div class="flex-1 overflow-auto flex items-start justify-center p-5"
             style="border: none; " id="print-area">
-            <div class="w-full shadow-lg border border-gray-600 text-white p-5" style="background-color:white; width: 210mm; height: 297mm;  min-height: 297mm; /* Default height */
-  height: auto; " class="print-page" id="include-content" >
-           @if (Request::is('transaksi/nota/*'))
-               @include('transaksi.dokumen.laporan.konsinyasiMain')
-           @elseif (Request::is('transaksi/invoice/*'))
-               @include('transaksi.dokumen.laporan.KwitansiMain')
-           @else
-               @include('transaksi.dokumen.laporan.KwitansiMain')
-           @endif
+            <div class="w-full shadow-lg  text-white p-5" style="background-color:white; width: 210mm; height: 297mm;  min-height: 290mm; /* Default height */
+                height: auto; " class="print-page" id="include-content" >
+                @if (Request::is('transaksi/nota/*'))
+                    @include('transaksi.dokumen.laporan.konsinyasiMain')
+                @elseif (Request::is('transaksi/invoice/*'))
+                    @include('transaksi.dokumen.laporan.KwitansiMain')
+                @else
+                    @include('transaksi.dokumen.laporan.KwitansiMain')
+                @endif
            
             </div>
         </div>
@@ -185,16 +281,16 @@
         </div>
     </div>
 </div>
-<script>
-  // Cek jika input belum ada value, baru set defaultDate
-document.querySelectorAll('.flatpickr-input').forEach(function (el) {
-    flatpickr(el, {
-        dateFormat: "d M Y",
-        defaultDate: el.value || "today"
-    });
-});
+        <script>
+        // Cek jika input belum ada value, baru set defaultDate
+        document.querySelectorAll('.flatpickr-input').forEach(function (el) {
+            flatpickr(el, {
+                dateFormat: "d M Y",
+                defaultDate: el.value || "today"
+            });
+        });
 
-</script>
+        </script>
         <script>
             function toggleVisibility(elementId) {
                 const element = document.getElementById(elementId);
