@@ -94,7 +94,37 @@
          .no-scrollbar::-webkit-scrollbar {
                 display: none;
             }
-       
+         @media (max-width: 768px) {
+            body {
+                zoom: 0.9; /* Zoom-out untuk layar kecil */
+            }
+
+            table {
+                font-size: 14px; /* Mengurangi ukuran font untuk tampilan kecil */
+            }
+
+            .search-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            /* Menyesuaikan ukuran tabel agar lebih baik di mobile */
+            th, td {
+                padding: 5px;
+            }
+        }
+
+        /* Lebih responsif jika ukuran lebih kecil dari 500px */
+        @media (max-width: 500px) {
+            body {
+                zoom: 0.7; /* Lebih kecil lagi di perangkat lebih kecil */
+            }
+
+            table {
+                font-size: 12px; /* Ukuran font semakin kecil */
+            }
+        }
+        
     </style>
     <script>
         document.getElementById('rightSidebar').addEventListener('click', function() {
@@ -302,7 +332,7 @@
                                             class="my-4 py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 dark:bg-white/5">
                                             <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Ubah
                                                 Foto</label>
-                                            <input type="file" id="image-input" accept="image/*" class="form-input">
+                                            <input type="file" id="image-input"  class="form-input">
                                         </div>
 
                                         {{-- LOADING INDICATOR (Opsional) --}}
@@ -637,7 +667,7 @@
                     </thead>
                     <tbody>
                         @foreach ($mitra as $item)
-                            <tr class="hover:bg-gray-50 border-b">
+                            <tr class="hover:bg-gray-50 border-b dark:border-white/10">
                                 <td class="whitespace-nowrap px-4 py-2">
                                     <a href="/mitra/detail/{{ $item->id }}" class="text-blue-600 hover:underline">
                                         {{ $item->kode_mitra }}
@@ -680,7 +710,7 @@
                             <th class="w-6"></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 dark:divide-white/10">
                         @foreach ($produk as $item)
                             <tr class="hover:bg-gray-50">
                                 <!-- Produk -->
@@ -744,6 +774,8 @@
                 <p class="text-xs text-black/60 dark:text-white/60">Berikut adalah daftar Transaksi dengan Mitra yang telah
                     terdaftar di sistem.</p>
             </div>
+
+            
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -755,16 +787,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($transaksi as $item)
+                    
+                        @foreach ($transaksi2 as $item)
                             <tr>
                                 <td class="whitespace-nowrap"><a
                                         href="/transaksi/{{ $item->id }}">{{ $item->kode_transaksi }}</a></td>
-                                <td class="hidden md:block">{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->translatedFormat('d F Y') }}</td>
+                                <td class="hidden md:block">{{ \Carbon\Carbon::make($item->tanggal_transaksi)->translatedFormat('d F Y') }}</td>
                                 <td>{{ $item->mitra->nama_mitra }}</td>
                                 <td class="hidden md:block">Rp{{ number_format($item->total, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
-                        @if ($transaksi->isEmpty())
+                        @if ($transaksi2->isEmpty())
                             <tr>
                                 <td colspan="5" class="text-center text-gray-500 py-4">Data tidak ditemukan</td>
                             </tr>

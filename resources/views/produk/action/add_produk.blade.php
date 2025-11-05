@@ -53,7 +53,9 @@
         background: transparent;
         border: none;
     }
-
+    .dark .satuan+.select2-container--default .select2-selection--single{
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
     .p-7 {
         padding: 0px !important;
     }
@@ -387,15 +389,11 @@
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Stok Produk <span style="color: red">*</span></label>
                         <div class="flex items-center">
                             <input type="number" name="stok" placeholder="Stok Produk" class="form-input" value="1" />
-                            <select name="satuan_id" style="width:100px;" class="satuan-select form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-
-
+                            <select name="satuan_id" style="width:100px;" class="satuan-select satuan form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-black rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
                                 @foreach($satuans as $satuan)
                                 <option value="{{ $satuan->id }}">{{ $satuan->nama }}</option>
                                 @endforeach
-
                             </select>
-
                         </div>
                     </div>
 

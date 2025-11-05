@@ -143,7 +143,7 @@
                                 <!-- Kode Produk -->
                                 <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
                                     <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Kode Produk <span class="text-red-500">*</span></label>
-                                    <input type="text" name="kode_produk" id="kode_produk" class="form-input" value="{{ old('kode_produk', $produk->kode_produk ?? '') }}" readonly>
+                                    <input type="text" name="kode_produk" class="form-input" value="{{ $produk->kode_produk }}" readonly>
                                 </div>
 
                                 <!-- Nama Produk -->

@@ -52,12 +52,12 @@
     @if(session('success'))
         <div class="mb-2 p-2 bg-green-200 text-green-800 rounded">{{ session('success') }}</div>
     @endif
-    <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md">
-    <table class="w-full border bg-white border-gray-200 rounded">
+    <div class="">
+    <table class="w-full border bg-white border-gray-200 rounded dark:bg-black dark:border-white/10 text-sm">
         <thead>
-            <tr class="bg-gray-100">
-                <th class="border px-2 py-1">No</th>
-                <th class="border px-2 py-1">Nama</th>
+            <tr class="bg-gray-100 dark:bg-white/5"> 
+                <th class="border dark:border-white/10 px-2 py-1">No</th>
+                <th class="border dark:border-white/10 px-2 py-1">Nama</th>
             
             </tr>
         </thead>

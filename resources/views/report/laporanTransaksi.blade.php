@@ -24,6 +24,10 @@
 
            /* cegah side scroll */
   }
+  .mobile {
+    visibility: hidden;
+    display: none;
+  }
 
 }
 </style>
@@ -34,7 +38,7 @@
             <label for="awal" class="block mb-1 text-xs font-semibold text-gray-600 dark:text-gray-300">
                 Tanggal Awal
             </label>
-            <input type="date" name="awal" id="awal"
+            <input type="date" name="awal" id="awal" placeholder="Tanggal Awal" 
                 class="form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 
                        dark:border-white/10 rounded-lg focus:ring-0 focus:shadow-none"
                 value="{{ request('awal') ?? '' }}">
@@ -44,19 +48,16 @@
             <label for="akhir" class="block mb-1 text-xs font-semibold text-gray-600 dark:text-gray-300">
                 Tanggal Akhir
             </label>
-            <input type="date" name="akhir" id="akhir"
+            <input type="date" name="akhir" id="akhir" onchange="this.form.submit()" placeholder="Tanggal Akhir"
                 class="form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 
                        dark:border-white/10 rounded-lg focus:ring-0 focus:shadow-none"
                 value="{{ request('akhir') ?? '' }}">
         </div>
 
         <div class="flex gap-2 items-end w-full sm:w-auto">
-            <button type="submit"
-                class="btn py-2.5 px-6 text-base w-full sm:w-auto">
-                Filter
-            </button>
-            <a href="/laporan/pdf"
-                class="btn py-2.5 px-6 text-base w-full sm:w-auto text-center">
+       
+           <a href="/laporan/pdf?awal={{ $awal }}&akhir={{ $akhir }}"
+            class="btn py-2.5 px-6 text-base w-full sm:w-auto text-center">
                 Cetak PDF
             </a>
         </div>
@@ -67,10 +68,7 @@
 
 
 
-
-
-
-<div class="rounded-lg">
+<div class="rounded-lg mobile">
     <h2 class="text-center text-lg sm:text-xl font-bold tracking-wide uppercase mb-2">
         Laporan Penjualan Detail
     </h2>

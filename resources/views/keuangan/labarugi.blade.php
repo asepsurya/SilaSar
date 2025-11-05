@@ -8,7 +8,7 @@
     {{-- Laporan --}}
     <div class="max-w-6xl mx-auto border dark:border-white/10 rounded-xl overflow-hidden">
         {{-- Header Laporan --}}
-        <div class="flex flex-col md:flex-row justify-between items-center border-b dark:border-white/10 px-6 py-4 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-center border-b dark:border-white/10 px-6 py-4 gap-4 hidden md:flex">
             {{-- Judul di kiri --}}
             <h2 class="text-2xl font-semibold text-gray-800">
                 Laporan Laba Rugi
@@ -34,7 +34,38 @@
             </form>
         </div>
 
+<div class="flex flex-col md:flex-row md:justify-between md:items-center border-b dark:border-white/10 px-6 py-4 block md:hidden">
+    <!-- Judul -->
+    <h2 class="text-xl font-bold text-center md:text-left mb-3 md:mb-0">
+        Laporan Laba Rugi <span class="text-gray-500">(Dalam Rupiah)</span>
+    </h2>
 
+    <!-- Form Filter (❗ hanya tampil di mobile) -->
+    <form id="filterForm" method="GET"
+        class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0 ">
+        <div class="flex">
+            <select name="bulan" id="bulanSelect" style="width: 200px;"
+                class="form-select border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                onchange="this.form.submit()">
+                @foreach(range(1, 12) as $b)
+                <option value="{{ $b }}" {{ $b == $bulan ? 'selected' : '' }}>
+                    {{ \Carbon\Carbon::createFromDate(null, (int)$b, 1)->translatedFormat('F') }}
+                </option>
+                @endforeach
+            </select>
+
+            <input type="number" id="tahunInput" name="tahun" value="{{ $tahun }}" placeholder="Tahun"
+                class="form-input w-24 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                onchange="this.form.submit()">
+        </div>
+
+        <a id="pdfLink"
+           href="{{ route('laporan.neracaPdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+           class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 sm:ml-3 mt-2 sm:mt-0">
+           Cetak PDF
+        </a>
+    </form>
+</div>
         {{-- Ringkasan --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 py-4  dark:border-white/10 dark:bg-white/5">
             <div class="p-4 rounded-lg bg-lightblue-100 text-center">

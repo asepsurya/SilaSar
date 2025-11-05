@@ -158,7 +158,7 @@
             <span class="text-xs">Legalitas</span>
         </button>
 
-        @if(!auth()->user()->role == 'gold'))
+        @if(auth()->user()->role != 'gold')
         <!-- Stempel -->
         <button onclick="openTab('tab-stamp')"
             class="flex-1 flex flex-col items-center justify-center text-xs text-center text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 py-2">
@@ -223,7 +223,7 @@
                                     alt="Logo Perusahaan" onclick="document.getElementById('logo-upload').click()">
 
                                 <!-- File Input (hidden) -->
-                                <input type="file" id="logo-upload" class="hidden" accept=".png,.jpg,.jpeg"
+                                <input type="file" id="logo-upload" class="hidden" 
                                     onchange="uploadLogo(this)">
 
                                 <!-- Loading Overlay -->
@@ -723,7 +723,7 @@
                             class="fixed inset-0 flex items-center justify-center " @click.away="showModal = false"
                             @keydown.escape.window="showModal = false">
                             <div class="relative bg-white dark:bg-gray-800 rounded shadow-lg max-w-3xl max-h-[90vh] p-4">
-                                <button @click="showModal = false"
+                                <button @click="showModal = false" type="button"
                                     class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 dark:hover:text-white text-xl font-bold"
                                     aria-label="Close modal">&times;</button>
 

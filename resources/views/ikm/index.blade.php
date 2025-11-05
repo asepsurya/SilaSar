@@ -53,7 +53,37 @@
         border-bottom: 3px solid #075ade;
         /* border-b-2 */
     }
+  @media (max-width: 768px) {
+            body {
+                zoom: 0.9; /* Zoom-out untuk layar kecil */
+            }
 
+            table {
+                font-size: 14px; /* Mengurangi ukuran font untuk tampilan kecil */
+            }
+
+            .search-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            /* Menyesuaikan ukuran tabel agar lebih baik di mobile */
+            th, td {
+                padding: 5px;
+            }
+        }
+
+        /* Lebih responsif jika ukuran lebih kecil dari 500px */
+        @media (max-width: 500px) {
+            body {
+                zoom: 0.8; /* Lebih kecil lagi di perangkat lebih kecil */
+            }
+
+            table {
+                font-size: 12px; /* Ukuran font semakin kecil */
+            }
+        }
+        
 </style>
 @endsection
 @section('container')

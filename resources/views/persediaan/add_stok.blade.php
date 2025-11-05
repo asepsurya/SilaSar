@@ -58,8 +58,20 @@
         </div>
         <div x-data="produkSearch()" class="mb-5">
             <label class="block mb-1 ">Cari Produk</label>
-            <input type="text" x-model="keyword" @keydown.enter.prevent="search()" placeholder="Cari Produk..." class="form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg">
+           <input 
+                type="text" 
+                x-model="keyword" 
+                @keydown.enter.prevent="search()" 
+                placeholder="Cari Produk..." 
+                class="mb-3 form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg">
 
+            <!-- Tombol pencarian -->
+            <button 
+                type="button" 
+                @click="search()" 
+                class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Cari Produk
+            </button>
             {{-- Modal --}}
             <div x-show="open" x-transition @click.self="open = false" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 dark:bg-white/10 ">
                 <div class="bg-white dark:bg-black rounded-xl shadow-2xl p-5 w-full max-w-lg dark:border-white/10">
@@ -344,7 +356,7 @@
             <td class="border dark:border-white/10 px-2 py-1">
                 <input type="text" name="items[${no - 1}][kode_produk]" 
                     value="${data.kode_produk ?? ''}" 
-                    class="kode_produk border-0 w-full form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg">
+                    class="kode_produk border-0 w-full form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg " readonly>
             </td>
             <td class="border dark:border-white/10 px-2 py-1">
                 <input type="text" name="items[${no - 1}][nama_produk]" 
@@ -387,8 +399,14 @@
         hitungTotal();
     }
 
-    function syncCards() {
+function syncCards() {
     if (!itemCards) return;
+
+    // ✅ Simpan elemen aktif & posisi kursor (jika input sedang fokus)
+    const active = document.activeElement;
+    const activeIndex = active?.dataset?.index || null;
+    const caretPos = active?.selectionStart || 0;
+
     itemCards.innerHTML = '';
 
     tableBody.querySelectorAll('tr:not(.empty-row)').forEach((tr, i) => {
@@ -396,7 +414,7 @@
         const nama = tr.querySelector('.nama_produk')?.value || '';
         const jumlah = tr.querySelector('.jumlah')?.value || 0;
         const harga = parseFloat(tr.querySelector('.harga')?.value) || 0;
-        const total = tr.querySelector('.total')?.textContent  || 'Rp 0';
+        const total = tr.querySelector('.total')?.textContent || 'Rp 0';
 
         const card = document.createElement('div');
         card.className = "p-3 border rounded-lg dark:border-white/10 bg-white dark:bg-black space-y-2 mb-3";
@@ -455,7 +473,23 @@
 
         itemCards.appendChild(card);
     });
+
+    // ✅ Restore fokus dan posisi kursor setelah rebuild
+    if (activeIndex !== null) {
+        const restoredInput = itemCards.querySelector(`.jumlahMobile[data-index="${activeIndex}"]`);
+        if (restoredInput) {
+            restoredInput.focus();
+
+            // restore posisi kursor (biar gak balik ke depan)
+            if (caretPos !== null && restoredInput.setSelectionRange) {
+                const length = restoredInput.value.length;
+                const pos = Math.min(caretPos, length);
+                restoredInput.setSelectionRange(pos, pos);
+            }
+        }
+    }
 }
+
 
     function hapusRow(index) {
         const tr = tableBody.querySelectorAll('tr:not(.empty-row)')[index];

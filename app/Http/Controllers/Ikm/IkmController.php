@@ -33,15 +33,16 @@ class IkmController extends Controller
             '<div ><a href="https://wa.me/' . preg_replace('/[^0-9]/', '', (substr($item->telp, 0, 1) === '0' ? '+62' . substr($item->telp, 1) : $item->telp)) . '" target="_blank" class="inline-flex items-center  py-1 rounded-full  hover:bg-green-600">' .($item->telp ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</a></div>',
             '<div class="mobile">' . ($item->email ?? '<span class="text-gray-500">Tidak Diketahui</span>') .'</div>',
            
-            '<form action="' . route('ikm.updateRole', $item->id) . '" method="POST">
-              ' . csrf_field() . '
-              <select name="role" onchange="this.form.submit()" id="role"
-                  class="form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-                  <option value="admin" ' . ($item->user->role == "admin" ? "selected" : "") . '>Admin</option>
-                  <option value="platinum" ' . ($item->user->role == "platinum" ? "selected" : "") . '>Platinum</option>
-                  <option value="gold" ' . ($item->user->role == "gold" ? "selected" : "") . '>Gold</option>
-              </select>
-          </form>'
+           '<form action="' . route('ikm.updateRole', $item->user->id) . '" method="POST">
+        ' . csrf_field() . '
+       
+        <select name="role" onchange="this.form.submit()" id="role"
+            class="form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
+            <option value="admin" ' . ($item->user?->role == "admin" ? "selected" : "") . '>Admin</option>
+            <option value="platinum" ' . ($item->user?->role == "platinum" ? "selected" : "") . '>Platinum</option>
+            <option value="gold" ' . ($item->user?->role == "gold" ? "selected" : "") . '>Gold</option>
+        </select>
+    </form>'
         ];
 
       })->values();
@@ -58,14 +59,15 @@ class IkmController extends Controller
   }
   public function updateRole(Request $request, $id)
   {
-      $request->validate([
-          'role' => 'required|in:admin,platinum,gold'
-      ]);
-      $user = User::findOrFail($id);
-      // Hapus role lama dan assign yang baru
-      $user->syncRoles([$request->role]);
-      $user->update(['role' => $request->role]);
-      return redirect()->back()->with('success', 'Role berhasil diperbarui.');
+    
+    $user = User::findOrFail($id);
+ 
+    // Hapus role lama dan assign role baru
+    $user->syncRoles([$request->role]);
+    $user->role = $request->role;
+    $user->save();
+
+    return redirect()->back()->with('success', 'Role berhasil diperbarui.');
   }
 
   public function keaktifan()
@@ -200,13 +202,13 @@ class IkmController extends Controller
     if (!$ikm) {
         abort(404);
     }
-
+    
     // 🔹 Ambil user berdasarkan nomor telepon IKM
     $user = User::where("phone", $ikm->telp)->first();
     if (!$user) {
         abort(404, 'User tidak ditemukan untuk IKM ini.');
     }
-
+       $daftarTransaksi = Transaksi::where('auth', $user->id)->with('mitra')->get();
     // 🔹 Ambil filter dari request
     $bulan = $request->input('bulan', date('m'));
     $tahun = $request->input('tahun', date('Y'));
@@ -251,22 +253,51 @@ class IkmController extends Controller
     // ==============================================================
     // 🔹 FILTER DATA BERDASARKAN RANGE ATAU BULAN/TAHUN
     // ==============================================================
+    // ==============================================================
+// 🔹 FILTER DATA BERDASARKAN RANGE ATAU BULAN/TAHUN
+// ==============================================================
     if ($from && $to) {
         try {
-            // Format input dari form adalah d/m/Y → ubah ke Carbon
-            $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
-            $toDate = Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
+            // 🧩 Deteksi otomatis format tanggal (d/m/Y atau Y-m-d atau d-m-Y)
+            $fromDate = null;
+            $toDate = null;
 
-            // Filter keuangan berdasarkan kolom tanggal (string d/m/Y)
-            $keuanganQuery->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [
+            foreach (['d/m/Y', 'Y-m-d', 'd-m-Y'] as $fmt) {
+                try {
+                    $fromDate = Carbon::createFromFormat($fmt, $from);
+                    $toDate = Carbon::createFromFormat($fmt, $to);
+                    break; // Berhenti kalau berhasil parse
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+
+            if (!$fromDate || !$toDate) {
+                $fromDate = Carbon::parse($from);
+                $toDate = Carbon::parse($to);
+            }
+
+            $fromDate = $fromDate->startOfDay();
+            $toDate = $toDate->endOfDay();
+
+            // ✅ Keuangan → format tanggal: d/m/Y
+            $keuanganQuery->whereRaw("
+                STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
+            ", [
                 $fromDate->format('Y-m-d'),
                 $toDate->format('Y-m-d')
             ]);
 
-            // Filter transaksi berdasarkan created_at (datetime)
-            $transaksiQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            // ✅ Transaksi → format tanggal_transaksi: d-m-Y
+            $transaksiQuery->whereRaw("
+                STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d') BETWEEN ? AND ?
+            ", [
+                $fromDate->format('Y-m-d'),
+                $toDate->format('Y-m-d')
+            ]);
+
         } catch (\Exception $e) {
-            // Abaikan error format tanggal
+            // Abaikan error format
         }
     } else {
         // 🔹 Jika tidak ada filter tanggal, gunakan bulan & tahun
@@ -275,8 +306,8 @@ class IkmController extends Controller
             ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
 
         $transaksiQuery
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun);
+            ->whereRaw("MONTH(STR_TO_DATE(tanggal_transaksi, '%Yd-%m-%d')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d')) = ?", [$tahun]);
     }
 
     // ==============================================================
@@ -319,6 +350,7 @@ class IkmController extends Controller
         "mitra" => $mitra,
         "produk" => $produk,
         "transaksi" => $transaksi,
+        "transaksi2" => $daftarTransaksi,
         "keuangan" => $keuangan,
         "Ikmlogs" => $Ikmlogs,
         "tahun" => $tahun,

@@ -178,6 +178,50 @@
                 transform: rotate(360deg);
             }
         }
+         .toggle-container {
+            border-radius: 9999px; /* capsule */
+            background-color: #f3f4f6; /* bg-gray-100 */
+            position: relative;
+            display: flex;
+            width: 100%; /* full width */
+            max-width: 400px; /* optional max-width agar tidak terlalu lebar di layar besar */
+            padding: 8px; /* padding lebih besar */
+            cursor: pointer;
+            box-sizing: border-box; /* agar padding tidak menambah lebar */
+        }
+        .toggle-indicator {
+            position: absolute;
+            top: 4px; /* sesuaikan dengan padding baru */
+            bottom: 4px;
+            width: 50%;
+            background-color: #2563eb; /* biru Tailwind */
+            border-radius: 9999px;
+            transition: transform 0.3s ease;
+        }
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            z-index: 10;
+            padding: 8px 0; /* lebih nyaman untuk diklik */
+        }
+        .toggle-option.active {
+            color: white;
+        }
+          .toggle-container {
+            display: none; /* default sembunyi */
+        }
+
+        @media (max-width: 768px) {
+            .toggle-container {
+            display: flex; /* tampil di mobile */
+            }
+            .mobile{
+                display: none;
+                disability: hidden;
+            }
+        }
+        
 
     </style>
 </head>
@@ -185,11 +229,12 @@
 <body class="bg-white min-h-screen">
 
     <!-- DESKTOP LOGIN -->
-    <main class="flex flex-col md:flex-row min-h-screen overflow-hidden bg-cover bg-center bg-[url('{{ asset('assets/bg2.png') }}')] md:bg-none">
-        
+    <main class="flex flex-col md:flex-row min-h-screen overflow-hidden bg-cover bg-center ">
+        {{-- bg-[url('{{ asset('assets/bg2.png') }}')] md:bg-none --}}
         <!-- Right Form Section -->
-        <section class="flex items-center min-h-screen w-full md:w-1/2 px-6 py-12 md:px-16">
+        <section class="flex items-center min-h-screen w-full md:w-1/2 px-5 py-12 md:px-16">
             <div class="flex-grow">
+                    
                 <!-- Logo -->
                 <div class="mb-10">
                     <img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded" width="150">
@@ -197,7 +242,12 @@
 
                 <!-- Heading -->
                 <h1 class="text-[#0f172a] text-3xl font-semibold mb-2">Masuk ke Akun Anda</h1>
-                <p class="text-[#334155] mb-8 text-base text-sm">Selamat datang! Silakan masukkan detail Anda.</p>
+                <p class="text-[#334155] mb-8  text-sm">Selamat datang! Silakan masukkan detail Anda.</p>
+                 <div id="toggle" class="toggle-container">
+                <div id="indicator" class="toggle-indicator"></div>
+                <div id="login" class="toggle-option active" data-link="/login">Login</div>
+                <div id="register" class="toggle-option" data-link="/register">Register</div>
+                </div>
 
                 <!-- Error Alert -->
                 @if ($errors->any())
@@ -216,6 +266,7 @@
                     @csrf
 
                     <!-- Email -->
+                   
                     <label class="relative block">
                         <span class="absolute inset-y-0 left-4 flex items-center text-[#64748b]">
                             <i class="fas fa-user"></i>
@@ -236,7 +287,12 @@
 
                     <!-- Forgot Password -->
                     <div class="flex justify-between mb-8 text-sm text-[#475569]">
-                        <div></div>
+                        <a href="{{ asset('SilaSar.v1.1.apk') }}" target="_blank"
+                        class="rounded-lg 
+                                py-1 px-3  sm:py-2 
+                                 w-max text-[#64748b] text-sm "> Download versi Mobile App
+                        </a>
+                        
                         <a href="{{ route('passReset') }}" class="text-blue-600 hover:underline">Lupa Password..?</a>
                     </div>
 
@@ -252,13 +308,12 @@
                     Belum memiliki akun?
                     <a href="/register" class="text-blue-600 font-semibold hover:underline">Mendaftar</a>
                 </p>
-               <footer class="hidden md:flex mt-auto p-7 flex-wrap items-center justify-center sm:justify-between gap-3">
-                    <p class="text-xs text-black">&copy; {{ date('Y') }} {{ config('app.name') }}</p>
-                    <ul class="flex items-center text-black/40 text-xs gap-5">
-                        {{-- <li><img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded" width="110"></li> --}}
-                        <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="BI Logo" width="120"></li>
-                    </ul>
-                </footer>
+            <footer class="hidden sm:flex p-7 flex-wrap items-center justify-center sm:justify-between gap-3 bg-white text-xs text-black">
+                <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
+                <ul class="flex items-center text-black/40 gap-5">
+                    <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="BI Logo" width="120" /></li>
+                </ul>
+            </footer>
 
             </div>
 
@@ -291,5 +346,31 @@
             icon.classList.toggle('fa-eye-slash', isPassword);
         }
     </script>
+<script>
+  const toggle = document.getElementById('toggle');
+  const indicator = document.getElementById('indicator');
+  const options = toggle.querySelectorAll('.toggle-option');
+
+  options.forEach(option => {
+    option.addEventListener('click', () => {
+      // Hapus class active dari semua
+      options.forEach(o => o.classList.remove('active'));
+      option.classList.add('active');
+
+      // Swipe indicator
+      if(option.id === 'login') {
+        indicator.style.transform = 'translateX(0%)';
+      } else {
+        indicator.style.transform = 'translateX(100%)';
+      }
+
+      // Redirect ke link
+      const link = option.dataset.link;
+      setTimeout(() => {
+        window.location.href = link;
+      }, 300); // delay 300ms supaya efek swipe terlihat
+    });
+  });
+</script>
 </body>
 </html>

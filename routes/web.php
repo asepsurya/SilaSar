@@ -155,7 +155,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     Route::post('/people/update/foto', [IkmController::class, 'updateFoto'])->name('ikm.update.foto');
     Route::post('/keaktifan', [IkmController::class, 'getAktifData'])->name('getAktifData');
     Route::get('/people/keaktifan', [IkmController::class, 'keaktifan'])->name('keaktifan.pengguna');
-    Route::post('/ikm/{id}/update-role', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
+    Route::post('/ikm/updaterole/{id}', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
     // ------------------------------------------------
     // Route Keuangan
     // ------------------------------------------------

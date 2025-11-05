@@ -18,7 +18,7 @@
     <style>
       body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f1f1;
+            background-color: #ffffff;
             /* background-image: url('{{ asset('assets/bg3.jpg') }}');
             background-size: cover;
             background-position: center; */
@@ -55,7 +55,7 @@
 </head>
 
 <body class="flex items-center justify-center min-h-screen" style="">
-<main class="w-full max-w-5xl mx-auto bg-white rounded-lg overflow-hidden flex flex-col md:flex-row ">
+<main class="w-full max-w-7xl mx-auto bg-white rounded-lg overflow-hidden flex flex-col md:flex-row ">
 
     <!-- Side Animation - Only Desktop -->
     <section class="hidden md:flex w-1/2 bg-[#f0f5ff] items-center justify-center">
@@ -70,7 +70,7 @@
     </section>
 
     <!-- Content Section -->
-    <section class="w-full md:w-1/2 p-6 sm:p-8 md:p-12 flex flex-col justify-center" id="content">
+    <section class="w-full md:w-1/2 p-5 sm:p-8 md:p-12 flex flex-col justify-center" id="content">
 
         <!-- Logo -->
         <div class="flex items-center space-x-2 mb-6">

@@ -43,6 +43,9 @@
       .p-6, .sm\:p-6 {
           padding: 1rem !important;
       }
+      .mobile {
+          display: none;
+      }
       
   }
 </style>
@@ -230,7 +233,7 @@ date_default_timezone_set('Asia/Jakarta');
                                         ->sum('total');
                 $color = $colors[$i % count($colors)];
             @endphp
-            <div class="p-3 rounded-lg border  dark:bg-gray-900 flex justify-between items-center shadow cursor-pointer"
+            <div class="p-3 rounded-lg border dark:border-white/10  dark:bg-gray-900 flex justify-between items-center shadow cursor-pointer"
                  @click="showModal=true; detail={nama:'{{ $a->nama_akun }}', warna:'{{ $color }}', total:'Rp.{{ number_format($totalAkun, 0, ',', '.') }}'}">
                 <span class="text-gray-800 dark:text-gray-100 font-medium">{{ $a->nama_akun }}</span>
                 <span class="inline-block w-4 h-4 rounded-full" style="background: {{ $color }}"></span>
@@ -258,12 +261,12 @@ date_default_timezone_set('Asia/Jakarta');
 </div>
 
     <!-- Right: Progress Table -->
-   <div class="bg-lightwhite dark:bg-white/5 p-4 sm:p-6 rounded-2xl shadow-md overflow-x-auto">
-    <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Persentase Penggunaan Akun</h3>
+   <div class="bg-lightwhite dark:bg-white/5 p-4 sm:p-6 rounded-2xl shadow-md overflow-x-auto mobile ">
+    <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 ">Persentase Penggunaan Akun</h3>
     @php
         $totalPengeluaran = $transaksi->where('tipe', 'pengeluaran')->sum('total');
     @endphp
-    <table class="w-full min-w-[320px]">
+    <table class="w-full min-w-[320px] h ">
         <thead>
             <tr>
                 <th class="text-left py-2 text-gray-700 dark:text-gray-200">Akun</th>

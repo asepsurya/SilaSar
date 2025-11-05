@@ -396,33 +396,33 @@ class TransaksiController extends Controller
     }
 
     public function laporanTransaksi(){
-        $awal = request('awal');
-        $akhir = request('akhir');
-      $laporan = DB::table('transaksis as t')
-            ->join('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
-            ->join('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
-            ->join('satuans as s', 'p.satuan_id', '=', 's.id')
-            ->join('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
-            ->select(
-                't.kode_transaksi',
-                't.tanggal_transaksi',
-                't.kode_mitra',
-                'm.nama_mitra as nama_pelanggan',
-                'm.alamat_mitra as alamat',
-                'tp.kode_produk',
-                'p.nama_produk',
-                'tp.barang_keluar',
-                'tp.barang_retur',
-                'tp.barang_terjual as jumlah',
-                's.nama as satuan',   // ✅ ambil dari tabel satuans
-                'p.harga',
-                DB::raw('(tp.barang_terjual * p.harga) as total')
-            )
-            ->when(request('awal') && request('akhir'), function ($query) {
-                $query->whereBetween('t.tanggal_transaksi', [request('awal'), request('akhir')]);
-            })
-            ->get();
+        $awal = request('awal');   // contoh: 2025-11-01
+        $akhir = request('akhir'); // contoh: 2025-11-30
 
+    $laporan = DB::table('transaksis as t')
+        ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+        ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+        ->leftJoin('satuans as s', 'p.satuan_id', '=', 's.id')
+        ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+        ->select(
+            't.kode_transaksi',
+            't.tanggal_transaksi',
+            't.kode_mitra',
+            'm.nama_mitra as nama_pelanggan',
+            'm.alamat_mitra as alamat',
+            'tp.kode_produk',
+            'p.nama_produk',
+            'tp.barang_keluar',
+            'tp.barang_retur',
+            'tp.barang_terjual as jumlah',
+            's.nama as satuan',
+            'p.harga',
+            DB::raw('(tp.barang_terjual * p.harga) as total')
+        )
+        ->when($awal && $akhir, function ($query) use ($awal, $akhir) {
+            $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+        })
+        ->get();
 
 
         $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
@@ -444,31 +444,30 @@ class TransaksiController extends Controller
     {
         $awal = request('awal');
         $akhir = request('akhir');
-          $laporan = DB::table('transaksis as t')
-            ->join('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
-            ->join('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
-            ->join('satuans as s', 'p.satuan_id', '=', 's.id')
-            ->join('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
-            ->select(
-                't.kode_transaksi',
-                't.tanggal_transaksi',
-                't.kode_mitra',
-                'm.nama_mitra as nama_pelanggan',
-                'm.alamat_mitra as alamat',
-                'tp.kode_produk',
-                'p.nama_produk',
-                'tp.barang_keluar',
-                'tp.barang_retur',
-                'tp.barang_terjual as jumlah',
-                's.nama as satuan',   // ✅ ambil dari tabel satuans
-                'p.harga',
-                DB::raw('(tp.barang_terjual * p.harga) as total')
-            )
-            ->when(request('awal') && request('akhir'), function ($query) {
-                $query->whereBetween('t.tanggal_transaksi', [request('awal'), request('akhir')]);
-            })
-            ->get();
-
+           $laporan = DB::table('transaksis as t')
+        ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+        ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+        ->leftJoin('satuans as s', 'p.satuan_id', '=', 's.id')
+        ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+        ->select(
+            't.kode_transaksi',
+            't.tanggal_transaksi',
+            't.kode_mitra',
+            'm.nama_mitra as nama_pelanggan',
+            'm.alamat_mitra as alamat',
+            'tp.kode_produk',
+            'p.nama_produk',
+            'tp.barang_keluar',
+            'tp.barang_retur',
+            'tp.barang_terjual as jumlah',
+            's.nama as satuan',
+            'p.harga',
+            DB::raw('(tp.barang_terjual * p.harga) as total')
+        )
+        ->when($awal && $akhir, function ($query) use ($awal, $akhir) {
+            $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+        })
+        ->get();
 
 
         $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);

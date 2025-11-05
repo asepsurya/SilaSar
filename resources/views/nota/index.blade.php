@@ -41,7 +41,7 @@
     </button>
 
     <!-- Dropdown Menu -->
-    <div id="dropdownMenu" class="shadow absolute left-0 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-lg rounded-lg mt-2 hidden">
+    <div id="dropdownMenu" class="shadow absolute left-0 w-full bg-white dark:bg-black text-gray-800 dark:text-white shadow-lg rounded-lg mt-2 hidden">
         <a href="{{ route('transaksi.nota.manual', $transactionCode) }}" 
             class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition">
             KONSINYASI

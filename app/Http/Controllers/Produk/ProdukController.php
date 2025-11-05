@@ -171,7 +171,7 @@ class ProdukController extends Controller
     
         // Update data produk
         $produk->update([
-             'kode_produk' => $request->kode_produk ?? 'PRD-' . uniqid(),
+            'kode_produk' => $request->kode_produk ?? $produk->kode_produk,
             'nama_produk' => $request->nama_produk,
             'harga' => $request->harga,
             'harga_jual' => $request->harga_jual,
@@ -191,7 +191,7 @@ class ProdukController extends Controller
             'beban_non_inventory_id'=> $request->beban_non_inventory_id,
            
         ]);
-    
+        
         return back()->with("success", "Data has been updated successfully!");
     }
 
@@ -382,7 +382,7 @@ class ProdukController extends Controller
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         
         return view('persediaan.index',[
-              'activeMenu' => 'produk',
+              'activeMenu' => 'persediaan',
             'active' => 'persediaan',
         ],compact('logs','stok'));
     }

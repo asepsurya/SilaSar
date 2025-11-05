@@ -464,7 +464,7 @@
                                     <tr class="hover:bg-gray-50 dark:hover:bg-black">
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center" width="1%">
                                             <button type="button"
-                                                onclick="hapusItem('{{ $transaksi->kode_transaksi }}','{{ $row->produk->kode_produk }}')"
+                                                onclick="hapusItem('{{ $transaksi->kode_transaksi ?? '' }}','{{ $row->produk->kode_produk ?? '-' }}')"
                                                 style="color:red;">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -477,15 +477,15 @@
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
                                             <button type="button"
                                                 class="form-input w-full bg-gray-50 dark:bg-gray-800 border-gray-300 rounded-md text-left cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900"
-                                                onclick="showProductDetail('{{ $row->produk->kode_produk }}')"
+                                                onclick="showProductDetail('{{ $row->produk->kode_produk  ?? '-'}}')"
                                                 style="padding: 0.5rem 0.75rem;">
                                                 {{ $row->produk->nama_produk ?? '-' }}
                                             </button>
                                             <input type="hidden" name="kode_produk[]"
-                                                value="{{ $row->produk->kode_produk }}">
+                                                value="{{ $row->produk->kode_produk ?? '-' }}">
 
                                             <!-- Modal for product detail -->
-                                            <div id="modal-detail-{{ $row->produk->kode_produk }}"
+                                            <div id="modal-detail-{{ $row->produk->kode_produk ?? ''}}"
                                                 class="fixed inset-0 z-[99999] flex items-center justify-center hidden"
                                                 style="z-index: 999999">
                                                 <!-- Overlay -->
@@ -495,7 +495,7 @@
                                                     class="relative bg-white  dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3 rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
                                                     <button type="button"
                                                         class="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-                                                        onclick="closeProductDetail('{{ $row->produk->kode_produk }}')">
+                                                        onclick="closeProductDetail('{{ $row->produk->kode_produk ?? '=' }}')">
                                                         &times;
                                                     </button>
                                                     <h3 class="text-lg font-bold mb-3">Detail Produk Penawaran</h3>
@@ -509,7 +509,7 @@
                                                                             class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
                                                                             Kode Produk</td>
                                                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                                            {{ $row->produk->kode_produk }}</td>
+                                                                            {{ $row->produk->kode_produk ?? '-' }}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td
@@ -532,7 +532,7 @@
                                                                             class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
                                                                             Stok Saat ini</td>
                                                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                                             <b>( {{ $row->produk->stok }} )</b> Pcs
+                                                                             <b>( {{ $row->produk->stok ?? '0'}} )</b> Pcs
                                                                         </td>
                                                                     </tr>
                                                                     <!-- Tambahkan detail lain sesuai kebutuhan -->
@@ -543,7 +543,7 @@
                                                     </div>
                                                     <button type="button"
                                                         class="mt-3 w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium  bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition duration-150  right-2 text-white hover:text-red-600"
-                                                        onclick="closeProductDetail('{{ $row->produk->kode_produk }}')">
+                                                        onclick="closeProductDetail('{{ $row->produk->kode_produk ?? '-' }}')">
                                                         Oke
                                                     </button>
                                                 </div>
@@ -887,7 +887,7 @@
                                     <div class="flex items-center gap-3">
                                         <!-- Tombol Hapus -->
                                         <button type="button"
-                                            onclick="hapusItem('{{ $transaksi->kode_transaksi }}','{{ $row->produk->kode_produk }}')"
+                                            onclick="hapusItem('{{ $transaksi->kode_transaksi ?? '-' }}','{{ $row->produk->kode_produk ?? '-' }}')"
                                             class="text-red-600 hover:text-red-800">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -899,9 +899,9 @@
 
                                         <!-- Nama Produk -->
                                         <button type="button"
-                                            onclick="showProductDetail2('{{ $row->produk->kode_produk }}')"
+                                            onclick="showProductDetail2('{{ $row->produk->kode_produk ?? '-' }}')"
                                             class="text-sm font-semibold text-gray-800 hover:text-blue-600">
-                                            {{ $row->produk->nama_produk }}
+                                            {{ $row->produk->nama_produk ?? '-' }}
                                         </button>
                                     </div>
 
@@ -913,7 +913,7 @@
 
 
 
-                                <div id="modal-detail2-{{ $row->produk->kode_produk }}"
+                                <div id="modal-detail2-{{ $row->produk->kode_produk ?? '' }}"
                                     class="fixed inset-0 z-40 hidden overflow-y-auto bg-black/40 flex items-center justify-center">
 
                                     <div class="relative bg-white dark:bg-black dark:border-white/10 w-11/12 max-w-sm mx-auto rounded-lg shadow-lg p-5 z-10 space-y-3 animate-fadeIn">
@@ -922,7 +922,7 @@
                                             <h3 class="text-lg font-bold">Detail Produk</h3>
                                             <button type="button"
                                                 class="text-gray-500 hover:text-red-600 text-2xl leading-none"
-                                                onclick="closeProductDetail2('{{ $row->produk->kode_produk }}')">
+                                                onclick="closeProductDetail2('{{ $row->produk->kode_produk ?? '-' }}')">
                                                 &times;
                                             </button>
                                         </div>
@@ -932,13 +932,13 @@
                                             <tbody>
                                                 <tr>
                                                     <td class="border px-2 py-1 font-medium">Kode</td>
-                                                    <td class="border px-2 py-1">{{ $row->produk->kode_produk }}</td>
+                                                    <td class="border px-2 py-1">{{ $row->produk->kode_produk ?? '-' }}</td>
                                                     <input type="hidden" name="kode_produk[]"
-                                                    value="{{ $row->produk->kode_produk }}">
+                                                    value="{{ $row->produk->kode_produk ?? '-' }}">
                                                 </tr>
                                                 <tr>
                                                     <td class="border px-2 py-1 font-medium">Nama</td>
-                                                    <td class="border px-2 py-1">{{ $row->produk->nama_produk }}</td>
+                                                    <td class="border px-2 py-1">{{ $row->produk->nama_produk ?? '-' }}</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="border px-2 py-1 font-medium">Barang Keluar <span class="text-red-600">*</span></td>
@@ -987,7 +987,7 @@
                                         <!-- Tombol Tutup -->
                                         <button type="button"
                                             class="w-full mt-3 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-                                            onclick="closeProductDetail2('{{ $row->produk->kode_produk }}')">
+                                            onclick="closeProductDetail2('{{ $row->produk->kode_produk ?? '-' }}')">
                                             Simpan
                                         </button>
                                     </div>

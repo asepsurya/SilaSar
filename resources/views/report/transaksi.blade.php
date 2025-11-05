@@ -66,12 +66,13 @@
 </head>
 <body>
     <h2>Laporan Penjualan Detail</h2>
-    <p>
-        Periode: {{ isset($awal) ? \Carbon\Carbon::parse($awal)->format('d/m/Y') : '-' }}
-        - {{ isset($akhir) ? \Carbon\Carbon::parse($akhir)->format('d/m/Y') : '-' }}
+     <p class="text-center text-xs sm:text-sm text-gray-600 mb-4">
+        Periode:
+        {{ isset($awal) ? \Carbon\Carbon::parse($awal)->format('d/m/Y') : '-' }} s/d
+        {{ isset($akhir) ? \Carbon\Carbon::parse($akhir)->format('d/m/Y') : '-' }}
     </p>
 
-```
+
 @php $grandTotal = $laporan->sum('total'); @endphp
 
 @foreach($laporan->groupBy('kode_transaksi') as $kode => $transaksi)
@@ -149,7 +150,6 @@
         <td width="120" class="text-right">{{ number_format($grandTotal, 0) }}</td>
     </tr>
 </table>
-```
 
 </body>
 </html>
