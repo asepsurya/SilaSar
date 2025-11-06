@@ -141,25 +141,28 @@ function printArea() {
             // Cek apakah WebView Android terpasang
             if (window.Android) {
                 // Android WebView: generate PDF sebagai blob, kirim ke server, download via DownloadManager
-                html2pdf().set(opt).from(element).output('blob').then(function(blob) {
+              html2pdf().set(opt).from(element).output('blob').then(function(blob) {
                     const formData = new FormData();
                     formData.append('pdf', blob, fileName);
 
-                    fetch('/save-pdf', { // ganti dengan IP/domain Laravel yang bisa diakses WebView
+                    fetch('/save-pdf', { // ganti IP/public domain Laravel
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': token },
                         body: formData
                     })
                     .then(res => res.json())
                     .then(data => {
-                        // Panggil DownloadManager di WebView
-                        Android.downloadPdf(data.url);
-                    })
-                    .catch(err => console.error(err));
-                }).finally(() => {
-                    if (window.innerWidth <= 768 && includeContent) {
-                        includeContent.style.transform = originalTransform;
-                    }
+                        // Panggil DownloadManager di Android WebView
+                        if (window.Android) {
+                            Android.downloadPdf(data.url);
+                        } else {
+                            // fallback browser desktop
+                            const a = document.createElement('a');
+                            a.href = data.url;
+                            a.download = fileName;
+                            a.click();
+                        }
+                    });
                 });
             } else {
                 // Browser desktop: langsung download
