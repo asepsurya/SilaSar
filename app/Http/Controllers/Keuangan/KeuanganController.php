@@ -722,44 +722,44 @@ class KeuanganController extends Controller
 
 public function neraca()
     {
-     // Ambil bulan & tahun dari query string, default ke sekarang
+
     // Ambil bulan & tahun dari request, default ke bulan & tahun sekarang
-    $bulan = request('bulan', Carbon::now()->month);
-    $tahun = request('tahun', Carbon::now()->year);
+   $bulan = (int) request('bulan', Carbon::now()->month);
+    $tahun = (int) request('tahun', Carbon::now()->year);
 
     $saldoAkuns = Akun::select(
-            'akuns.id',
-            'akuns.kode_akun',
-            'akuns.nama_akun',
-            'kategori_akuns.nama_kategori',
-            'kategori_akuns.tipe',
-            DB::raw('
-                SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
-            '),
-            DB::raw('
-                SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
-            ')
-        )
-        ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
-        ->leftJoin('keuangans', function($join) use ($bulan, $tahun) {
-            $join->on(function($q) {
-                    $q->on('keuangans.id_akun','=','akuns.id')
-                    ->orOn('keuangans.id_akun_second','=','akuns.id');
-                })
-                ->whereRaw('MONTH(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$bulan])
-                ->whereRaw('YEAR(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$tahun]);
-        })
-        ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
-        ->get()
-        ->map(function($row){
-            // Hitung saldo sesuai posisi normal akun
-            if (in_array($row->tipe, ['aset','beban'])) {
-                $row->saldo = $row->total_debit - $row->total_kredit;
-            } else {
-                $row->saldo = $row->total_kredit - $row->total_debit;
-            }
-            return $row;
-        });
+        'akuns.id',
+        'akuns.kode_akun',
+        'akuns.nama_akun',
+        'kategori_akuns.nama_kategori',
+        'kategori_akuns.tipe',
+        DB::raw('
+            SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
+        '),
+        DB::raw('
+            SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
+        ')
+    )
+    ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
+    ->leftJoin('keuangans', function($join) use ($bulan, $tahun) {
+        $join->on(function($q) {
+                $q->on('keuangans.id_akun','=','akuns.id')
+                  ->orOn('keuangans.id_akun_second','=','akuns.id');
+            })
+            ->whereRaw('MONTH(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$bulan])
+            ->whereRaw('YEAR(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$tahun])
+            ->where('keuangans.auth', auth()->id()); // ✅ pindahkan ke sini
+    })
+    ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
+    ->get()
+    ->map(function($row){
+        if (in_array($row->tipe, ['aset','beban'])) {
+            $row->saldo = $row->total_debit - $row->total_kredit;
+        } else {
+            $row->saldo = $row->total_kredit - $row->total_debit;
+        }
+        return $row;
+    });
 
     // Pisahkan Neraca dan Laba Rugi
     $neraca = $saldoAkuns->whereIn('tipe', ['aset','liabilitas','ekuitas'])
@@ -792,32 +792,30 @@ public function neraca()
         $bulan = request('bulan', Carbon::now()->month);
         $tahun = request('tahun', Carbon::now()->year);
 
-        $saldoAkuns = Akun::select(
+            $saldoAkuns = Akun::select(
             'akuns.id',
             'akuns.kode_akun',
             'akuns.nama_akun',
             'kategori_akuns.nama_kategori',
             'kategori_akuns.tipe',
             DB::raw('
-                COALESCE((
-                    SELECT SUM(k.total)
-                    FROM keuangans k
-                    WHERE k.id_akun = akuns.id
-                    AND MONTH(STR_TO_DATE(k.tanggal, "%d/%m/%Y")) = '.$bulan.'
-                    AND YEAR(STR_TO_DATE(k.tanggal, "%d/%m/%Y")) = '.$tahun.'
-                ), 0) AS total_debit
+                SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
             '),
             DB::raw('
-                COALESCE((
-                    SELECT SUM(k2.total)
-                    FROM keuangans k2
-                    WHERE k2.id_akun_second = akuns.id
-                    AND MONTH(STR_TO_DATE(k2.tanggal, "%d/%m/%Y")) = '.$bulan.'
-                    AND YEAR(STR_TO_DATE(k2.tanggal, "%d/%m/%Y")) = '.$tahun.'
-                ), 0) AS total_kredit
+                SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
             ')
         )
         ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
+        ->leftJoin('keuangans', function($join) use ($bulan, $tahun) {
+            $join->on(function($q) {
+                    $q->on('keuangans.id_akun','=','akuns.id')
+                    ->orOn('keuangans.id_akun_second','=','akuns.id');
+                })
+                ->whereRaw('MONTH(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                ->whereRaw('YEAR(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$tahun])
+                ->where('keuangans.auth', auth()->id()); // ✅ pindahkan ke sini
+        })
+        ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
         ->get()
         ->map(function($row){
             if (in_array($row->tipe, ['aset','beban'])) {

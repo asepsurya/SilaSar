@@ -778,7 +778,7 @@
                                         <div x-show="open" x-transition x-transition.duration.300 class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8" style="display: none;">
                                             <!-- Header -->
                                             <div class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
-                                                <h5 class="font-semibold text-lg">Tambah Transaksi Baru</h5>
+                                                <h5 class="font-semibold text-lg">Edit Transaksi</h5>
                                                 <a href="#" onclick="event.preventDefault(); Swal.fire({
                                                                 title: 'Yakin ingin menghapus?',
                                                                 text: 'Data transaksi yang dihapus tidak bisa dikembalikan.',
@@ -820,12 +820,12 @@
                                                     <div class="mb-2 relative bg-white dark:bg-white/5 py-4 px-5 rounded-lg border border-black/10 flex items-center gap-4">
                                                         <div style="width:70%">
                                                             <label class="block text-xs text-black/40 dark:text-white/40 mb-1">Tanggal</label>
-                                                            <input type="text" name="tanggal" class="tanggal form-input w-full" value="{{ $item->tanggal }}">
+                                                            <input type="text" name="tanggal" class=" form-input w-full" value=" {{ $item->tanggal }}" readonly>
                                                         </div>
                                                         <div style="width:30%">
                                                             <label class="block text-xs text-black/40 dark:text-white/40 mb-1">Waktu</label>
-                                                            <input type="text" class=" form-input w-full cursor-not-allowed" disabled value="{{ $item->waktu }}">
-                                                            <input type="hidden" name="waktu" class="waktu" value="{{ $item->waktu }}">
+                                                            <input type="hidden" class=" form-input w-full cursor-not-allowed waktu_display" disabled value="{{ $item->waktu }}">
+                                                            <input type="text" name="waktu" class="form-input w-full cursor-not-allowed" value="{{ $item->waktu ?? '-' }}" readonly>
                                                         </div>
                                                     </div>
 
