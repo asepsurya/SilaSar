@@ -90,6 +90,9 @@
                 background: #888;
                 border-radius: 5px;
             }
+            .mobile{
+                display: none;
+            }
         }
     </style>
     <div class="px-2 py-1 mb-4 flex items-center justify-between">
@@ -341,7 +344,7 @@
                                                             <input type="checkbox" id="check-all"
                                                                 onclick="toggleCheckAll(this)">
                                                         </th>
-                                                        <th class="px-3 py-2 border  dark:border-white/10 ">Kode</th>
+                                                        <th class="px-3 py-2 border  dark:border-white/10 mobile ">Kode</th>
                                                         <th class="py-2 border  dark:border-white/10 ">Nama</th>
                                                         <th class="py-2 border  dark:border-white/10 ">Stok</th>
                                                     </tr>
@@ -349,11 +352,11 @@
                                                  <tbody>
                                                         @foreach ($penawaran as $produk)
                                                             <tr class="hover:bg-gray-50">
-                                                                <td class="px-3 py-2 border  dark:border-white/10 text-center w-12">
+                                                                <td class="px-3 py-2 border  dark:border-white/10 text-center w-12 ">
                                                                     <input type="checkbox" name="kode_produk[]"
                                                                         value="{{ $produk->produk->kode_produk ?? '' }}">
                                                                 </td>
-                                                                <td class="px-5 py-2 border  dark:border-white/10 w-32">
+                                                                <td class="px-5 py-2 border  dark:border-white/10 w-32 mobile">
                                                                     {{ $produk->produk->kode_produk ?? '' }}
                                                                 </td>
                                                                 <td class="px-3 py-2 border  dark:border-white/10 w-[300px]">

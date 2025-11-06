@@ -60,7 +60,7 @@
         </div>
 
         <a id="pdfLink"
-           href="{{ route('laporan.neracaPdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+           href="{{ route('laporan.labarugipdf') }}"
            class="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 sm:ml-3 mt-2 sm:mt-0">
            Cetak PDF
         </a>

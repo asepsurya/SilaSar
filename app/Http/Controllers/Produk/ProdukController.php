@@ -252,126 +252,123 @@ class ProdukController extends Controller
 
     public function manajemenStokcreate(Request $request)
         {
-             // validasi utama transaksi
-            $validated = $request->validate([
-            
-                'tanggal'      => 'required|date_format:Y-m-d',
-                'deskripsi'    => 'nullable|string|max:255',
-                'subtotal'     => 'required',
-                'potongan'     => 'nullable',
-                'pajak'        => 'nullable',
-                'total_akhir'  => 'required',
-                'items'        => 'required|array|min:1', // wajib ada minimal 1 item
-            ], [
-                'no_transaksi.required' => 'Nomor transaksi wajib diisi!',
-                'no_transaksi.unique'   => 'Nomor transaksi sudah digunakan!',
-                'tanggal.required'      => 'Tanggal wajib diisi!',
-                'items.required'        => 'Minimal harus ada 1 produk!',
-            ]);
+           // 🔹 Validasi utama transaksi
+    $validated = $request->validate([
+        'no_transaksi' => 'required|string',
+        'tanggal'      => 'required|date_format:Y-m-d',
+        'deskripsi'    => 'nullable|string|max:255',
+        'subtotal'     => 'required',
+        'potongan'     => 'nullable',
+        'pajak'        => 'nullable',
+        'total_akhir'  => 'required',
+        'items'        => 'required|array|min:1',
+    ]);
 
-            // validasi tiap item
-            foreach ($request->items as $index => $item) {
-                $request->validate([
-                    "items.$index.kode_produk" => 'required|string|exists:produks,kode_produk',
-                    "items.$index.jumlah"      => 'required|numeric|min:1',
-                    "items.$index.harga"       => 'required|numeric|min:0',
-                    "items.$index.satuan_id"      => 'required|exists:satuans,id',
-                ], [
-                    "items.$index.kode_produk.required" => "Kode produk pada item #".($index+1)." wajib diisi",
-                    "items.$index.kode_produk.exists"   => "Kode produk pada item #".($index+1)." tidak valid",
-                    "items.$index.jumlah.required"      => "Jumlah pada item #".($index+1)." wajib diisi",
-                    "items.$index.jumlah.numeric"       => "Jumlah pada item #".($index+1)." harus angka",
-                    "items.$index.harga.required"       => "Harga pada item #".($index+1)." wajib diisi",
-                    "items.$index.harga.numeric"        => "Harga pada item #".($index+1)." harus angka",
-                    "items.$index.satuan.required"      => "Satuan pada item #".($index+1)." wajib dipilih",
-                    "items.$index.satuan.exists"        => "Satuan pada item #".($index+1)." tidak valid",
-                ]);
-            }
+    // 🔹 Validasi tiap item
+    foreach ($request->items as $index => $item) {
+        $request->validate([
+            "items.$index.kode_produk" => 'required|string|exists:produks,kode_produk',
+            "items.$index.jumlah"      => 'required|numeric|min:1',
+            "items.$index.harga"       => 'required|numeric|min:0',
+            "items.$index.satuan_id"   => 'required|exists:satuans,id',
+        ]);
+    }
 
-           // parsing angka dari format rupiah
-            $subtotal   = $this->unformatRupiah($request->subtotal);
-            $potongan   = $this->unformatRupiah($request->potongan);
-            $pajak      = $this->unformatRupiah($request->pajak);
-            $totalAkhir = $this->unformatRupiah($request->total_akhir);
+    // 🔹 Parsing angka dari format rupiah
+    $subtotal   = $this->unformatRupiah($request->subtotal);
+    $potongan   = $this->unformatRupiah($request->potongan);
+    $pajak      = $this->unformatRupiah($request->pajak);
+    $totalAkhir = $this->unformatRupiah($request->total_akhir);
 
-            // buat / update transaksi
-            $transaksi = StokTransaksi::updateOrCreate(
-                ['no_transaksi' => $request->no_transaksi],
-                [
-                    'tanggal'     => $request->tanggal,
-                    'deskripsi'   => $request->deskripsi,
-                    'subtotal'    => $subtotal,
-                    'potongan'    => $potongan,
-                    'pajak'       => $pajak,
-                    'total_akhir' => $totalAkhir,
-                    'auth'        => auth()->id(),
-                ]
-            );
+    // 🔹 Buat atau update transaksi utama
+    $transaksi = StokTransaksi::updateOrCreate(
+        ['no_transaksi' => $request->no_transaksi],
+        [
+            'tanggal'     => $request->tanggal,
+            'deskripsi'   => $request->deskripsi,
+            'subtotal'    => $subtotal,
+            'potongan'    => $potongan,
+            'pajak'       => $pajak,
+            'total_akhir' => $totalAkhir,
+            'auth'        => auth()->id(),
+        ]
+    );
 
-            // ambil item lama keyed by kode_produk
-            $oldItems = $transaksi->items()->get()->keyBy('kode_produk');
+    // 🔹 Ambil item lama keyed by kode_produk
+    $oldItems = $transaksi->items()->get()->keyBy('kode_produk');
 
-            foreach ($request->items as $item) {
-                if (empty($item['kode_produk'])) continue;
+    // 🔹 Simpan semua kode produk baru (untuk deteksi item yang dihapus)
+    $newKodeProduks = collect($request->items)->pluck('kode_produk')->toArray();
 
-                $kodeProduk = $item['kode_produk'];
-                $jumlahBaru = intval($item['jumlah'] ?? 0);
-                $harga      = $item['harga'];
-                $pot        = intval($item['pot'] ?? 0);
+    foreach ($request->items as $item) {
+        $kodeProduk = $item['kode_produk'];
+        $jumlahBaru = intval($item['jumlah']);
+        $harga      = $this->unformatRupiah($item['harga']);
+        $pot        = intval($item['pot'] ?? 0);
+        $satuan     = $item['satuan_id'];
 
-                // cek item lama
-                $oldItem = $oldItems[$kodeProduk] ?? null;
-                $jumlahLama = $oldItem->jumlah ?? 0;
+        // 🔸 Ambil produk di DB
+        $produk = Produk::where('kode_produk', $kodeProduk)->firstOrFail();
 
-                // hitung selisih stok
-                $selisih = $jumlahBaru - $jumlahLama;
+        // 🔸 Cek item lama (jika ada)
+        $oldItem = $oldItems[$kodeProduk] ?? null;
+        $jumlahLama = $oldItem->jumlah ?? 0;
+        $selisih = $jumlahBaru - $jumlahLama;
 
-                // update atau create item stok
-                if ($oldItem) {
-                    $oldItem->update([
-                        'nama_produk' => $item['nama_produk'] ?? $oldItem->nama_produk,
-                        'jumlah'      => $jumlahBaru,
-                        'satuan'      => $item['satuan'] ?? $oldItem->satuan,
-                        'harga'       => $harga,
-                        'pot'         => $pot,
-                        'total'       => $jumlahBaru * $this->unformatRupiah($harga) * (1 - ($pot/100)),
-                    ]);
-                } else {
-                    $transaksi->items()->create([
-                        'kode_produk' => $kodeProduk,
-                        'nama_produk' => $item['nama_produk'] ?? '',
-                        'jumlah'      => $jumlahBaru,
-                        'satuan'      => $item['satuan'] ?? '',
-                        'harga'       => $harga,
-                        'pot'         => $pot,
-                        'total'       => $jumlahBaru * $this->unformatRupiah($harga) * (1 - ($pot/100)),
-                    ]);
-                }
+        // 🔹 Cegah stok minus
+        if ($selisih < 0 && $produk->stok < abs($selisih)) {
+            return back()->with('error', "Stok produk {$produk->nama_produk} tidak mencukupi!");
+        }
 
-                // update stok produk sesuai selisih
-                $produk = Produk::where('kode_produk', $kodeProduk)->firstOrFail();
+        // 🔸 Update atau create item
+        $transaksi->items()->updateOrCreate(
+            ['kode_produk' => $kodeProduk],
+            [
+                'nama_produk' => $item['nama_produk'] ?? $produk->nama_produk,
+                'jumlah'      => $jumlahBaru,
+                'satuan'      => $satuan,
+                'harga'       => $harga,
+                'pot'         => $pot,
+                'total'       => $jumlahBaru * $harga * (1 - $pot / 100),
+            ]
+        );
 
-                if ($selisih < 0 && $produk->stok < abs($selisih)) {
-                    return back()->with("error", "Stok produk {$produk->nama_produk} tidak mencukupi!");
-                }
+        // 🔹 Update stok produk
+        $produk->stok += $selisih;
+        $produk->satuan_id = $satuan;
+        $produk->harga_jual = $harga;
+        $produk->save();
 
-                $produk->stok += $selisih;
+        // 🔹 Log aktivitas
+        activity('ikm')
+            ->causedBy(auth()->user())
+            ->log("Update stok {$produk->nama_produk}: dari {$jumlahLama} → {$jumlahBaru} (selisih {$selisih})");
+    }
 
-                // update satuan & harga jika berubah
-                if (!empty($item['satuan'])) {
-                    $produk->satuan_id = $item['satuan'];
-                    $produk->harga_jual = $item['harga'];
-                }
+    // 🔹 Hapus item lama yang tidak ada lagi di request
+    $itemsToDelete = $oldItems->keys()->diff($newKodeProduks);
 
-                $produk->save();
+    foreach ($itemsToDelete as $kodeHapus) {
+        $item = $oldItems[$kodeHapus];
 
-                activity('ikm')
-                    ->causedBy(auth()->user())
-                    ->log("Manajemen Stok Produk {$produk->nama_produk} Jumlah lama: {$jumlahLama}, Jumlah baru: {$jumlahBaru}, Selisih: {$selisih}");
-            }
-          return redirect()
-            ->route('manajemenStok.update', $transaksi->id)
-            ->with('success', 'Stok berhasil disimpan/diperbarui!');
+        // Kembalikan stok
+        $produk = Produk::where('kode_produk', $kodeHapus)->first();
+        if ($produk) {
+            $produk->stok -= $item->jumlah;
+            $produk->save();
+        }
+
+        // Hapus item dari transaksi
+        $item->delete();
+
+        activity('ikm')
+            ->causedBy(auth()->user())
+            ->log("Hapus item {$produk->nama_produk} dari transaksi {$transaksi->no_transaksi}");
+    }
+
+    return redirect()
+        ->route('manajemenStok.update', $transaksi->id)
+        ->with('success', 'Transaksi berhasil disimpan atau diperbarui!');
 
          
 

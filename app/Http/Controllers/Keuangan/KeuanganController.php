@@ -860,33 +860,33 @@ public function neraca()
             ->latest()
             ->take(10)
             ->get();
-       $bulan = $request->input('bulan', now()->format('m'));
-    $tahun = $request->input('tahun', now()->format('Y'));
-    $auth = auth()->user()->id;
-    $data = DB::table('keuangans')
-        ->select(
-            'akuns.id',
-            'akuns.kode_akun',
-            'akuns.nama_akun',
-            DB::raw("SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_debit"),
-            DB::raw("SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_kredit")
-        )
-        ->join('akuns', function ($join) {
-            $join->on('keuangans.id_akun', '=', 'akuns.id')
-                ->orOn('keuangans.id_akun_second', '=', 'akuns.id');
-        })
-        ->whereRaw("STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y') IS NOT NULL")
-        ->whereRaw("MONTH(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$bulan])
-        ->whereRaw("YEAR(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$tahun])
-        ->where("keuangans.auth", $auth)
-        ->groupBy('akuns.id', 'akuns.kode_akun', 'akuns.nama_akun')
-        ->get();
+        $bulan = $request->input('bulan', now()->format('m'));
+        $tahun = $request->input('tahun', now()->format('Y'));
+        $auth = auth()->user()->id;
+        $data = DB::table('keuangans')
+            ->select(
+                'akuns.id',
+                'akuns.kode_akun',
+                'akuns.nama_akun',
+                DB::raw("SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_debit"),
+                DB::raw("SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_kredit")
+            )
+            ->join('akuns', function ($join) {
+                $join->on('keuangans.id_akun', '=', 'akuns.id')
+                    ->orOn('keuangans.id_akun_second', '=', 'akuns.id');
+            })
+            ->whereRaw("STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y') IS NOT NULL")
+            ->whereRaw("MONTH(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$tahun])
+            ->where("keuangans.auth", $auth)
+            ->groupBy('akuns.id', 'akuns.kode_akun', 'akuns.nama_akun')
+            ->get();
 
-    return view('keuangan.neracasaldo',[
-        'activeMenu' => 'laporan',
-        'active' => 'neracasaldo',
-        'logs' => $logs
-    ],compact('data','bulan','tahun'));
+        return view('keuangan.neracasaldo',[
+            'activeMenu' => 'laporan',
+            'active' => 'neracasaldo',
+            'logs' => $logs
+        ],compact('data','bulan','tahun'));
 
     }
 

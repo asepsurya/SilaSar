@@ -151,7 +151,7 @@
                               @foreach ($transaksi->items as $i => $item)
                                 <tr>
                                     <td class="border dark:border-white/10 px-2 py-1 nomor">{{ $i + 1 }}</td>
-
+                                    <td hidden><input type="text" class="kode_item2" value="{{ $item->id }}" ></td>
                                     <td class="border dark:border-white/10 px-2 py-1">
                                         <input type="text" name="items[{{ $i }}][kode_produk]" value="{{ $item->kode_produk }}"
                                             class="kode_produk border-0 dark:bg-transparent dark:text-white focus:outline-none focus:ring-0" readonly>
@@ -168,12 +168,14 @@
                                     </td>
 
                                     <td class="border dark:border-white/10 px-2 py-1">
-                                        <select name="items[{{ $i }}][satuan]" class="form-select" id="">
-                                            @foreach ($satuans as $satuan )
-                                                <option value="{{ $satuan->id }}" {{ $satuan->id == $item->satuan ? 'selected' : '' }}> {{ $satuan->nama }}</option>
+                                        <select name="items[{{ $i }}][satuan_id]" class="form-select" required>
+                                            <option value="">-- Pilih Satuan --</option>
+                                            @foreach ($satuans as $satuan)
+                                                <option value="{{ $satuan->id }}" {{ $satuan->id == $item->satuan ? 'selected' : '' }}>
+                                                    {{ $satuan->nama }}
+                                                </option>
                                             @endforeach
                                         </select>
-                                      
                                     </td>
 
                                     <td class="border dark:border-white/10 px-2 py-1">
@@ -493,7 +495,7 @@
                     class="jumlah text-center border-0 w-full">
             </td>
             <td class="border px-2 py-1">
-                <select name="items[${no - 1}][satuan]" 
+                <select name="items[${no - 1}][satuan_id]" 
                         class="satuan border-0 w-full ">
                     ${satuanOptions}
                 </select>
@@ -505,7 +507,7 @@
             </td>
             <td class="border px-2 py-1 total text-center">0</td>
             <td class="border px-2 py-1 text-center">
-                <button type="button" class="hapus p-1 rounded text-red-600">Hapus</button>
+                <button type="button" class="hapus p-1 rounded text-red-600" >Hapus</button>
             </td>
         `;
 
@@ -536,10 +538,12 @@
     tableBody.querySelectorAll('tr:not(.empty-row)').forEach((tr, i) => {
         const kode = tr.querySelector('.kode_produk')?.value || '';
         const nama = tr.querySelector('.nama_produk')?.value || '';
+        const kode_item = tr.querySelector('.kode_item2')?.value || ''; // id item database
         const jumlah = tr.querySelector('.jumlah')?.value || 0;
         const harga = parseFloat(tr.querySelector('.harga')?.value) || 0;
         const total = tr.querySelector('.total')?.textContent || 'Rp 0';
 
+        // buat card mobile
         const card = document.createElement('div');
         card.className = "p-3 border rounded-lg dark:border-white/10 bg-white dark:bg-black space-y-2 mb-3";
 
@@ -550,7 +554,7 @@
                     <p class="text-xs text-gray-500">Kode: ${kode}</p>
                 </div>
                 <button type="button" class="hapusMobile text-red-500 hover:text-red-700 transition-colors"
-                        data-index="${i}">
+                        data-index="${i}" data-id="${kode_item}">
                     <svg xmlns="http://www.w3.org/2000/svg" 
                         class="h-5 w-5" fill="none" viewBox="0 0 24 24" 
                         stroke="currentColor">
@@ -585,18 +589,42 @@
             const trTarget = tableBody.querySelectorAll('tr:not(.empty-row)')[idx];
             if (trTarget) {
                 trTarget.querySelector('.jumlah').value = e.target.value;
-                hitungTotal();
+                hitungTotal(); // fungsi hitung total utama
             }
         });
 
         // event: hapus item di mobile
         card.querySelector('.hapusMobile').addEventListener('click', (e) => {
             const idx = e.currentTarget.dataset.index;
-            hapusRow(idx);
+            const id = e.currentTarget.dataset.id;
+
+            Swal.fire({
+                title: "Yakin hapus data ini?",
+                text: "Data stok akan berkurang sesuai jumlah!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, hapus!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg",
+                    cancelButton: "bg-gray-300 hover:bg-gray-400 text-black font-medium px-4 py-2 rounded-lg"
+                },
+                buttonsStyling: false
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                     if (id) {
+                        window.location.href = `/management/stok/delete/${id}`;
+                    } else {
+                        hapusRow(idx);
+                        card.remove();
+                    }
+                }
+            });
         });
 
         itemCards.appendChild(card);
     });
+
 
     // ✅ Restore fokus dan posisi kursor setelah rebuild
     if (activeIndex !== null) {
