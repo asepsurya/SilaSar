@@ -109,6 +109,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::post('/update-penawaran', [TransaksiController::class, 'updateKodeTransaksi'])->name('updateKodeTransaksi');
         Route::post('/hapus-produk-transaksi', [TransaksiController::class, 'hapusProduk'])->name('transaksi.hapus-produk');
         Route::get('/transaksi/destory/{id}', [TransaksiController::class, 'hapusTransksi'])->name('hapusTransksi');
+        Route::post('/save-pdf', [TransaksiController::class, 'savePdf'])->name('savePdf');
 
 
         Route::get('/laporan/penjualan', [TransaksiController::class, 'laporanTransaksi'])->name('laporan.penjualan');

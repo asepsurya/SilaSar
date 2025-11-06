@@ -486,5 +486,16 @@ class TransaksiController extends Controller
             return $pdf->download($namaFile);
     }
 
+    public function savePdf(Request $request) {
+        if ($request->hasFile('pdf')) {
+            $file = $request->file('pdf');
+            $fileName = $file->getClientOriginalName();
+            $path = $file->storeAs('public/pdfs', $fileName);
+            return response()->json(['url' => asset('storage/pdfs/'.$fileName)]);
+        }
+        return response()->json(['error' => 'No file'], 400);
+    }
+
+
 
 }

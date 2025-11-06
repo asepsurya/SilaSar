@@ -173,15 +173,13 @@
                     document.body.innerHTML = originalContents;
                 }
 
-        function downloadPDF() {
+       function downloadPDF() {
             const nomorNota = document.getElementById("nomor-nota")?.innerText || "UNKNOWN";
             const tanggal = new Date().toISOString().slice(0,10).replace(/-/g, "");
             const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
             const fileName = `nota_download_${nomorNota}_${tanggal}_${randomCode}.pdf`;
 
             const element = document.getElementById("print-area");
-
-            // Untuk mobile: pastikan area print di-scale normal sebelum download PDF
             const includeContent = document.getElementById('include-content');
             let originalTransform = '';
             if (window.innerWidth <= 768 && includeContent) {
@@ -193,38 +191,51 @@
                 margin: 0,
                 filename: fileName,
                 image: { type: 'jpeg', quality: 1 },
-                html2canvas: {
-                    scale: 5,
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    removeContainer: true,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: element.scrollWidth,
-                    windowHeight: element.scrollHeight
+                html2canvas: { 
+                    scale: 5, 
+                    useCORS: true, 
+                    backgroundColor: '#ffffff', 
+                    removeContainer: true 
                 },
-                jsPDF: {
-                    unit: 'mm',
-                    format: [210, 297],
-                    orientation: 'portrait',
-                    compress: true,
-                    putOnlyUsedFonts: true,
-                    precision: 16
-                }
+                jsPDF: { unit: 'mm', format: [210, 297], orientation: 'portrait' }
             };
 
-            document.body.style.margin = '0';
-            document.body.style.padding = '0';
-            document.documentElement.style.margin = '0';
-            document.documentElement.style.padding = '0';
+            // Ambil CSRF token Laravel
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Kembalikan scale jika diubah
-                if (window.innerWidth <= 768 && includeContent) {
-                    includeContent.style.transform = originalTransform;
-                }
-            });
+            // Cek apakah WebView Android terpasang
+            if (window.Android) {
+                // Android WebView: generate PDF sebagai blob, kirim ke server, download via DownloadManager
+                html2pdf().set(opt).from(element).output('blob').then(function(blob) {
+                    const formData = new FormData();
+                    formData.append('pdf', blob, fileName);
+
+                    fetch('/save-pdf', { // ganti dengan IP/domain Laravel yang bisa diakses WebView
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': token },
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        // Panggil DownloadManager di WebView
+                        Android.downloadPdf(data.url);
+                    })
+                    .catch(err => console.error(err));
+                }).finally(() => {
+                    if (window.innerWidth <= 768 && includeContent) {
+                        includeContent.style.transform = originalTransform;
+                    }
+                });
+            } else {
+                // Browser desktop: langsung download
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (window.innerWidth <= 768 && includeContent) {
+                        includeContent.style.transform = originalTransform;
+                    }
+                });
+            }
         }
+
         </script>
 
             <!-- Library html2pdf.js -->
