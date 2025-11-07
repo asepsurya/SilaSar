@@ -22,38 +22,121 @@ use Illuminate\Support\Facades\Validator;
 class TransaksiController extends Controller
 {
     public function transaksiIndex(){
-    $mitra = Mitra::where('auth', auth()->user()->id)
-        ->orderBy('created_at', 'desc')
-        ->select('id', 'kode_mitra', 'nama_mitra')
-        ->get();
-        // Hitung jumlah berdasarkan Kota
+        $mitra = Mitra::where('auth', auth()->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->select('id', 'kode_mitra', 'nama_mitra')
+            ->get();
 
-        $transaksi = Transaksi::where('auth', auth()->user()->id)
+        // Ambil filter dari request
+        $statusPembayaran = request('status_pembayaran');
+        $kodeMitra = request('kode_mitra');
+        $periode = request('periode');
+        $bulan = request('bulan');
+        $tahunBulan = request('tahun_bulan');
+        $tahunTahun = request('tahun_tahun');
+        $awal = request('tanggal_awal');
+        $akhir = request('tanggal_akhir');
+
+        // Query transaksi dengan filter, pastikan tidak ada duplikat kode_transaksi
+        $transaksiQuery = Transaksi::where('auth', auth()->user()->id);
+
+        if ($statusPembayaran === 'belum_bayar') {
+            $transaksiQuery->where('status_bayar', 'Belum Bayar');
+        } elseif ($statusPembayaran === 'sudah_bayar') {
+            $transaksiQuery->where('status_bayar', 'Sudah Bayar');
+        }
+
+        if ($kodeMitra) {
+            $transaksiQuery->where('kode_mitra', $kodeMitra);
+        }
+
+        // Filter periode
+        if ($periode === 'bulanan' && $bulan && $tahunBulan) {
+            $transaksiQuery->whereMonth('tanggal_transaksi', $bulan)
+                ->whereYear('tanggal_transaksi', $tahunBulan);
+        } elseif ($periode === 'tahunan' && $tahunTahun) {
+            $transaksiQuery->whereYear('tanggal_transaksi', $tahunTahun);
+        } elseif ($awal && $akhir) {
+            $transaksiQuery->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
+        }
+
+        $transaksi = $transaksiQuery
             ->orderBy('created_at', 'desc')
             ->get()
+            ->unique('kode_transaksi')
             ->map(function ($item) {
-            return [
-                // Kode Transaksi
-                '<a href="' . route("transaksi.detail", $item->id) . '" class="flex items-center space-x-2 text-blue-600 hover:underline">
-                <span>' . e($item->kode_transaksi) . '</span>
-                </a>',
-                // Tanggal Transaksi
-                '<div class="mobile">' . ($item->tanggal_transaksi ? \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d M Y') : '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
-                // Nama Toko (ambil dari relasi mitra, jika ada)
-                '<div class="mobile">' . ($item->mitra->nama_mitra ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
-                // Nilai Pesanan (misal: total_harga, jika ada field ini)
-                '<div class="mobile">' . (isset($item->total) ? 'Rp ' . number_format($item->total, 0, ',', '.') : '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
-                // Status Pembayaran (misal: status_pembayaran, jika ada field ini)
-                '<div class="mobile">' . ($item->status_bayar ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
-            ];
+                return [
+                    '<a href="' . route("transaksi.detail", $item->id) . '" class="flex items-center space-x-2 text-blue-600 hover:underline">
+                    <span>' . e($item->kode_transaksi) . '</span>
+                    </a>',
+                    '<div class="mobile">' . ($item->tanggal_transaksi ? \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d M Y') : '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
+                    '<div class="mobile">' . ($item->mitra->nama_mitra ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
+                    '<div class="mobile">' . (isset($item->total) ? 'Rp ' . number_format($item->total, 0, ',', '.') : '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
+                    '<div class="mobile">' . ($item->status_bayar ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
+                ];
             })->values();
-        $totalTransaksiluar = Transaksi::where(['auth'=> auth()->user()->id,'status_bayar'=>'Belum Bayar'])->sum('total');
-        $totalTransaksi = Transaksi::where(['auth'=> auth()->user()->id,'status_bayar'=>'Sudah Bayar'])->sum('total');
+
+        $transaksimobile = Transaksi::where('auth', auth()->user()->id)
+            ->when($statusPembayaran === 'belum_bayar', function($q) {
+                $q->where('status_bayar', 'Belum Bayar');
+            })
+            ->when($statusPembayaran === 'sudah_bayar', function($q) {
+                $q->where('status_bayar', 'Sudah Bayar');
+            })
+            ->when($kodeMitra, function($q) use ($kodeMitra) {
+                $q->where('kode_mitra', $kodeMitra);
+            })
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('tanggal_transaksi', $bulan)
+                  ->whereYear('tanggal_transaksi', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function($q) use ($tahunTahun) {
+                $q->whereYear('tanggal_transaksi', $tahunTahun);
+            })
+            ->when($awal && $akhir, function($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
+            })
+            ->get()
+            ->unique('kode_transaksi');
+
+        $totalTransaksiluar = Transaksi::where(['auth'=> auth()->user()->id,'status_bayar'=>'Belum Bayar'])
+            ->when($kodeMitra, function($q) use ($kodeMitra) {
+                $q->where('kode_mitra', $kodeMitra);
+            })
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('tanggal_transaksi', $bulan)
+                  ->whereYear('tanggal_transaksi', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function($q) use ($tahunTahun) {
+                $q->whereYear('tanggal_transaksi', $tahunTahun);
+            })
+            ->when($awal && $akhir, function($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
+            })
+            ->sum('total');
+
+        $totalTransaksi = Transaksi::where(['auth'=> auth()->user()->id,'status_bayar'=>'Sudah Bayar'])
+            ->when($kodeMitra, function($q) use ($kodeMitra) {
+                $q->where('kode_mitra', $kodeMitra);
+            })
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('tanggal_transaksi', $bulan)
+                  ->whereYear('tanggal_transaksi', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function($q) use ($tahunTahun) {
+                $q->whereYear('tanggal_transaksi', $tahunTahun);
+            })
+            ->when($awal && $akhir, function($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
+            })
+            ->sum('total');
+
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+
         return view('transaksi.index', [
             'activeMenu' => 'transaksi',
             'active' => 'transaksi',
-        ], compact('mitra','logs','transaksi','totalTransaksi','totalTransaksiluar'));
+        ], compact('mitra','logs','transaksi','totalTransaksi','totalTransaksiluar','transaksimobile','awal','akhir','periode','bulan','tahunBulan','tahunTahun'));
     }
 
     public function DetailTransaki($id){
@@ -85,6 +168,7 @@ class TransaksiController extends Controller
         $transaksi->kode_mitra         = $request->kode_mitra;
         $transaksi->tanggal_transaksi  = now();
         $transaksi->auth               = auth()->user()->id;
+        $transaksi->status_bayar       = 'Belum Bayar';
         $transaksi->save();
 
         // Ambil semua penawaran untuk mitra terkait
@@ -101,8 +185,7 @@ class TransaksiController extends Controller
                     'barang_retur'    => 0,
                     'total'           => 0,
                 ]);
-
-             
+            
             }
         }
        
@@ -132,7 +215,7 @@ class TransaksiController extends Controller
 
        $kode_mitra = $request->kode_mitra;
         $transaksi = Transaksi::where('kode_transaksi', $request->nomor_transaksi)->firstOrFail();
-        $transaksi->tanggal_transaksi = $request->tanggal_transaksi;
+        $transaksi->tanggal_transaksi = $request->tanggal_transaksi ?? $transaksi->tanggal_transaksi;
         $transaksi->diskon = str_replace(['.', ','], '',  $request->discount ?? '0');
         $transaksi->ongkir = str_replace(['.', ','], '', $request->ongkir ?? '0');
         $transaksi->tanggal_pembayaran = $request->tanggal_bayar ?? $transaksi->tanggal_pembayaran;

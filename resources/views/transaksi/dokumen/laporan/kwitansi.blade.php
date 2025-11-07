@@ -106,7 +106,7 @@
                         <tr class="text-center text-xs font-bold">
                             <td class="border border-gray-400 px-2 py-1">{{ $transaksi->kode_transaksi }}</td>
                             <td class="border border-gray-400 px-2 py-1">
-                                {{ \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('d-M-y') }}
+                                {{ \Carbon\Carbon::parse($transaksi->tanggal_pembayaran)->format('d-M-y') ?? '' }}
                             </td>
                         </tr>
                     </tbody>
