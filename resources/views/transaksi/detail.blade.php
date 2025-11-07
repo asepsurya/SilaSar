@@ -295,7 +295,8 @@
         @endif
 
         <div>
-            <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md">
+            <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md h-auto md:h-auto"
+                 style="height: auto; min-height: 500px; max-height: none; overflow-y: auto;">
                 <div class="px-2 py-1 mb-4 flex items-center justify-between">
                     <p class="text-sm font-semibold">Daftar barang yang dijual</p>
                     <div x-data="{ open: false }">
@@ -401,14 +402,20 @@
                             <input type="date" id="tanggal_transaksi_new"
                             class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
                             name="tanggal_transaksi"  required />
-                            <script>
-                                $(document).ready(function () {
-                                    $('#tanggal_transaksi_new').val($('#tanggal_transaksi').val());
-                                    $('#tanggal_transaksi').on('change input', function () {
-                                        $('#tanggal_transaksi_new').val($(this).val());
+                           <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        // Set initial value
+                                        document.getElementById('tanggal_transaksi_new').value = document.getElementById('tanggal_transaksi').value;
+
+                                        // Sync value on change/input
+                                        document.getElementById('tanggal_transaksi').addEventListener('change', function () {
+                                            document.getElementById('tanggal_transaksi_new').value = this.value;
+                                        });
+                                        document.getElementById('tanggal_transaksi').addEventListener('input', function () {
+                                            document.getElementById('tanggal_transaksi_new').value = this.value;
+                                        });
                                     });
-                                });
-                            </script>
+                                </script>
                             <input type="text"
                             class="form-input w-full rounded-md border-gray-300  text-gray-800 font-bold text-lg"
                             name="nomor_transaksi" value="{{ $transaksi->kode_transaksi }}" readonly />
@@ -849,14 +856,21 @@
                     @csrf
                         <div class="md:hidden space-y-2">
                             <div class="hidden">
-                                <input type="date" id="tanggal_transaksi_new"
-                                class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
-                                name="tanggal_transaksi"  required />
+                                <input type="date" id="tanggal_transaksi_new2"
+                                    class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
+                                    name="tanggal_transaksi" required />
+
                                 <script>
-                                    $(document).ready(function () {
-                                        $('#tanggal_transaksi_new').val($('#tanggal_transaksi').val());
-                                        $('#tanggal_transaksi').on('change input', function () {
-                                            $('#tanggal_transaksi_new').val($(this).val());
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        // Set initial value
+                                        document.getElementById('tanggal_transaksi_new2').value = document.getElementById('tanggal_transaksi').value;
+
+                                        // Sync value on change/input
+                                        document.getElementById('tanggal_transaksi').addEventListener('change', function () {
+                                            document.getElementById('tanggal_transaksi_new2').value = this.value;
+                                        });
+                                        document.getElementById('tanggal_transaksi').addEventListener('input', function () {
+                                            document.getElementById('tanggal_transaksi_new2').value = this.value;
                                         });
                                     });
                                 </script>
@@ -1241,6 +1255,7 @@
                 document.addEventListener('DOMContentLoaded', function () {
                     const select = document.getElementById('action-selector');
                     const kode = @json($transaksi->kode_transaksi);
+                    const id = @json($transaksi->id);
 
                     select?.addEventListener('change', function () {
                         const value = this.value;
@@ -1249,12 +1264,15 @@
                         switch (value) {
                             case 'konsinyasi':
                                 url = `{{ route('transaksi.konsinyasi', ['id' => '__KODE__', 'type' => 'konsinyasi']) }}`.replace('__KODE__', kode);
+                                url += `&trans=${id}`;
                                 break;
                             case 'invoice':
                                 url = `{{ route('transaksi.kwitansi', ['id' => '__KODE__', 'type' => 'invoice']) }}`.replace('__KODE__', kode);
+                                url += `&trans=${id}`;
                                 break;
                             case 'kwitansi':
                                 url = `{{ route('transaksi.invoce', ['id' => '__KODE__', 'type' => 'kwitansi']) }}`.replace('__KODE__', kode);
+                                url += `&trans=${id}`;
                                 break;
                         }
 
@@ -1279,13 +1297,13 @@
 
 
             <div class="flex flex-wrap gap-3 hidden md:block">
-                <a href="{{ route('transaksi.konsinyasi', ['id' => $transaksi->kode_transaksi, 'type' => 'konsinyasi']) }}"
+                <a href="{{ route('transaksi.konsinyasi', ['id' => $transaksi->kode_transaksi, 'type' => 'konsinyasi','trans'=>$transaksi->id]) }}"
                     target="_BLANK"
                     class="inline-flex items-center px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
                     id="btn-konsinyasi" disabled>
                     Buat Nota Konsinyasi
                 </a>
-                <a href="{{ route('transaksi.kwitansi', ['id' => $transaksi->kode_transaksi, 'type' => 'invoice']) }}"
+                <a href="{{ route('transaksi.kwitansi', ['id' => $transaksi->kode_transaksi, 'type' => 'invoice','trans'=>$transaksi->id]) }}"
                     target="_BLANK"
                     class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
                     id="btn-invoice"
@@ -1297,7 +1315,7 @@
                         @if (!$adaTerjual) disabled style="opacity:0.5;pointer-events:none;" @endif>
                         Buat Invoice
                 </a>
-                <a href="{{ route('transaksi.invoce', ['id' => $transaksi->kode_transaksi, 'type' => 'kwitansi']) }}"
+                <a href="{{ route('transaksi.invoce', ['id' => $transaksi->kode_transaksi, 'type' => 'kwitansi','trans'=>$transaksi->id]) }}"
                     target="_BLANK"
                     class="inline-flex items-center px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
                     id="btn-kwitansi2"

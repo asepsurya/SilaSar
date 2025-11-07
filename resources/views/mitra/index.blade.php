@@ -62,33 +62,120 @@
     </div>
 </div>
 {{-- ---------------------------------------------------------------- --}}
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 mb-4">
-    <div class="bg-lightblue-100 rounded-2xl p-6">
+<!-- Mobile: Carousel -->
+<div class="relative w-full mb-6 block md:hidden">
+    <!-- Slide 1: Jumlah Mitra -->
+    <div x-data="{ show: false }" class="bg-lightblue-100 rounded-2xl p-6 mySlides w-full h-[200px] flex flex-col justify-center" style="display:flex;">
         <p class="text-sm font-semibold text-black mb-2">Jumlah Mitra</p>
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl leading-9 font-semibold text-black">{{ $mitra->count() }}</h2>
-            <div class="flex items-center gap-1">
-                <p class="text-xs leading-[18px] text-black">Toko/Mitra</p>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.45488 5.60777L14 4L12.6198 9.6061L10.898 7.9532L8.12069 10.8463C8.02641 10.9445 7.89615 11 7.76 11C7.62385 11 7.49359 10.9445 7.39931 10.8463L5.36 8.72199L2.36069 11.8463C2.16946 12.0455 1.85294 12.0519 1.65373 11.8607C1.45453 11.6695 1.44807 11.3529 1.63931 11.1537L4.99931 7.65373C5.09359 7.55552 5.22385 7.5 5.36 7.5C5.49615 7.5 5.62641 7.55552 5.72069 7.65373L7.76 9.77801L10.1766 7.26067L8.45488 5.60777Z" fill="#1C1C1C"></path>
+        <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-black">
+                <span x-show="show" x-cloak>
+                    {{ $mitra->count() }}
+                </span>
+                <span x-show="!show" x-cloak>
+                    •••••••
+                </span>
+            </h2>
+            <button @click="show = !show" class="p-2 rounded-full bg-white hover:bg-gray-100 shadow">
+                <!-- Mata tertutup -->
+                <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.3 11.3 0 012.172-3.364m4.473-2.469A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7.5-.446.93-1.037 1.78-1.736 2.52M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-            </div>
+                <!-- Mata terbuka -->
+                <svg x-show="show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M1.5 12C3.27 7.61 7.5 4.5 12 4.5s8.73 3.11 10.5 7.5c-1.77 4.39-6 7.5-10.5 7.5s-8.73-3.11-10.5-7.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+            </button>
         </div>
+        <p class="text-xs text-black mt-2">Toko/Mitra</p>
     </div>
-    <div class="bg-lightpurple-100 rounded-2xl p-6">
+    <!-- Slide 2: Jumlah Kota -->
+    <div x-data="{ show: false }" class="bg-lightpurple-100 rounded-2xl p-6 mySlides w-full h-[200px] flex flex-col justify-center" style="display:none;">
         <p class="text-sm font-semibold text-black mb-2">Jumlah Kota</p>
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl leading-9 font-semibold text-black">{{ $totalKota }}</h2>
-            <div class="flex items-center gap-1">
-                <p class="text-xs leading-[18px] text-black">Kota</p>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.45488 5.60777L14 4L12.6198 9.6061L10.898 7.9532L8.12069 10.8463C8.02641 10.9445 7.89615 11 7.76 11C7.62385 11 7.49359 10.9445 7.39931 10.8463L5.36 8.72199L2.36069 11.8463C2.16946 12.0455 1.85294 12.0519 1.65373 11.8607C1.45453 11.6695 1.44807 11.3529 1.63931 11.1537L4.99931 7.65373C5.09359 7.55552 5.22385 7.5 5.36 7.5C5.49615 7.5 5.62641 7.55552 5.72069 7.65373L7.76 9.77801L10.1766 7.26067L8.45488 5.60777Z" fill="#1C1C1C"></path>
+        <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-black">
+                <span x-show="show" x-cloak>
+                    {{ $totalKota }}
+                </span>
+                <span x-show="!show" x-cloak>
+                    •••••••
+                </span>
+            </h2>
+            <button @click="show = !show" class="p-2 rounded-full bg-white hover:bg-gray-100 shadow">
+                <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.3 11.3 0 012.172-3.364m4.473-2.469A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7.5-.446.93-1.037 1.78-1.736 2.52M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-            </div>
+                <svg x-show="show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M1.5 12C3.27 7.61 7.5 4.5 12 4.5s8.73 3.11 10.5 7.5c-1.77 4.39-6 7.5-10.5 7.5s-8.73-3.11-10.5-7.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+            </button>
         </div>
+        <p class="text-xs text-black mt-2">Kota</p>
     </div>
-
+    <!-- Tombol panah -->
+    <button class="absolute left-0 top-1/2 -translate-y-1/2 text-black text-3xl px-3 py-2 rounded-r-lg" onclick="plusDivs(-1)">&#10094;</button>
+    <button class="absolute right-0 top-1/2 -translate-y-1/2 text-black text-3xl px-3 py-2 rounded-l-lg" onclick="plusDivs(1)">&#10095;</button>
 </div>
+
+<!-- Desktop: 2 cards side by side -->
+<div class="w-full mb-6 hidden md:flex gap-6">
+    <!-- Card 1: Jumlah Mitra -->
+    <div x-data="{ show: false }" class="bg-lightblue-100 rounded-2xl p-6 flex-1 flex flex-col justify-center">
+        <p class="text-sm font-semibold text-black mb-2">Jumlah Mitra</p>
+        <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-black">
+                <span x-show="show" x-cloak>
+                    {{ $mitra->count() }}
+                </span>
+                <span x-show="!show" x-cloak>
+                    •••••••
+                </span>
+            </h2>
+            <button @click="show = !show" class="p-2 rounded-full bg-white hover:bg-gray-100 shadow">
+                <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.3 11.3 0 012.172-3.364m4.473-2.469A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7.5-.446.93-1.037 1.78-1.736 2.52M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg x-show="show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M1.5 12C3.27 7.61 7.5 4.5 12 4.5s8.73 3.11 10.5 7.5c-1.77 4.39-6 7.5-10.5 7.5s-8.73-3.11-10.5-7.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+            </button>
+        </div>
+        <p class="text-xs text-black mt-2">Toko/Mitra</p>
+    </div>
+    <!-- Card 2: Jumlah Kota -->
+    <div x-data="{ show: false }" class="bg-lightpurple-100 rounded-2xl p-6 flex-1 flex flex-col justify-center">
+        <p class="text-sm font-semibold text-black mb-2">Jumlah Kota</p>
+        <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-black">
+                <span x-show="show" x-cloak>
+                    {{ $totalKota }}
+                </span>
+                <span x-show="!show" x-cloak>
+                    •••••••
+                </span>
+            </h2>
+            <button @click="show = !show" class="p-2 rounded-full bg-white hover:bg-gray-100 shadow">
+                <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.3 11.3 0 012.172-3.364m4.473-2.469A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7.5-.446.93-1.037 1.78-1.736 2.52M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <svg x-show="show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M1.5 12C3.27 7.61 7.5 4.5 12 4.5s8.73 3.11 10.5 7.5c-1.77 4.39-6 7.5-10.5 7.5s-8.73-3.11-10.5-7.5zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+            </button>
+        </div>
+        <p class="text-xs text-black mt-2">Kota</p>
+    </div>
+</div>
+
+
 @foreach($errors->all() as $error)
 <div class="bg-red-100 text-red-800 p-4 rounded-lg mb-4">
     <p class="text-sm">{{ $error }}</p>
@@ -97,7 +184,7 @@
 
 <div class="grid grid-cols-1 gap-7">
     {{-- Simple DataTable --}}
-    <div x-data="main" x-init="init()" class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md">
+    <div x-data="main" x-init="init()" class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md hidden md:block">
         <div class="mb-4">
             <p class="text-sm font-semibold">Daftar Mitra dan Toko</p>
             <p class="text-xs text-black/60 dark:text-white/60">Berikut adalah daftar mitra dan toko yang telah terdaftar di sistem.</p>
@@ -108,6 +195,48 @@
     </div>
 
 
+</div>
+  {{-- Mobile Card --}}
+<div class="block md:hidden border border-black/10 dark:border-white/10 bg-lightwhite dark:bg-white/5 p-2 rounded-md">
+    <div class="mb-4">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">
+            Daftar Mitra dan Toko
+        </h2>
+        <p class="text-xs text-gray-600 dark:text-gray-400">
+            Berikut adalah daftar mitra dan toko yang telah terdaftar di sistem.
+        </p>
+    </div>
+
+    @foreach($mitraData as $a)
+        <div class="bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <p class="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Kode Mitra</p>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ $a->kode_mitra }}</p>
+                </div>
+                <a href="{{ route('detail.mitra', $a->id) }}"
+                   class="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200">
+                    Detail
+                </a>
+            </div>
+
+            <!-- Body -->
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500 dark:text-gray-400">Nama Mitra:</span>
+                    <span class="font-medium text-gray-800 dark:text-gray-100 text-right">{{ $a->nama_mitra }}</span>
+                </div>
+
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500 dark:text-gray-400">Tanggal Bergabung:</span>
+                    <span class="font-medium text-gray-800 dark:text-gray-100">
+                        {{ \Carbon\Carbon::parse($a->created_at)->locale('id')->translatedFormat('d M Y') }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    @endforeach
 </div>
 
 
@@ -128,6 +257,46 @@
                 kodeInput.value = `MTR-${month}${year}/${random}`;
             }
         });
+
+        // Carousel script
+        var slideIndex = 1;
+        showDivs(slideIndex);
+
+        function plusDivs(n) {
+            showDivs(slideIndex += n);
+        }
+
+        function showDivs(n) {
+            var i;
+            var x = document.getElementsByClassName("mySlides");
+            if (n > x.length) { slideIndex = 1 }
+            if (n < 1) { slideIndex = x.length }
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            x[slideIndex - 1].style.display = "flex";
+        }
+
+        // Swipe support
+        let startX = 0;
+        let endX = 0;
+        document.addEventListener("touchstart", function (e) {
+            startX = e.touches[0].clientX;
+        });
+        document.addEventListener("touchend", function (e) {
+            endX = e.changedTouches[0].clientX;
+            handleSwipe();
+        });
+        function handleSwipe() {
+            let diffX = startX - endX;
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    plusDivs(1);
+                } else {
+                    plusDivs(-1);
+                }
+            }
+        }
    </script>
 <script>
     document.addEventListener("alpine:init", () => {

@@ -220,97 +220,97 @@
             }
             </script>
         </div>
+    
 
         <div class="grid grid-cols-1 gap-7 lg:grid-cols-2">
-            <div>
-                <input type="text" name="id" value="{{ $mitra->id }}" hidden>
-                <div class="space-y-4">
-                    <!-- Mita -->
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Kode Mitra
-                        </label>
-                        <input type="text" placeholder="Kode Mitra" class="form-input" name="kode_mitra" id="kode_mitra"
-                            value="{{ $mitra->kode_mitra }}" readonly />
-                    </div>
-
-                    <!-- Nama Mitra -->
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Nama Mitra / Toko
-                        </label>
-                        <input type="text" placeholder="Nama Mitra atau Toko" class="form-input" name="nama_mitra"
-                            id="nama_mitra" value="{{ $mitra->nama_mitra }}" />
-                    </div>
-                    <!-- Telp Mitra -->
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Nomor Telepon Mitra
-                        </label>
-                        <input type="text" placeholder="Nomor Telepon" class="form-input" name="no_telp_mitra"
-                            id="no_telp_mitra" value="{{ $mitra->no_telp_mitra }}" />
-                    </div>
-                    <!-- Alamat -->
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Alamat Mitra/Toko
-                        </label>
-                        <textarea type="text" class="form-input" placeholder="Alamat Mitra" name="alamat_mitra">{{ $mitra->alamat_mitra }}</textarea>
-                    </div>
-
-                    <!-- Provinsi -->
-
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Kota
-                        </label>
-                        <input type="text" id="kota-input" name="id_kota" placeholder="Masukan Nama Kota Mitra "
-                            class="form-input" oninput="showRecommendations()" value="{{ $mitra->id_kota }}" />
-                        <!-- Dropdown for Recommendations -->
-                        <ul id="kota-recommendations"
-                            class="absolute w-full mt-1 bg-white dark:bg-dark  dark:border-white/10 p-5  border border-gray-200  shadow-lg hidden max-h-40 overflow-y-auto z-10">
-                            <!-- Data recommendations will be injected here -->
-                        </ul>
-
-                    </div>
-                    <div class="border border-black/10 dark:border-white/10 p-5 rounded-md hidden sm:block">
-                        <p class="text-sm font-semibold mb-3">Titik Lokasi</p>
-                        <div class="mb-4">
-                            <label class="block mb-1">Tempel Link Google Maps</label>
-                            <input type="text" id="gmaps-link" placeholder="Paste link Google Maps di sini"
-                                class="form-input mt-2 py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
+              <div class="border border-black/10 dark:border-white/10 rounded-lg mb-2">
+            <button type="button" class="w-full flex justify-between items-center px-4 py-3 bg-gray-100 dark:bg-white/10 rounded-t-lg focus:outline-none" data-accordion-target="#accordion-mitra" aria-expanded="true" aria-controls="accordion-mitra" onclick="toggleAccordion('accordion-mitra')">
+                <span class="font-semibold text-sm">Data Mitra / Toko</span>
+                <svg class="w-4 h-4 transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="accordion-mitra" class="px-4 py-3 bg-white dark:bg-black rounded-b-lg">
+                <div>
+                    <input type="text" name="id" value="{{ $mitra->id }}" hidden>
+                    <div class="space-y-4">
+                        <!-- Mita -->
+                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                                Kode Mitra
+                            </label>
+                            <input type="text" placeholder="Kode Mitra" class="form-input" name="kode_mitra" id="kode_mitra" value="{{ $mitra->kode_mitra }}" readonly />
                         </div>
 
-                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <!-- Longitude Field -->
-                            <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
-                                <label for="longitude" class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
-                                    Longitude
-                                </label>
-                                <input type="text" id="longitude" name="longitude"
-                                    placeholder="Longitude"
-                                    value="{{ $mitra->longitude }}"
-                                    class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                            </div>
-
-                            <!-- Latitude Field -->
-                            <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
-                                <label for="latitude" class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
-                                    Latitude
-                                </label>
-                                <input type="text" id="latitude" name="latitude"
-                                    placeholder="Latitude"
-                                    value="{{ $mitra->latitude }}"
-                                    class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                            </div>
+                        <!-- Nama Mitra -->
+                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                                Nama Mitra / Toko
+                            </label>
+                            <input type="text" placeholder="Nama Mitra atau Toko" class="form-input" name="nama_mitra" id="nama_mitra" value="{{ $mitra->nama_mitra }}" />
+                        </div>
+                        <!-- Telp Mitra -->
+                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                                Nomor Telepon Mitra
+                            </label>
+                            <input type="text" placeholder="Nomor Telepon" class="form-input" name="no_telp_mitra" id="no_telp_mitra" value="{{ $mitra->no_telp_mitra }}" />
+                        </div>
+                        <!-- Alamat -->
+                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                                Alamat Mitra/Toko
+                            </label>
+                            <textarea type="text" class="form-input" placeholder="Alamat Mitra" name="alamat_mitra">{{ $mitra->alamat_mitra }}</textarea>
                         </div>
 
-                    </div>
-                    <!-- Submit Button -->
-                    <div>
+                        <!-- Provinsi -->
+
+                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                                Kota
+                            </label>
+                            <input type="text" id="kota-input" name="id_kota" placeholder="Masukan Nama Kota Mitra " class="form-input" oninput="showRecommendations()" value="{{ $mitra->id_kota }}" />
+                            <!-- Dropdown for Recommendations -->
+                            <ul id="kota-recommendations" class="absolute w-full mt-1 bg-white dark:bg-dark  dark:border-white/10 p-5  border border-gray-200  shadow-lg hidden max-h-40 overflow-y-auto z-10">
+                                <!-- Data recommendations will be injected here -->
+                            </ul>
+
+                        </div>
+                        <div class="border border-black/10 dark:border-white/10 p-5 rounded-md hidden sm:block">
+                            <p class="text-sm font-semibold mb-3">Titik Lokasi</p>
+                            <div class="mb-4">
+                                <label class="block mb-1">Tempel Link Google Maps</label>
+                                <input type="text" id="gmaps-link" placeholder="Paste link Google Maps di sini" class="form-input mt-2 py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <!-- Longitude Field -->
+                                <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
+                                    <label for="longitude" class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
+                                        Longitude
+                                    </label>
+                                    <input type="text" id="longitude" name="longitude" placeholder="Longitude" value="{{ $mitra->longitude }}" class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
+                                </div>
+
+                                <!-- Latitude Field -->
+                                <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
+                                    <label for="latitude" class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
+                                        Latitude
+                                    </label>
+                                    <input type="text" id="latitude" name="latitude" placeholder="Latitude" value="{{ $mitra->latitude }}" class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- Submit Button -->
+                        <div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+
             <div>
                 <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-3 rounded-md mb-5">
                     <div class="">

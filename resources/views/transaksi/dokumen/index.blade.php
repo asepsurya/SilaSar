@@ -72,7 +72,7 @@
    <div class="flex items-center justify-between px-4 h-14 header" style="background-color: #2c2b2b;">
     <div class="flex items-center space-x-3">
         <!-- Tombol Kembali -->
-        <a href="{{ route('nota.index') }}" 
+        <a href="{{ route("transaksi.detail", request('trans')) }}" 
            class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-800 rounded shadow">
             ← Kembali
         </a>
