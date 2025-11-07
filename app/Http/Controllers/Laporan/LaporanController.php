@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Laporan;
 
 use App\Models\Akun;
-use App\Models\Keuangan;
+use App\Models\KeuanganTable;
+use App\Models\AkunTable;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -42,7 +43,7 @@ class LaporanController extends Controller
             'logo'        => $perusahaan->logo,
             'alamat'      => $alamat,
         ])->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream("Nota-Konsinyasi-{$transaksi->kode_transaksi}.pdf");
 
     }
@@ -77,9 +78,9 @@ class LaporanController extends Controller
             'logo'        => $perusahaan->logo,
             'alamat'      => $alamat,
         ])->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream("INVOICE-{$transaksi->kode_transaksi}.pdf");
-    }  
+    }
     public function laporankwitansi($id){
         $transaksi = Transaksi::with(['mitra', 'ProdukTransaksi.produk', 'ProdukTransaksi.penawaran'])
             ->where('kode_transaksi', $id)
@@ -90,7 +91,7 @@ class LaporanController extends Controller
         // Handle logo (base64 supaya aman di Dompdf)
         $defaulttd = public_path('assets/ttd-default.png');
         $defaultStamp = public_path('assets/stamp-default.png');
-        
+
         $ttdPath = $defaulttd;
         if ($perusahaan->ttd && file_exists(storage_path('app/public/' . $perusahaan->ttd))) {
             $ttdPath = storage_path('app/public/' . $perusahaan->ttd);
@@ -123,9 +124,9 @@ class LaporanController extends Controller
             'ttd'         => $ttdPath,
             'stempel'      => $stempelPath,
         ])->setPaper('A4', 'portrait');
-            
+
         return $pdf->stream("NOTA-PEMBAYARAN-{$transaksi->kode_transaksi}.pdf");
-            
+
         }
     public function laporanlabarugi(Request $request){
         $perusahaan = auth()->user()->perusahaanUser;
@@ -138,7 +139,7 @@ class LaporanController extends Controller
         $bulan = $request->query('bulan', date('m'));
         $tahun = $request->query('tahun', date('Y'));
         // Ambil semua transaksi bulan ini beserta kedua akun
-        $items = Keuangan::with(['akun.kategori', 'akunSecond.kategori'])
+        $items = KeuanganTable::with(['akun.kategori', 'akunSecond.kategori'])
             ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
             ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
             ->get();
@@ -195,7 +196,7 @@ class LaporanController extends Controller
 
         // Loop akun yang sudah dijumlahkan totalnya
         foreach ($addedAkun as $akunId => $total) {
-            $akun = Akun::with('kategori')->find($akunId);
+            $akun = AkunTable::with('kategori')->find($akunId);
             if ($akun) {
                 $pushToLabaRugi($akun, $total);
             }
@@ -236,11 +237,11 @@ class LaporanController extends Controller
             'perusahaan'  => $perusahaan,
             'logo'        => $logo,
         ])->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream("LAPORAN-LABA-RUGI-{$bulan}-{$tahun}.pdf");
     }
     public function laporanneraca(Request $request){
-        
+
         $perusahaan = auth()->user()->perusahaanUser;
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
@@ -254,7 +255,7 @@ class LaporanController extends Controller
             'perusahaan'  => $perusahaan,
             'logo'        => $logo,
         ])->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream("LAPORAN-NERACA-{$bulan}-{$tahun}.pdf");
     }
 

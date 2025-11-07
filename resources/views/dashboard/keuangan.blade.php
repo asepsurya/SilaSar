@@ -46,13 +46,13 @@
       .mobile {
           display: none;
       }
-      
+
   }
 </style>
 
 @endsection
 @section('container')
-  
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @php
 date_default_timezone_set('Asia/Jakarta');
@@ -77,18 +77,34 @@ date_default_timezone_set('Asia/Jakarta');
         <span class="pr-2">
            <span class="pr-2">
                   <span class="ml-1">{{ $icon }}</span> <span class="font-semibold">{{ $ucapan }},</span> {{ auth()->user()->name }}!
-                <span class="text-xs text-black/60 dark:text-white/60"></span>     
+                <span class="text-xs text-black/60 dark:text-white/60"></span>
             </span>
      </span>
    </div>
 <div class="flex items-center justify-between mb-6">
     <h2 class="text-lg sm:text-xl font-bold ">Ringkasan Keuangan</h2>
-    <a href="{{ route('index.keuangan') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-        Lihat Transaksi
-        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-    </a>
+    <div class="flex items-center gap-2">
+        <!-- Filter Bulanan -->
+        <button type="button" id="filterBulanan" class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition">
+            Bulanan
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+        </button>
+        <!-- Filter Tahunan -->
+        <button type="button" id="filterTahunan" class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition">
+            Tahunan
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+        </button>
+        <a href="{{ route('index.keuangan') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+            Lihat Transaksi
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
     <!-- Pemasukan -->
@@ -160,7 +176,7 @@ date_default_timezone_set('Asia/Jakarta');
         <h3 class="text-lg sm:text-xl font-semibold mb-4  text-center">
             Grafik Pemasukan & Pengeluaran
         </h3>
-        
+
         <!-- Wrapper Canvas -->
         <div class="w-full overflow-x-auto">
             <canvas id="lineChart" class="min-w-[300px] sm:min-w-0" height="180"></canvas>
@@ -284,7 +300,7 @@ date_default_timezone_set('Asia/Jakarta');
                     onclick="showAkunDetailModal({{ $a->id }})">
                     <!-- Nama akun -->
                     <td class="py-2 text-gray-800 dark:text-gray-100">{{ $a->nama_akun }}</td>
-                    
+
                     <!-- Persentase progress bar -->
                     <td class="py-2 w-2/5">
                         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
@@ -295,7 +311,7 @@ date_default_timezone_set('Asia/Jakarta');
                             {{ number_format($percent, 1) }}%
                         </span>
                     </td>
-                    
+
                     <!-- Total hanya muncul di desktop -->
                     <td class="py-2 text-gray-800 dark:text-gray-100 hidden sm:table-cell">
                         Rp.{{ number_format($totalAkun, 0, ',', '.') }}
@@ -421,7 +437,7 @@ window.addEventListener('load', function () {
 window.addEventListener('load', function () {
     // Donut Chart (Pengeluaran per Akun)
     const chartCanvas = document.getElementById('donutChart');
-    
+
     if (chartCanvas && window.Chart) {
         const ctx = chartCanvas.getContext('2d');
         const akunLabels = @json($akun->pluck('nama_akun'));

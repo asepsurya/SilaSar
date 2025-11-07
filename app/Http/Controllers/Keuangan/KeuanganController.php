@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Keuangan;
 
 use Storage;
 use App\Models\App;
-use App\Models\Akun;
-use App\Models\Keuangan;
-use App\Models\Rekening;
+use App\Models\AkunTable;
+use App\Models\KeuanganTable;
+use App\Models\RekeningTable;
 use App\Models\KategoriAkun;
 use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use App\Models\HistoryRekening;
+use App\Models\HistoryRekeningTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +23,7 @@ use Spatie\Activitylog\Models\Activity;
 class KeuanganController extends Controller
 {
     public function index(){
-        $rekening = Rekening::where('auth', auth()->user()->id)->latest()->get();
+        $rekening = RekeningTable::where('auth', auth()->user()->id)->latest()->get();
 
         // Ambil parameter request
         $sort  = request('sort', 'desc');
@@ -32,7 +32,7 @@ class KeuanganController extends Controller
         $bulan = request('bulan', date('m'));
         $tahun = request('tahun', date('Y'));
 
-        $query = Keuangan::with(['akun', 'rekening'])
+        $query = KeuanganTable::with(['akun', 'rekening'])
             ->where('auth', auth()->id());
 
         if (request('periode')) {
@@ -76,7 +76,7 @@ class KeuanganController extends Controller
             ->appends(request()->query());
 
         // 🔹 Ambil data akun
-        $akun = Akun::with('kategori')->get();
+        $akun = AkunTable::with('kategori')->get();
 
         $akunJs = $akun->map(function ($a) {
             return [
@@ -96,8 +96,8 @@ class KeuanganController extends Controller
     }
 
     public function IndexAkun(){
-      
-        $akun = Akun::all();
+
+        $akun = AkunTable::all();
         $kategori = KategoriAkun::all();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('keuangan.akun',[
@@ -107,7 +107,7 @@ class KeuanganController extends Controller
     }
 
     public function akunCreate(request $request){
-        
+
        $request->validate([
             'nama_akun'   => 'required|string|max:255',
             'jenis_akun'  => 'required',
@@ -121,7 +121,7 @@ class KeuanganController extends Controller
         ]);
 
         // Simpan data
-        $akun = Akun::create($request->all());
+        $akun = AkunTable::create($request->all());
 
         // Log aktivitas
         activity('ikm')
@@ -147,7 +147,7 @@ class KeuanganController extends Controller
         $gabunganKode = $request->id . '-' . $request->kode_akun;
 
         // Cari data akun yang mau diupdate
-        $akun = Akun::findOrFail($request->akun_id);
+        $akun = AkunTable::findOrFail($request->akun_id);
 
         // Update data
         $akun->update([
@@ -167,7 +167,7 @@ class KeuanganController extends Controller
     }
 
     public function akunDelete($id){
-        $akun = Akun::findOrFail($id);
+        $akun = AkunTable::findOrFail($id);
         $akun->delete();
 
         activity('ikm')
@@ -179,7 +179,7 @@ class KeuanganController extends Controller
     }
     public function rekeningIndex(){
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        $rekening = Rekening::where('auth', auth()->user()->id)->latest()->get();
+        $rekening = RekeningTable::where('auth', auth()->user()->id)->latest()->get();
         return view('keuangan.rekening',[
             'activeMenu' => 'rekening',
             'active' => 'rekening',
@@ -196,8 +196,8 @@ class KeuanganController extends Controller
             'auth' => 'nullable|string',
         ]);
         $validated['auth'] = auth()->user()->id;
-        Rekening::create($validated);
-        HistoryRekening::create([
+        RekeningTable::create($validated);
+        HistoryRekeningTable::create([
             'id_rekening' => $validated['kode_rekening'],
             'tanggal' => now()->format('d/m/Y'),
             'keterangan' => 'Saldo Awal',
@@ -206,7 +206,7 @@ class KeuanganController extends Controller
             'saldo' => $validated['jumlah'],
         ]);
 
-        Keuangan::create([
+        KeuanganTable::create([
             'tanggal' => now()->format('d/m/Y'),
             'deskripsi' => 'Modal Awal',
             'id_akun' => 5,
@@ -225,12 +225,12 @@ class KeuanganController extends Controller
             'tanggal' => 'required',
             'deskripsi' => 'required|string',
             'waktu' => 'required|string',
-            'id_akun' => 'required|exists:akuns,id',
-            'id_akun_second' => 'required|exists:akuns,id',
+            'id_akun' => 'required|exists:akun_tables,id',
+            'id_akun_second' => 'required|exists:akun_tables,id',
             'tipe' => 'required',
             'jenis_transaksi' => 'nullable|string',
             'total' => 'required|numeric',
-            'id_rekening' => 'nullable|exists:rekenings,id',
+            'id_rekening' => 'nullable|exists:rekening_tables,id',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
@@ -244,7 +244,7 @@ class KeuanganController extends Controller
             if ($defaultRekening) {
 
                 // Gunakan rekening default yang sudah ada
-                $rekening = Rekening::where('kode_rekening', $defaultRekening->value)->first();
+                $rekening = RekeningTable::where('kode_rekening', $defaultRekening->value)->first();
                 if ($rekening) {
                     $data['id_rekening'] = $rekening->id;
                     // Update saldo rekening sesuai tipe transaksi
@@ -256,7 +256,7 @@ class KeuanganController extends Controller
                     $rekening->save();
 
                     // Catat history rekening
-                    HistoryRekening::create([
+                    HistoryRekeningTable::create([
                         'id_rekening' => $rekening->kode_rekening,
                         'tanggal' => $request->tanggal,
                         'keterangan' => $request->deskripsi,
@@ -268,7 +268,7 @@ class KeuanganController extends Controller
                     $rekeningid = 'RKN' . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
 
                     // Jika kode rekening di App tidak ditemukan di tabel rekening, buat baru
-                    $rekeningBaru = Rekening::create([
+                    $rekeningBaru = RekeningTable::create([
                         'kode_rekening' => $rekeningid,
                         'nama_rekening' => 'Rekening Otomatis',
                         'jenis_akun' => 'default',
@@ -277,7 +277,7 @@ class KeuanganController extends Controller
                         'auth' => auth()->user()->id,
                     ]);
                     $data['id_rekening'] = $rekeningBaru->id;
-                    HistoryRekening::create([
+                    HistoryRekeningTable::create([
                         'id_rekening' => $rekeningBaru->kode_rekening,
                         'tanggal' => $request->tanggal,
                         'keterangan' => $request->deskripsi,
@@ -286,16 +286,17 @@ class KeuanganController extends Controller
                         'saldo' => $rekeningBaru->jumlah,
                     ]);
                     // Tambahkan data default rekening ke tabel App (key-value)
-                    App::where(['key' => 'default_rekening','auth'=> auth()->user()->id])->update([
-                        'value' => $rekeningid
-                    ]);
+                    App::updateOrCreate(
+                        ['key' => 'default_rekening', 'auth' => auth()->user()->id],
+                        ['value' => $rekeningid]
+                    );
 
                     Artisan::call('optimize:clear');
                 }
             } else {
                 // Buat rekening baru dan simpan sebagai default
                 $kodeRekeningBaru = 'RK-' . strtoupper(uniqid());
-                $rekeningBaru = Rekening::create([
+                $rekeningBaru = RekeningTable::create([
                     'kode_rekening' => $kodeRekeningBaru,
                     'nama_rekening' => 'Rekening Otomatis',
                     'jenis_akun' => 'default',
@@ -306,7 +307,7 @@ class KeuanganController extends Controller
                 $data['id_rekening'] = $rekeningBaru->id;
 
                 // Catat history rekening
-                HistoryRekening::create([
+                HistoryRekeningTable::create([
                     'id_rekening' => $rekeningBaru->kode_rekening,
                     'tanggal' => $request->tanggal,
                     'keterangan' => $request->deskripsi,
@@ -315,14 +316,15 @@ class KeuanganController extends Controller
                     'saldo' => $rekeningBaru->jumlah,
                 ]);
                 // Tambahkan data default rekening ke tabel App (key-value)
-                App::where(['key' => 'default_rekening','auth'=> auth()->user()->id])->update([
-                    'value' => $rekeningBaru->kode_rekening,
-                ]);
+                App::updateOrCreate(
+                    ['key' => 'default_rekening', 'auth' => auth()->user()->id],
+                    ['value' => $rekeningBaru->kode_rekening]
+                );
                   Artisan::call('optimize:clear');
             }
         } else {
             $data['id_rekening'] = $request->id_rekening;
-            $rekening = Rekening::find($request->id_rekening);
+            $rekening = RekeningTable::find($request->id_rekening);
             if ($rekening) {
                 if ($request->tipe === 'pengeluaran') {
                     $rekening->jumlah -= $request->total;
@@ -332,7 +334,7 @@ class KeuanganController extends Controller
                 $rekening->save();
 
                 // Tambahkan ke HistoryRekening
-                HistoryRekening::create([
+                HistoryRekeningTable::create([
                     'id_rekening' => $rekening->kode_rekening,
                     'tanggal' => $request->tanggal,
                     'keterangan' => $request->deskripsi,
@@ -350,7 +352,7 @@ class KeuanganController extends Controller
             $data['foto'] = null;
         }
 
-        $keuangan = Keuangan::create($data);
+        $keuangan = KeuanganTable::create($data);
 
         activity('ikm')
             ->performedOn($keuangan)
@@ -366,24 +368,24 @@ class KeuanganController extends Controller
             'tanggal' => 'required',
             'deskripsi' => 'required|string',
             'waktu' => 'required|string',
-            'id_akun' => 'required|exists:akuns,id',
-            'id_akun_second' => 'required|exists:akuns,id',
+            'id_akun' => 'required|exists:akun_tables,id',
+            'id_akun_second' => 'required|exists:akun_tables,id',
             'tipe' => 'required|in:pemasukan,pengeluaran',
             'total' => 'required|numeric',
             'jenis_transaksi' => 'nullable|string',
-            'id_rekening' => 'nullable|exists:rekenings,id',
+            'id_rekening' => 'nullable|exists:rekening_tables,id',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
 
-        $keuangan = Keuangan::findOrFail($request->id);
+        $keuangan = KeuanganTable::findOrFail($request->id);
         $oldTotal = $keuangan->total;
         $oldTipe = $keuangan->tipe;
         $oldRekeningId = $keuangan->id_rekening;
 
         // Kembalikan saldo rekening lama
         if ($oldRekeningId && $oldRekeningId !== '00') {
-            $oldRekening = Rekening::find($oldRekeningId);
+            $oldRekening = RekeningTable::find($oldRekeningId);
             if ($oldRekening) {
                 if ($oldTipe === 'pengeluaran') {
                     $oldRekening->jumlah += $oldTotal;
@@ -392,7 +394,7 @@ class KeuanganController extends Controller
                 }
                 $oldRekening->save();
 
-                HistoryRekening::create([
+                HistoryRekeningTable::create([
                     'id_rekening' => $oldRekening->kode_rekening,
                     'tanggal' => now()->format('d/m/Y'),
                     'keterangan' => 'Update transaksi: saldo dikembalikan',
@@ -409,7 +411,7 @@ class KeuanganController extends Controller
         $newTotal = $request->total;
 
         if ($newRekeningId && $newRekeningId !== '00') {
-            $newRekening = Rekening::find($newRekeningId);
+            $newRekening = RekeningTable::find($newRekeningId);
             if ($newRekening) {
                 if ($newTipe === 'pengeluaran') {
                     $newRekening->jumlah -= $newTotal;
@@ -418,7 +420,7 @@ class KeuanganController extends Controller
                 }
                 $newRekening->save();
 
-                HistoryRekening::create([
+                HistoryRekeningTable::create([
                     'id_rekening' => $newRekening->kode_rekening,
                     'tanggal' => $request->tanggal,
                     'keterangan' => 'Update transaksi: saldo diperbarui',
@@ -452,14 +454,14 @@ class KeuanganController extends Controller
     }
 
     public function keuanganDelete($id){
-        $keuangan = Keuangan::findOrFail($id);
+        $keuangan = KeuanganTable::findOrFail($id);
         $oldTotal = $keuangan->total;
         $oldTipe = $keuangan->tipe;
         $oldRekeningId = $keuangan->id_rekening;
 
         // Update saldo rekening jika ada
         if ($oldRekeningId && $oldRekeningId !== '00') {
-            $rekening = Rekening::find($oldRekeningId);
+            $rekening = RekeningTable::find($oldRekeningId);
             if ($rekening) {
             if ($oldTipe === 'pengeluaran') {
                 $rekening->jumlah += $oldTotal;
@@ -469,7 +471,7 @@ class KeuanganController extends Controller
             $rekening->save();
 
             // Tambahkan ke HistoryRekening
-            HistoryRekening::create([
+            HistoryRekeningTable::create([
                 'id_rekening' => $rekening->kode_rekening,
                 'tanggal' => now()->format('d/m/Y'),
                 'keterangan' => 'Hapus transaksi: saldo dikembalikan',
@@ -502,7 +504,7 @@ class KeuanganController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        $rekening = Rekening::findOrFail($validated['id']);
+        $rekening = RekeningTable::findOrFail($validated['id']);
         $oldJumlah = $rekening->jumlah;
 
         $rekening->update([
@@ -516,7 +518,7 @@ class KeuanganController extends Controller
 
         // Catat perubahan saldo ke history jika jumlah berubah
         if ($oldJumlah != $validated['jumlah']) {
-            HistoryRekening::create([
+            HistoryRekeningTable::create([
             'id_rekening' => $validated['kode_rekening'],
             'tanggal' => now()->format('d/m/Y'),
             'keterangan' => 'Update Saldo Rekening',
@@ -525,7 +527,7 @@ class KeuanganController extends Controller
             'saldo' => $validated['jumlah'],
             ]);
 
-            Keuangan::create([
+            KeuanganTable::create([
             'tanggal' => now()->format('d/m/Y'),
             'deskripsi' => 'Update Saldo Rekening',
             'id_akun' => 5, // sesuaikan id akun jika perlu
@@ -546,10 +548,10 @@ class KeuanganController extends Controller
     }
 
     public function rekeningDelete($id){
-        $rekening = Rekening::findOrFail($id);
+        $rekening = RekeningTable::findOrFail($id);
 
         // Hapus semua transaksi keuangan terkait rekening ini
-        $transaksis = Keuangan::where('id_rekening', $rekening->id)->get();
+        $transaksis = KeuanganTable::where('id_rekening', $rekening->id)->get();
         foreach ($transaksis as $transaksi) {
             // Hapus foto jika ada
             if ($transaksi->foto) {
@@ -559,7 +561,7 @@ class KeuanganController extends Controller
         }
 
         // Hapus semua history rekening terkait
-        HistoryRekening::where('id_rekening', $rekening->kode_rekening)->delete();
+        HistoryRekeningTable::where('id_rekening', $rekening->kode_rekening)->delete();
 
         // Hapus rekening
         $rekening->delete();
@@ -573,7 +575,7 @@ class KeuanganController extends Controller
     }
 
     public function rekeningDefault($id){
-        $rekening = Rekening::findOrFail($id);
+        $rekening = RekeningTable::findOrFail($id);
 
         // Update atau buat entry default rekening di tabel App
         App::updateOrCreate(
@@ -599,7 +601,7 @@ class KeuanganController extends Controller
     $id_user = $request->filled('ip') ? $request->ip : auth()->id();
 
     // 🔹 Mulai query
-    $query = Keuangan::with(['akun', 'rekening'])
+    $query = KeuanganTable::with(['akun', 'rekening'])
         ->where('auth', $id_user);
 
     // 🔹 Filter tipe (pemasukan/pengeluaran)
@@ -660,7 +662,7 @@ class KeuanganController extends Controller
 
     // 🔹 Ambil data
     $keuangan = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get();
-   
+
     // 🔹 Jika tidak ada filter, tampilkan semua periode
     if (
         !$request->filled('from') &&
@@ -688,7 +690,7 @@ class KeuanganController extends Controller
     return $pdf->download($filename);
     }
  public function kelenderIndex(){
-        $data = Keuangan::where('auth',auth()->user()->id)->get();
+        $data = KeuanganTable::where('auth',auth()->user()->id)->get();
          $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('keuangan.bulan',[
             'activeMenu' => 'keuangan',
@@ -698,11 +700,11 @@ class KeuanganController extends Controller
 
  public function cetakHistoryPDF($id_rekening)
 {
-    $histories = HistoryRekening::where('id_rekening', $id_rekening)
+    $histories = HistoryRekeningTable::where('id_rekening', $id_rekening)
         ->orderBy('tanggal', 'desc')
         ->get();
 
-    $rekening = Rekening::where('kode_rekening',$id_rekening)->first();
+    $rekening = RekeningTable::where('kode_rekening',$id_rekening)->first();
 
     if (!$rekening) {
         abort(404, 'Rekening tidak ditemukan');
@@ -727,30 +729,30 @@ public function neraca()
    $bulan = (int) request('bulan', Carbon::now()->month);
     $tahun = (int) request('tahun', Carbon::now()->year);
 
-    $saldoAkuns = Akun::select(
-        'akuns.id',
-        'akuns.kode_akun',
-        'akuns.nama_akun',
+    $saldoakun_tables = AkunTable::select(
+        'akun_tables.id',
+        'akun_tables.kode_akun',
+        'akun_tables.nama_akun',
         'kategori_akuns.nama_kategori',
         'kategori_akuns.tipe',
         DB::raw('
-            SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
+            SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_debit
         '),
         DB::raw('
-            SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
+            SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_kredit
         ')
     )
-    ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
-    ->leftJoin('keuangans', function($join) use ($bulan, $tahun) {
+    ->join('kategori_akuns','kategori_akuns.id','=','akun_tables.kategori_id')
+    ->leftJoin('keuangan_tables', function($join) use ($bulan, $tahun) {
         $join->on(function($q) {
-                $q->on('keuangans.id_akun','=','akuns.id')
-                  ->orOn('keuangans.id_akun_second','=','akuns.id');
+                $q->on('keuangan_tables.id_akun','=','akun_tables.id')
+                  ->orOn('keuangan_tables.id_akun_second','=','akun_tables.id');
             })
-            ->whereRaw('MONTH(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$bulan])
-            ->whereRaw('YEAR(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$tahun])
-            ->where('keuangans.auth', auth()->id()); // ✅ pindahkan ke sini
+            ->whereRaw('MONTH(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$bulan])
+            ->whereRaw('YEAR(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$tahun])
+            ->where('keuangan_tables.auth', auth()->id()); // ✅ pindahkan ke sini
     })
-    ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
+    ->groupBy('akun_tables.id','akun_tables.kode_akun','akun_tables.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
     ->get()
     ->map(function($row){
         if (in_array($row->tipe, ['aset','beban'])) {
@@ -762,10 +764,10 @@ public function neraca()
     });
 
     // Pisahkan Neraca dan Laba Rugi
-    $neraca = $saldoAkuns->whereIn('tipe', ['aset','liabilitas','ekuitas'])
+    $neraca = $saldoakun_tables->whereIn('tipe', ['aset','liabilitas','ekuitas'])
                         ->groupBy('tipe');
 
-    $labaRugi = $saldoAkuns->whereIn('tipe', ['pendapatan','beban'])
+    $labaRugi = $saldoakun_tables->whereIn('tipe', ['pendapatan','beban'])
                         ->groupBy('tipe');
 
     // Ambil log aktivitas terbaru
@@ -792,30 +794,30 @@ public function neraca()
         $bulan = request('bulan', Carbon::now()->month);
         $tahun = request('tahun', Carbon::now()->year);
 
-            $saldoAkuns = Akun::select(
-            'akuns.id',
-            'akuns.kode_akun',
-            'akuns.nama_akun',
+            $saldoakun_tables = AkunTable::select(
+            'akun_tables.id',
+            'akun_tables.kode_akun',
+            'akun_tables.nama_akun',
             'kategori_akuns.nama_kategori',
             'kategori_akuns.tipe',
             DB::raw('
-                SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS total_debit
+                SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_debit
             '),
             DB::raw('
-                SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS total_kredit
+                SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_kredit
             ')
         )
-        ->join('kategori_akuns','kategori_akuns.id','=','akuns.kategori_id')
-        ->leftJoin('keuangans', function($join) use ($bulan, $tahun) {
+        ->join('kategori_akuns','kategori_akuns.id','=','akun_tables.kategori_id')
+        ->leftJoin('keuangan_tables', function($join) use ($bulan, $tahun) {
             $join->on(function($q) {
-                    $q->on('keuangans.id_akun','=','akuns.id')
-                    ->orOn('keuangans.id_akun_second','=','akuns.id');
+                    $q->on('keuangan_tables.id_akun','=','akun_tables.id')
+                    ->orOn('keuangan_tables.id_akun_second','=','akun_tables.id');
                 })
-                ->whereRaw('MONTH(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$bulan])
-                ->whereRaw('YEAR(STR_TO_DATE(keuangans.tanggal, "%d/%m/%Y")) = ?', [$tahun])
-                ->where('keuangans.auth', auth()->id()); // ✅ pindahkan ke sini
+                ->whereRaw('MONTH(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                ->whereRaw('YEAR(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$tahun])
+                ->where('keuangan_tables.auth', auth()->id()); // ✅ pindahkan ke sini
         })
-        ->groupBy('akuns.id','akuns.kode_akun','akuns.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
+        ->groupBy('akun_tables.id','akun_tables.kode_akun','akun_tables.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
         ->get()
         ->map(function($row){
             if (in_array($row->tipe, ['aset','beban'])) {
@@ -826,8 +828,8 @@ public function neraca()
             return $row;
         });
 
-        $neraca = $saldoAkuns->whereIn('tipe', ['aset','liabilitas','ekuitas'])->groupBy('tipe');
-        $labaRugi = $saldoAkuns->whereIn('tipe', ['pendapatan','beban'])->groupBy('tipe');
+        $neraca = $saldoakun_tables->whereIn('tipe', ['aset','liabilitas','ekuitas'])->groupBy('tipe');
+        $labaRugi = $saldoakun_tables->whereIn('tipe', ['pendapatan','beban'])->groupBy('tipe');
 
 
             // Ambil log aktivitas terbaru (opsional untuk catatan bawah PDF)
@@ -863,23 +865,23 @@ public function neraca()
         $bulan = $request->input('bulan', now()->format('m'));
         $tahun = $request->input('tahun', now()->format('Y'));
         $auth = auth()->user()->id;
-        $data = DB::table('keuangans')
+        $data = DB::table('keuangan_tables')
             ->select(
-                'akuns.id',
-                'akuns.kode_akun',
-                'akuns.nama_akun',
-                DB::raw("SUM(CASE WHEN keuangans.id_akun = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_debit"),
-                DB::raw("SUM(CASE WHEN keuangans.id_akun_second = akuns.id THEN keuangans.total ELSE 0 END) AS saldo_kredit")
+                'akun_tables.id',
+                'akun_tables.kode_akun',
+                'akun_tables.nama_akun',
+                DB::raw("SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS saldo_debit"),
+                DB::raw("SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS saldo_kredit")
             )
-            ->join('akuns', function ($join) {
-                $join->on('keuangans.id_akun', '=', 'akuns.id')
-                    ->orOn('keuangans.id_akun_second', '=', 'akuns.id');
+            ->join('akun_tables', function ($join) {
+                $join->on('keuangan_tables.id_akun', '=', 'akun_tables.id')
+                    ->orOn('keuangan_tables.id_akun_second', '=', 'akun_tables.id');
             })
-            ->whereRaw("STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y') IS NOT NULL")
-            ->whereRaw("MONTH(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$bulan])
-            ->whereRaw("YEAR(STR_TO_DATE(keuangans.tanggal, '%d/%m/%Y')) = ?", [$tahun])
-            ->where("keuangans.auth", $auth)
-            ->groupBy('akuns.id', 'akuns.kode_akun', 'akuns.nama_akun')
+            ->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') IS NOT NULL")
+            ->whereRaw("MONTH(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$tahun])
+            ->where("keuangan_tables.auth", $auth)
+            ->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
             ->get();
 
         return view('keuangan.neracasaldo',[
@@ -902,7 +904,7 @@ public function neraca()
         $tahun = $request->input('tahun', date('Y'));
       $auth = auth()->id(); // lebih ringkas daripada auth()->user()->id
 
-    $items = Keuangan::with([
+    $items = KeuanganTable::with([
             'akun.kategori',
             'akunSecond.kategori'
         ])
@@ -965,7 +967,7 @@ public function neraca()
 
         // Loop akun yang sudah dijumlahkan totalnya
         foreach ($addedAkun as $akunId => $total) {
-            $akun = Akun::with('kategori')->find($akunId);
+            $akun = AkunTable::with('kategori')->find($akunId);
             if ($akun) {
                 $pushToLabaRugi($akun, $total);
             }
@@ -991,14 +993,14 @@ public function neraca()
             'labaRugi' => $labaRugi
         ]);
     }
-    
+
     public function laptransaksi(Request $request)
     {
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
         $auth = auth()->user()->id;
         // Ambil transaksi bulan & tahun tersebut
-        $transaksi = Keuangan::with(['akun', 'akunSecond', 'rekening'])
+        $transaksi = KeuanganTable::with(['akun', 'akunsecond', 'rekening'])
             ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
             ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
             ->where("auth", $auth)

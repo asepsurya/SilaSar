@@ -74,7 +74,7 @@
 
             {{-- Dashboard --}}
 
-          <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['dashboard', 'akun', 'rekening']) ? 'true' : 'false' }} }">
+          <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['dashboard', 'dahboardkeuangan', 'peta']) ? 'true' : 'false' }} }">
 
               <!-- Trigger utama -->
               <a href="javascript:;" class="nav-link group text-black dark:text-white" @click="open = !open" :class="{ 'active': open }">
@@ -109,6 +109,25 @@
 
           <h2 class="pl-3 my-2 text-black/60 dark:text-white/40 text-sm"><span>Keuangan</span></h2>
           {{-- Data Keuangan --}}
+          <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['keuangan_harian', 'akun_harian', 'rekening_harian']) ? 'true' : 'false' }} }">
+            <a href="javascript:;" class="nav-link group text-black dark:text-white" :class="{ 'active': open }" @click="open = !open">
+                <div class="text-black/50 dark:text-white/20 w-4 h-4 flex items-center justify-center transition-transform duration-300" :class="{ '!rotate-90': open }">
+                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M0.659675 9.35355C0.446775 9.15829 0.446775 8.84171 0.659675 8.64645L4.25 5.35355C4.4629 5.15829 4.4629 4.84171 4.25 4.64645L0.659675 1.35355C0.446776 1.15829 0.446776 0.841709 0.659675 0.646446C0.872575 0.451184 1.21775 0.451185 1.43065 0.646446L5.02098 3.93934C5.65967 4.52513 5.65968 5.47487 5.02098 6.06066L1.43065 9.35355C1.21775 9.54882 0.872574 9.54882 0.659675 9.35355Z" fill="currentcolor"></path>
+                    </svg>
+                </div>
+                <div class="flex items-center">
+                    <x-icon name="grafik" class="text-gray-600" />
+                    <span class="pl-1">Buku Harian</span>
+                </div>
+            </a>
+            <ul x-show="open" x-collapse class="sub-menu flex flex-col gap-1 text-black dark:text-white/80">
+                <li><a href="{{ route('index.keuangan.harian') }}" class="{{ $active === 'keuangan_harian' ? 'active' : '' }}">Buku Kas</a></li>
+                <li><a href="{{ route('index.akun.harian') }}" class="{{ $active === 'akun_harian' ? 'active' : '' }}">Akun</a>
+                </li>
+                <li><a href="{{ route('akun.rekening.harian') }}" class="{{ $active === 'rekening_harian' ? 'active' : '' }}">Rekening</a></li>
+            </ul>
+        </li>
           <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['keuangan', 'akun', 'rekening']) ? 'true' : 'false' }} }">
               <a href="javascript:;" class="nav-link group text-black dark:text-white" :class="{ 'active': open }" @click="open = !open">
                   <div class="text-black/50 dark:text-white/20 w-4 h-4 flex items-center justify-center transition-transform duration-300" :class="{ '!rotate-90': open }">
@@ -118,7 +137,7 @@
                   </div>
                   <div class="flex items-center">
                       <x-icon name="grafik" class="text-gray-600" />
-                      <span class="pl-1">Keuangan</span>
+                      <span class="pl-1">Keuangan Usaha</span>
                   </div>
               </a>
               <ul x-show="open" x-collapse class="sub-menu flex flex-col gap-1 text-black dark:text-white/80">
@@ -129,8 +148,6 @@
               </ul>
           </li>
 
-          
-            
 
             <li class="menu nav-item"   x-data="{ open: {{ in_array($active ?? '', ['laporan_transaksi', 'neraca', 'neracasaldo','labarugi']) ? 'true' : 'false' }} }">
                 <a href="javascript:;"
@@ -223,7 +240,7 @@
                             class="{{ $active === 'produk' ? 'active' : '' }}">Data Produk</a></li>
                     <li><a href="{{ route('produk.category') }}"
                             class="{{ $active === 'category' ? 'active' : '' }}">Kategori</a></li>
-                   
+
                     <li><a href="{{ route('satuan.index') }}"
                             class="{{ $active === 'satuan' ? 'active' : '' }}">Satuan</a></li>
                 </ul>
@@ -306,7 +323,7 @@
                     </ul>
                 </li>
             @endif
-             
+
             <li class="menu nav-item">
                 <a class="nav-link group" href="{{ route('perusahaan.setting') }}">
                     <div class="flex pl-5 items-center">

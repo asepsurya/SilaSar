@@ -278,7 +278,7 @@
             </div>
         </div>
     @endif
-    <div class="p-2 bg-lightwhite dark:bg-white/5 rounded-lg flex gap-2 justify-between mb-2 " >
+    <div class="p-2 rounded-lg flex gap-2 justify-between mb-2 " >
         <div class="flex items-center gap-4">
             <div class="flex gap-2 items-center">
                 <button
@@ -822,8 +822,8 @@
                         const filter = input.value.toLowerCase();
                         const trs = table.querySelectorAll('tbody tr');
                         trs.forEach(tr => {
-                            const text = tr.textContent.toLowerCase();
-                            tr.style.display = text.includes(filter) ? '' : 'none';
+                            const descriptions = Array.from(tr.querySelectorAll('.akun-nama')).map(el => el.textContent.toLowerCase()).join(' ');
+                            tr.style.display = descriptions.includes(filter) ? '' : 'none';
                         });
                     });
                 });
@@ -952,9 +952,6 @@
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
                 submitBtn.classList.remove('hover:bg-blue-700');
-
-                // Biarkan form lanjut submit (hapus preventDefault jika pakai action URL)
-                // e.preventDefault(); // hanya jika kamu tidak ingin submit form secara default
             });
         </script>
         <script>
@@ -969,9 +966,6 @@
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
                 submitBtn.classList.remove('hover:bg-blue-700');
-
-                // Biarkan form lanjut submit (hapus preventDefault jika pakai action URL)
-                // e.preventDefault(); // hanya jika kamu tidak ingin submit form secara default
             });
         </script>
         <script>
@@ -1379,4 +1373,5 @@
 
         </div>
     </div>
+</div>
 @endsection

@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('keuangan_tables', function (Blueprint $table) {
-           $table->string('jenis_transaksi')->after('tipe')->nullable();
+        Schema::create('akun_tables', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_akun');
+            $table->enum('jenis_akun', ['pemasukan', 'pengeluaran']);
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('keuangan_tables', function (Blueprint $table) {
-            $table->string('jenis_transaksi')->after('tipe')->nullable();
-        });
+        Schema::dropIfExists('akun_tables');
     }
 };

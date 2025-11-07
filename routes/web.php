@@ -16,6 +16,8 @@ use App\Http\Controllers\Keuangan\HistoryController;
 use App\Http\Controllers\Keuangan\KeuanganController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use App\Http\Controllers\Perusahaan\PerusahaanController;
+use App\Http\Controllers\Keuangan\HistoryHarianController;
+use App\Http\Controllers\Keuangan\KeuanganHarianController;
 use App\Http\Controllers\Dashboard\DashboardAdminController;
 
 
@@ -91,8 +93,6 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/management/stok/delete/{id}', [ProdukController::class, 'manajemenStokDelete'])->name('manajemenStok.delete');
         Route::get('/management/stok/transaksi/delete/{id}', [ProdukController::class, 'manajemenStokDeleteItem'])->name('manajemenStok.deleteItem');
 
-        
-
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
         // ------------------------------------------------
@@ -138,7 +138,33 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
 
         Route::get('/nota2/{id}', [NotaController::class, 'nota2'])->name('nota');
         Route::get('/update', [UpdateController::class, 'index'])->name('update.index');
-         Route::post('/update/run', [UpdateController::class, 'run'])->name('update.run');
+        Route::post('/update/run', [UpdateController::class, 'run'])->name('update.run');
+        Route::post('/ikm/{id}/update-role', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
+
+         // ------------------------------------------------
+         // Route Catatan Keuangan_harian
+         // ------------------------------------------------
+         Route::get('/catatan/keuangan/', [KeuanganHarianController::class, 'index'])->name('index.keuangan.harian');
+         Route::get('/catatan/keuangan/kalender', [KeuanganHarianController::class, 'kelenderIndex'])->name('keuangan.kalender.harian');
+         Route::post('/catatan/keuangan/add', [KeuanganHarianController::class, 'keuanganAdd'])->name('keuangan.add.harian');
+         Route::post('/catatan/keuangan/update', [KeuanganHarianController::class, 'keuanganUpdate'])->name('keuangan.update.harian');
+         Route::get('/catatan/keuangan/delete/{id}', [KeuanganHarianController::class, 'keuanganDelete'])->name('keuangan.delete.harian');
+         Route::get('/catatan/keuangan/export/pdf', [KeuanganHarianController::class, 'keuanganPDF'])->name('keuangan.pdf.harian');
+         Route::get('/catatan/history/cetakpdf/{id_rekening}', [KeuanganHarianController::class, 'cetakHistoryPDF'])->name('history.cetakpdf.harian');
+
+        // ------------------------------------------------
+        // Route Akun dan Rekening
+        // ------------------------------------------------
+        Route::get('/single/akun', [KeuanganHarianController::class, 'IndexAkun'])->name('index.akun.harian');
+        Route::post('/single/akun/create', [KeuanganHarianController::class, 'akunCreate'])->name('akun.create.harian');
+        Route::post('/single/akun/update', [KeuanganHarianController::class, 'akunUpdate'])->name('akun.update.harian');
+        Route::get('/single/akun/delete/{id}', [KeuanganHarianController::class, 'akunDelete'])->name('akun.delete.harian');
+        Route::get('/single/rekening', [KeuanganHarianController::class, 'rekeningIndex'])->name('akun.rekening.harian');
+        Route::post('/single/rekening', [KeuanganHarianController::class, 'rekeningAdd'])->name('rekening.add.harian');
+        Route::post('/single/rekening/update', [KeuanganHarianController::class, 'rekeningUpdate'])->name('rekening.update.harian');
+        Route::delete('/single/rekening/hapus/{id}', [KeuanganHarianController::class, 'rekeningDelete'])->name('rekening.delete.harian');
+        Route::get('/single/rekening/default/{id}', [KeuanganHarianController::class, 'rekeningDefault'])->name('default.rekening.harian');
+        Route::get('/single/rekening/{id_rekening}', [HistoryHarianController::class, 'rekeningHistory'])->name('rekening.history.harian');
     });
 
     Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');
