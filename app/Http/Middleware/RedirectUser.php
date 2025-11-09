@@ -23,7 +23,7 @@ class RedirectUser
             // Cek apakah user memiliki role pengguna dan mengakses dashboard
             if ($user->hasRole('gold') && $request->is('dashboard')) {
                 // Redirect ke dashboard.keuangan jika role pengguna
-                return redirect()->route('index.keuangan');
+                return redirect()->route('index.keuangan.harian');
             }
 
             // Cek jika tidak ada masalah, lanjutkan request

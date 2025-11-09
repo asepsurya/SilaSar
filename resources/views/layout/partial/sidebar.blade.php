@@ -18,7 +18,7 @@
 
 @media (min-width: 768px) {
   .sidebar {
-    z-index: 0;
+    z-index: 40;
   }
   .rigtcontent {
     z-index: 0;
@@ -74,7 +74,7 @@
 
             {{-- Dashboard --}}
 
-          <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['dashboard', 'dahboardkeuangan', 'peta']) ? 'true' : 'false' }} }">
+          <li class="menu nav-item" x-data="{ open: {{ in_array($active ?? '', ['dashboard', 'dahboardkeuangan', 'peta','catatan']) ? 'true' : 'false' }} }">
 
               <!-- Trigger utama -->
               <a href="javascript:;" class="nav-link group text-black dark:text-white" @click="open = !open" :class="{ 'active': open }">
@@ -100,6 +100,9 @@
                   </li>
                   <li>
                       <a href="{{ route('dashboard.keuangan') }}" class="{{ $active === 'dahboardkeuangan' ? 'active' : '' }}">Keuangan</a>
+                  </li>
+                  <li>
+                      <a href="{{ route('dashboard.keuangan.harian') }}" class="{{ $active === 'catatan' ? 'active' : '' }}">Keuangan Saya</a>
                   </li>
                   <li>
                       <a href="{{ route('dashboard.peta') }}" class="{{ $active === 'peta' ? 'active' : '' }}">Peta</a>

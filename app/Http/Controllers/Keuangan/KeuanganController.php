@@ -724,10 +724,17 @@ class KeuanganController extends Controller
 
 public function neraca()
     {
-
-    // Ambil bulan & tahun dari request, default ke bulan & tahun sekarang
-   $bulan = (int) request('bulan', Carbon::now()->month);
+    // Ambil parameter filter
+    $periode = request('periode');
+    $bulan = (int) request('bulan', Carbon::now()->month);
     $tahun = (int) request('tahun', Carbon::now()->year);
+    $tahun_tahun = (int) request('tahun_tahun', Carbon::now()->year);
+
+    // Jika periode tahunan, gunakan tahun_tahun dan set bulan ke null untuk filter tahunan
+    if ($periode === 'tahunan') {
+        $tahun = $tahun_tahun;
+        $bulan = null; // Tidak filter bulan untuk tahunan
+    }
 
     $saldoakun_tables = AkunTable::select(
         'akun_tables.id',
@@ -748,9 +755,11 @@ public function neraca()
                 $q->on('keuangan_tables.id_akun','=','akun_tables.id')
                   ->orOn('keuangan_tables.id_akun_second','=','akun_tables.id');
             })
-            ->whereRaw('MONTH(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$bulan])
             ->whereRaw('YEAR(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$tahun])
-            ->where('keuangan_tables.auth', auth()->id()); // ✅ pindahkan ke sini
+            ->when($bulan, function($query) use ($bulan) {
+                return $query->whereRaw('MONTH(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$bulan]);
+            })
+            ->where('keuangan_tables.auth', auth()->id());
     })
     ->groupBy('akun_tables.id','akun_tables.kode_akun','akun_tables.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
     ->get()
@@ -787,14 +796,31 @@ public function neraca()
         'logs' => $logs,
         'bulan' => $bulan,
         'tahun' => $tahun,
+        'periode' => $periode,
     ]);
     }
     public function neracapdf(){
-       // Ambil bulan & tahun dari request, default ke sekarang
+        // Ambil parameter filter
+        $periode = request('periode');
         $bulan = request('bulan', Carbon::now()->month);
         $tahun = request('tahun', Carbon::now()->year);
+        $tahun_bulan = request('tahun_bulan');
+        $tahun_tahun = request('tahun_tahun');
+        $tanggal_awal = request('tanggal_awal');
+        $tanggal_akhir = request('tanggal_akhir');
 
-            $saldoakun_tables = AkunTable::select(
+        // Jika ada filter periode bulanan, gunakan bulan dan tahun_bulan
+        if ($periode === 'bulanan' && $tahun_bulan) {
+            $tahun = (int) $tahun_bulan;
+        }
+
+        // Jika ada filter periode tahunan, gunakan tahun_tahun dan set bulan ke null
+        if ($periode === 'tahunan' && $tahun_tahun) {
+            $tahun = (int) $tahun_tahun;
+            $bulan = null;
+        }
+
+        $saldoakun_tables = AkunTable::select(
             'akun_tables.id',
             'akun_tables.kode_akun',
             'akun_tables.nama_akun',
@@ -808,14 +834,31 @@ public function neraca()
             ')
         )
         ->join('kategori_akuns','kategori_akuns.id','=','akun_tables.kategori_id')
-        ->leftJoin('keuangan_tables', function($join) use ($bulan, $tahun) {
+        ->leftJoin('keuangan_tables', function($join) use ($bulan, $tahun, $tanggal_awal, $tanggal_akhir) {
             $join->on(function($q) {
                     $q->on('keuangan_tables.id_akun','=','akun_tables.id')
                     ->orOn('keuangan_tables.id_akun_second','=','akun_tables.id');
                 })
-                ->whereRaw('MONTH(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$bulan])
-                ->whereRaw('YEAR(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$tahun])
-                ->where('keuangan_tables.auth', auth()->id()); // ✅ pindahkan ke sini
+                ->where('keuangan_tables.auth', auth()->id());
+
+            // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
+            if ($tanggal_awal && $tanggal_akhir) {
+                try {
+                    $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                    $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+                    $join->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+                } catch (\Exception $e) {
+                    // Abaikan jika format salah
+                }
+            } else {
+                // Filter berdasarkan tahun
+                $join->whereRaw('YEAR(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$tahun]);
+
+                // Filter berdasarkan bulan jika ada
+                if ($bulan) {
+                    $join->whereRaw('MONTH(STR_TO_DATE(keuangan_tables.tanggal, "%d/%m/%Y")) = ?', [$bulan]);
+                }
+            }
         })
         ->groupBy('akun_tables.id','akun_tables.kode_akun','akun_tables.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
         ->get()
@@ -853,7 +896,7 @@ public function neraca()
             // Output PDF langsung di browser
             return $pdf->stream("Laporan_Neraca_{$bulan}_{$tahun}.pdf");
     }
-    public function neracaSaldo(request $request)
+    public function neracaSaldo2(request $request)
     {
         $logs = Activity::where([
                 'causer_id'=>auth()->user()->id,
@@ -862,10 +905,30 @@ public function neraca()
             ->latest()
             ->take(10)
             ->get();
+
+        // Ambil parameter filter
+        $periode = $request->input('periode');
         $bulan = $request->input('bulan', now()->format('m'));
         $tahun = $request->input('tahun', now()->format('Y'));
+        $tahun_bulan = $request->input('tahun_bulan');
+        $tahun_tahun = $request->input('tahun_tahun');
+        $tanggal_awal = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
+
+        // Jika ada filter periode bulanan, gunakan bulan dan tahun_bulan
+        if ($periode === 'bulanan' && $tahun_bulan) {
+            $tahun = (int) $tahun_bulan;
+        }
+
+        // Jika ada filter periode tahunan, gunakan tahun_tahun dan set bulan ke null
+        if ($periode === 'tahunan' && $tahun_tahun) {
+            $tahun = (int) $tahun_tahun;
+            $bulan = null;
+        }
+
         $auth = auth()->user()->id;
-        $data = DB::table('keuangan_tables')
+
+        $query = DB::table('keuangan_tables')
             ->select(
                 'akun_tables.id',
                 'akun_tables.kode_akun',
@@ -878,10 +941,194 @@ public function neraca()
                     ->orOn('keuangan_tables.id_akun_second', '=', 'akun_tables.id');
             })
             ->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') IS NOT NULL")
-            ->whereRaw("MONTH(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$bulan])
-            ->whereRaw("YEAR(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$tahun])
-            ->where("keuangan_tables.auth", $auth)
-            ->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
+            ->where("keuangan_tables.auth", $auth);
+
+        // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
+        if ($tanggal_awal && $tanggal_akhir) {
+            try {
+                $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+                $query->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+            } catch (\Exception $e) {
+                // Abaikan jika format salah
+            }
+        } else {
+            // Filter berdasarkan tahun
+            $query->whereRaw("YEAR(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            // Filter berdasarkan bulan jika ada
+            if ($bulan) {
+                $query->whereRaw("MONTH(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$bulan]);
+            }
+        }
+
+        $data = $query->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
+            ->get();
+
+        return view('keuangan.neracasaldo',[
+            'activeMenu' => 'laporan',
+            'active' => 'neracasaldo',
+            'logs' => $logs
+        ],compact('data','bulan','tahun'));
+
+    }
+
+    public function neracaSaldoPdf(Request $request)
+    {
+        // Ambil parameter filter
+        $periode = $request->input('periode');
+        $bulan = $request->input('bulan', now()->format('m'));
+        $tahun = $request->input('tahun', now()->format('Y'));
+        $tahun_bulan = $request->input('tahun_bulan');
+        $tahun_tahun = $request->input('tahun_tahun');
+        $tanggal_awal = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
+
+        // Jika ada filter periode bulanan, gunakan bulan dan tahun_bulan
+        if ($periode === 'bulanan' && $tahun_bulan) {
+            $tahun = (int) $tahun_bulan;
+        }
+
+        // Jika ada filter periode tahunan, gunakan tahun_tahun dan set bulan ke null
+        if ($periode === 'tahunan' && $tahun_tahun) {
+            $tahun = (int) $tahun_tahun;
+            $bulan = null;
+        }
+
+        $auth = auth()->user()->id;
+
+        $query = DB::table('keuangan_tables')
+            ->select(
+                'akun_tables.id',
+                'akun_tables.kode_akun',
+                'akun_tables.nama_akun',
+                DB::raw("SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS saldo_debit"),
+                DB::raw("SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS saldo_kredit")
+            )
+            ->join('akun_tables', function ($join) {
+                $join->on('keuangan_tables.id_akun', '=', 'akun_tables.id')
+                    ->orOn('keuangan_tables.id_akun_second', '=', 'akun_tables.id');
+            })
+            ->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') IS NOT NULL")
+            ->where("keuangan_tables.auth", $auth);
+
+        // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
+        if ($tanggal_awal && $tanggal_akhir) {
+            try {
+                $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+                $query->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+            } catch (\Exception $e) {
+                // Abaikan jika format salah
+            }
+        } else {
+            // Filter berdasarkan tahun
+            $query->whereRaw("YEAR(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            // Filter berdasarkan bulan jika ada
+            if ($bulan) {
+                $query->whereRaw("MONTH(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$bulan]);
+            }
+        }
+
+        $data = $query->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
+            ->get();
+
+        $perusahaan = auth()->user()->perusahaanUser;
+
+        $logo = null;
+        if ($perusahaan->logo && file_exists(storage_path('app/public/' . $perusahaan->logo))) {
+            $logoPath = storage_path('app/public/' . $perusahaan->logo);
+            $logo = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logoPath));
+        } else {
+            // fallback ke logo default di public/assets
+            $defaultPath = public_path('assets/default_logo.png');
+            if (file_exists($defaultPath)) {
+                $logo = 'data:image/png;base64,' . base64_encode(file_get_contents($defaultPath));
+            }
+        }
+
+        // Generate PDF
+        $pdf = Pdf::loadView('keuangan.pdf.neracaSaldo', [
+            'data' => $data,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'perusahaan' => $perusahaan,
+            'logo' => $logo,
+            'periode' => $periode,
+            'tanggal_awal' => $tanggal_awal,
+            'tanggal_akhir' => $tanggal_akhir,
+        ])->setPaper('A4', 'portrait');
+
+        return $pdf->stream("LAPORAN-NERACA-SALDO-{$bulan}-{$tahun}.pdf");
+    }
+    public function neracaSaldo(request $request)
+    {
+        $logs = Activity::where([
+                'causer_id'=>auth()->user()->id,
+                'log_name' => 'ikm'
+            ])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Ambil parameter filter
+        $periode = $request->input('periode');
+        $bulan = $request->input('bulan', now()->format('m'));
+        $tahun = $request->input('tahun', now()->format('Y'));
+        $tahun_bulan = $request->input('tahun_bulan');
+        $tahun_tahun = $request->input('tahun_tahun');
+        $tanggal_awal = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
+
+        // Jika ada filter periode bulanan, gunakan bulan dan tahun_bulan
+        if ($periode === 'bulanan' && $tahun_bulan) {
+            $tahun = (int) $tahun_bulan;
+        }
+
+        // Jika ada filter periode tahunan, gunakan tahun_tahun dan set bulan ke null
+        if ($periode === 'tahunan' && $tahun_tahun) {
+            $tahun = (int) $tahun_tahun;
+            $bulan = null;
+        }
+
+        $auth = auth()->user()->id;
+
+        $query = DB::table('keuangan_tables')
+            ->select(
+                'akun_tables.id',
+                'akun_tables.kode_akun',
+                'akun_tables.nama_akun',
+                DB::raw("SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS saldo_debit"),
+                DB::raw("SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS saldo_kredit")
+            )
+            ->join('akun_tables', function ($join) {
+                $join->on('keuangan_tables.id_akun', '=', 'akun_tables.id')
+                    ->orOn('keuangan_tables.id_akun_second', '=', 'akun_tables.id');
+            })
+            ->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') IS NOT NULL")
+            ->where("keuangan_tables.auth", $auth);
+
+        // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
+        if ($tanggal_awal && $tanggal_akhir) {
+            try {
+                $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+                $query->whereRaw("STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+            } catch (\Exception $e) {
+                // Abaikan jika format salah
+            }
+        } else {
+            // Filter berdasarkan tahun
+            $query->whereRaw("YEAR(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            // Filter berdasarkan bulan jika ada
+            if ($bulan) {
+                $query->whereRaw("MONTH(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$bulan]);
+            }
+        }
+
+        $data = $query->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
             ->get();
 
         return view('keuangan.neracasaldo',[
@@ -900,20 +1147,56 @@ public function neraca()
             'log_name' => 'ikm'
         ])->latest()->take(10)->get();
 
+        // Ambil parameter filter
+        $periode = $request->input('periode');
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
-      $auth = auth()->id(); // lebih ringkas daripada auth()->user()->id
+        $tahun_bulan = $request->input('tahun_bulan');
+        $tahun_tahun = $request->input('tahun_tahun');
+        $tanggal_awal = $request->input('tanggal_awal');
+        $tanggal_akhir = $request->input('tanggal_akhir');
 
-    $items = KeuanganTable::with([
+        // Jika ada filter periode bulanan, gunakan bulan dan tahun_bulan
+        if ($periode === 'bulanan' && $tahun_bulan) {
+            $tahun = (int) $tahun_bulan;
+        }
+
+        // Jika ada filter periode tahunan, gunakan tahun_tahun dan set bulan ke null
+        if ($periode === 'tahunan' && $tahun_tahun) {
+            $tahun = (int) $tahun_tahun;
+            $bulan = null;
+        }
+
+        $auth = auth()->id(); // lebih ringkas daripada auth()->user()->id
+
+        $query = KeuanganTable::with([
             'akun.kategori',
             'akunSecond.kategori'
         ])
         ->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') IS NOT NULL")
-        ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
-        ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-        ->where('auth', $auth)
-        ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")
-        ->get();
+        ->where('auth', $auth);
+
+        // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
+        if ($tanggal_awal && $tanggal_akhir) {
+            try {
+                $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+            } catch (\Exception $e) {
+                // Abaikan jika format salah
+            }
+        } else {
+            // Filter berdasarkan tahun
+            $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            // Filter berdasarkan bulan jika ada
+            if ($bulan) {
+                $query->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
+            }
+        }
+
+        $items = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")
+            ->get();
 
         // Inisialisasi array Laba Rugi
         $labaRugi = [

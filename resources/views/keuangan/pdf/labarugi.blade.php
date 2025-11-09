@@ -15,7 +15,7 @@
     justify-content: space-between; /* kiri - kanan */
     align-items: center;            /* sejajarin vertikal */
    margin-bottom: 20px;
-  
+
 }
 
 .header-left h2 {
@@ -85,9 +85,18 @@
         <div class="header-left">
             <h2>{{ $perusahaan->nama_perusahaan }}</h2>
             <div>Laporan Laba Rugi</div>
-            <div class="periode"> Periode: {{ \Carbon\Carbon::createFromFormat('m', $bulan)->translatedFormat('F') }} {{ $tahun }}</div>
+            <div class="periode">
+                Periode:
+                @if($periode === 'tahunan')
+                    Tahunan {{ $tahun }}
+                @elseif($periode === 'rentang' && $tanggal_awal && $tanggal_akhir)
+                    {{ $tanggal_awal }} s.d. {{ $tanggal_akhir }}
+                @else
+                    {{ \Carbon\Carbon::createFromFormat('m', $bulan)->translatedFormat('F') }} {{ $tahun }}
+                @endif
+            </div>
         </div>
-       
+
     </div>
 
     <!-- Pendapatan -->

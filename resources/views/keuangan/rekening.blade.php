@@ -299,8 +299,14 @@
         @endforeach
         @if($rekening->isEmpty())
         <tr>
-            <td colspan="4" class="text-center py-4 text-gray-500">
-                Data tidak ditemukan.
+            <td colspan="4" class="text-center py-8">
+                <div class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 text-gray-300 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M9 13h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5l2 2h5a2 2 0 012 2v14a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="text-gray-400">Data tidak ditemukan.</span>
+                </div>
             </td>
         </tr>
         @endif

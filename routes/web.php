@@ -92,6 +92,8 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/management/stok/update/{id}', [ProdukController::class, 'manajemenStokUpdate'])->name('manajemenStok.update');
         Route::get('/management/stok/delete/{id}', [ProdukController::class, 'manajemenStokDelete'])->name('manajemenStok.delete');
         Route::get('/management/stok/transaksi/delete/{id}', [ProdukController::class, 'manajemenStokDeleteItem'])->name('manajemenStok.deleteItem');
+        Route::get('/produk/stok/logs', [ProdukController::class, 'logstok'])->name('manajemenStok.logstok');
+        Route::get('/produk/log-detail/{id}', [ProdukController::class, 'showLogDetail'])->name('produk.log.detail');
 
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
@@ -140,12 +142,13 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/update', [UpdateController::class, 'index'])->name('update.index');
         Route::post('/update/run', [UpdateController::class, 'run'])->name('update.run');
         Route::post('/ikm/{id}/update-role', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
-
-         // ------------------------------------------------
+    });
+    Route::middleware(['role:superadmin|admin|platinum|gold'])->group(function () {
+        // ------------------------------------------------
          // Route Catatan Keuangan_harian
          // ------------------------------------------------
-         Route::get('/catatan/keuangan/', [KeuanganHarianController::class, 'index'])->name('index.keuangan.harian');
-         Route::get('/catatan/keuangan/kalender', [KeuanganHarianController::class, 'kelenderIndex'])->name('keuangan.kalender.harian');
+         Route::get('/keuangan/catatan/', [KeuanganHarianController::class, 'index'])->name('index.keuangan.harian');
+         Route::get('/keuangan/calender', [KeuanganHarianController::class, 'kelenderIndex'])->name('keuangan.kalender.harian');
          Route::post('/catatan/keuangan/add', [KeuanganHarianController::class, 'keuanganAdd'])->name('keuangan.add.harian');
          Route::post('/catatan/keuangan/update', [KeuanganHarianController::class, 'keuanganUpdate'])->name('keuangan.update.harian');
          Route::get('/catatan/keuangan/delete/{id}', [KeuanganHarianController::class, 'keuanganDelete'])->name('keuangan.delete.harian');
@@ -155,11 +158,11 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         // ------------------------------------------------
         // Route Akun dan Rekening
         // ------------------------------------------------
-        Route::get('/single/akun', [KeuanganHarianController::class, 'IndexAkun'])->name('index.akun.harian');
+        Route::get('/data_akun', [KeuanganHarianController::class, 'IndexAkun'])->name('index.akun.harian');
         Route::post('/single/akun/create', [KeuanganHarianController::class, 'akunCreate'])->name('akun.create.harian');
         Route::post('/single/akun/update', [KeuanganHarianController::class, 'akunUpdate'])->name('akun.update.harian');
         Route::get('/single/akun/delete/{id}', [KeuanganHarianController::class, 'akunDelete'])->name('akun.delete.harian');
-        Route::get('/single/rekening', [KeuanganHarianController::class, 'rekeningIndex'])->name('akun.rekening.harian');
+        Route::get('/data_rekening', [KeuanganHarianController::class, 'rekeningIndex'])->name('akun.rekening.harian');
         Route::post('/single/rekening', [KeuanganHarianController::class, 'rekeningAdd'])->name('rekening.add.harian');
         Route::post('/single/rekening/update', [KeuanganHarianController::class, 'rekeningUpdate'])->name('rekening.update.harian');
         Route::delete('/single/rekening/hapus/{id}', [KeuanganHarianController::class, 'rekeningDelete'])->name('rekening.delete.harian');
@@ -167,68 +170,70 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/single/rekening/{id_rekening}', [HistoryHarianController::class, 'rekeningHistory'])->name('rekening.history.harian');
     });
 
-    Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');
+    Route::middleware(['role:superadmin|admin|platinum'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');
+    Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan_saya', [DashboardAdminController::class, 'dashboardKeuanganSaya'])->name('dashboard.keuangan.harian');
 
+    Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin','role:superadmin|admin|platinum'])->group(function () {
+        // ------------------------------------------------
+        // Route IKM
+        // ------------------------------------------------
+        Route::get('/people', [IkmController::class, 'index'])->name('index.ikm')->middleware('role:admin|superadmin');
+        Route::get('/people/create', [IkmController::class, 'create'])->name('ikm.create')->middleware('role:admin|superadmin');
+        Route::post('/people/create', [IkmController::class, 'store'])->name('ikm.store')->middleware('role:admin|superadmin');
+        Route::get('/people/delete/{id}', [IkmController::class, 'delete'])->name('ikm.delete')->middleware('role:admin|superadmin');
+        Route::get('/people/update/{id}', [IkmController::class, 'update'])->name('ikm.update');
+        Route::post('/people/update/action', [IkmController::class, 'updateIkm'])->name('ikm.update.action');
+        Route::post('/people/update/foto', [IkmController::class, 'updateFoto'])->name('ikm.update.foto');
+        Route::post('/keaktifan', [IkmController::class, 'getAktifData'])->name('getAktifData');
+        Route::get('/people/keaktifan', [IkmController::class, 'keaktifan'])->name('keaktifan.pengguna');
+        Route::post('/ikm/updaterole/{id}', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
+        // ------------------------------------------------
+        // Route Keuangan
+        // ------------------------------------------------
+        Route::get('/keuangan', [KeuanganController::class, 'index'])->name('index.keuangan');
+        Route::get('/keuangan/kalender', [KeuanganController::class, 'kelenderIndex'])->name('keuangan.kalender');
+        Route::post('/keuangan/add', [KeuanganController::class, 'keuanganAdd'])->name('keuangan.add');
+        Route::post('/keuangan/update', [KeuanganController::class, 'keuanganUpdate'])->name('keuangan.update');
+        Route::get('/keuangan/delete/{id}', [KeuanganController::class, 'keuanganDelete'])->name('keuangan.delete');
+        Route::get('/keuangan/export/pdf', [KeuanganController::class, 'keuanganPDF'])->name('keuangan.pdf');
+        Route::get('/history/cetak-pdf/{id_rekening}', [KeuanganController::class, 'cetakHistoryPDF'])->name('history.cetak-pdf');
+        Route::get('/laporan/neraca', [KeuanganController::class, 'neraca'])->name('laporan.neraca');
+        Route::get('/laporan/neraca/pdf', [KeuanganController::class, 'neracapdf'])->name('laporan.neracaPdf');
+        Route::get('/laporan/neracasaldo', [KeuanganController::class, 'neracaSaldo'])->name('laporan.neraca_saldo');
+        Route::get('/laporan/neracasaldo/pdf', [KeuanganController::class, 'neracaSaldoPdf'])->name('keuangan.neracaSaldoPdf');
+        Route::get('/laporan/labarugi', [KeuanganController::class, 'labarugi'])->name('laporan.labarugi');
+        Route::get('/laporan/transaksi', [KeuanganController::class, 'laptransaksi'])->name('laporan.transaksi');
 
-    // ------------------------------------------------
-    // Route IKM
-    // ------------------------------------------------
-    Route::get('/people', [IkmController::class, 'index'])->name('index.ikm')->middleware('role:admin|superadmin');
-    Route::get('/people/create', [IkmController::class, 'create'])->name('ikm.create')->middleware('role:admin|superadmin');
-    Route::post('/people/create', [IkmController::class, 'store'])->name('ikm.store')->middleware('role:admin|superadmin');
-    Route::get('/people/delete/{id}', [IkmController::class, 'delete'])->name('ikm.delete')->middleware('role:admin|superadmin');
-    Route::get('/people/update/{id}', [IkmController::class, 'update'])->name('ikm.update');
-    Route::post('/people/update/action', [IkmController::class, 'updateIkm'])->name('ikm.update.action');
-    Route::post('/people/update/foto', [IkmController::class, 'updateFoto'])->name('ikm.update.foto');
-    Route::post('/keaktifan', [IkmController::class, 'getAktifData'])->name('getAktifData');
-    Route::get('/people/keaktifan', [IkmController::class, 'keaktifan'])->name('keaktifan.pengguna');
-    Route::post('/ikm/updaterole/{id}', [IkmController::class, 'updateRole'])->name('ikm.updateRole');
-    // ------------------------------------------------
-    // Route Keuangan
-    // ------------------------------------------------
-    Route::get('/keuangan', [KeuanganController::class, 'index'])->name('index.keuangan');
-    Route::get('/keuangan/kalender', [KeuanganController::class, 'kelenderIndex'])->name('keuangan.kalender');
-    Route::post('/keuangan/add', [KeuanganController::class, 'keuanganAdd'])->name('keuangan.add');
-    Route::post('/keuangan/update', [KeuanganController::class, 'keuanganUpdate'])->name('keuangan.update');
-    Route::get('/keuangan/delete/{id}', [KeuanganController::class, 'keuanganDelete'])->name('keuangan.delete');
-    Route::get('/keuangan/export/pdf', [KeuanganController::class, 'keuanganPDF'])->name('keuangan.pdf');
-    Route::get('/history/cetak-pdf/{id_rekening}', [KeuanganController::class, 'cetakHistoryPDF'])->name('history.cetak-pdf');
-    Route::get('/laporan/neraca', [KeuanganController::class, 'neraca'])->name('laporan.neraca');
-    Route::get('/laporan/neraca/pdf', [KeuanganController::class, 'neracapdf'])->name('laporan.neracaPdf');
-    Route::get('/laporan/neracasaldo', [KeuanganController::class, 'neracaSaldo'])->name('laporan.neraca_saldo');
-    Route::get('/laporan/labarugi', [KeuanganController::class, 'labarugi'])->name('laporan.labarugi');
-    Route::get('/laporan/transaksi', [KeuanganController::class, 'laptransaksi'])->name('laporan.transaksi');
+        // ------------------------------------------------
+        // Route Akun dan Rekening
+        // ------------------------------------------------
+        Route::get('/akun', [KeuanganController::class, 'IndexAkun'])->name('index.akun');
+        Route::post('/akun/create', [KeuanganController::class, 'akunCreate'])->name('akun.create');
+        Route::post('/akun/update', [KeuanganController::class, 'akunUpdate'])->name('akun.update');
+        Route::get('/akun/delete/{id}', [KeuanganController::class, 'akunDelete'])->name('akun.delete');
+        Route::get('/rekening', [KeuanganController::class, 'rekeningIndex'])->name('akun.rekening');
+        Route::post('/rekening', [KeuanganController::class, 'rekeningAdd'])->name('rekening.add');
+        Route::post('/rekening/update', [KeuanganController::class, 'rekeningUpdate'])->name('rekening.update');
+        Route::delete('/rekening/hapus/{id}', [KeuanganController::class, 'rekeningDelete'])->name('rekening.delete');
+        Route::get('/rekening/default/{id}', [KeuanganController::class, 'rekeningDefault'])->name('default.rekening');
+        Route::get('/rekening/{id_rekening}', [HistoryController::class, 'rekeningHistory'])->name('rekening.history');
 
-    // ------------------------------------------------
-    // Route Akun dan Rekening
-    // ------------------------------------------------
-    Route::get('/akun', [KeuanganController::class, 'IndexAkun'])->name('index.akun');
-    Route::post('/akun/create', [KeuanganController::class, 'akunCreate'])->name('akun.create');
-    Route::post('/akun/update', [KeuanganController::class, 'akunUpdate'])->name('akun.update');
-    Route::get('/akun/delete/{id}', [KeuanganController::class, 'akunDelete'])->name('akun.delete');
-    Route::get('/rekening', [KeuanganController::class, 'rekeningIndex'])->name('akun.rekening');
-    Route::post('/rekening', [KeuanganController::class, 'rekeningAdd'])->name('rekening.add');
-    Route::post('/rekening/update', [KeuanganController::class, 'rekeningUpdate'])->name('rekening.update');
-    Route::delete('/rekening/hapus/{id}', [KeuanganController::class, 'rekeningDelete'])->name('rekening.delete');
-    Route::get('/rekening/default/{id}', [KeuanganController::class, 'rekeningDefault'])->name('default.rekening');
-    Route::get('/rekening/{id_rekening}', [HistoryController::class, 'rekeningHistory'])->name('rekening.history');
-    // ------------------------------------------------
-    // Route Perusahaan
-    // ------------------------------------------------
-    Route::get('/create/perusahaan/auth', [PerusahaanController::class, 'index'])->middleware('check.auth.perusahaan')->name('perusahaan.index');
-    Route::post('/create/perusahaan', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-    Route::get('/setelan', [PerusahaanController::class, 'PerusahaanSetting'])->name('perusahaan.setting');
+        // ------------------------------------------------
+        // Route Perusahaan
+        // ------------------------------------------------
+        Route::post('/perusahaan/upload-logo', [PerusahaanController::class, 'uploadLogo'])->name('perusahaan.update.logo');
+        Route::post('/perusahaan/update-profil', [PerusahaanController::class, 'updateProfil'])->name('perusahaan.update.profil');
+        Route::post('/perusahaan/update-legalitas', [PerusahaanController::class, 'updateLegalitas'])->name('perusahaan.update.legalitas');
+        Route::get('/perusahaan/hapus-legalitas/{id}', [PerusahaanController::class, 'HapusLegalitas'])->name('perusahaan.hapus.legalitas');
+        Route::post('/perusahaan/update-stamp', [PerusahaanController::class, 'updateStamp'])->name('perusahaan.update.stamp');
+    });
 
-    Route::post('/perusahaan/upload-logo', [PerusahaanController::class, 'uploadLogo'])->name('perusahaan.update.logo');
-    Route::post('/perusahaan/update-profil', [PerusahaanController::class, 'updateProfil'])->name('perusahaan.update.profil');
-    Route::post('/perusahaan/update-legalitas', [PerusahaanController::class, 'updateLegalitas'])->name('perusahaan.update.legalitas');
-    Route::get('/perusahaan/hapus-legalitas/{id}', [PerusahaanController::class, 'HapusLegalitas'])->name('perusahaan.hapus.legalitas');
-    Route::post('/perusahaan/update-stamp', [PerusahaanController::class, 'updateStamp'])->name('perusahaan.update.stamp');
-
-    // ------------------------------------------------
-    // Route Exsport PDF
-    // ------------------------------------------------
-
+        // ------------------------------------------------
+        // Route Perusahaan
+        // ------------------------------------------------
+        Route::get('/create/perusahaan/auth', [PerusahaanController::class, 'index'])->middleware('check.auth.perusahaan')->name('perusahaan.index');
+        Route::post('/create/perusahaan', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+        Route::get('/setelan', [PerusahaanController::class, 'PerusahaanSetting'])->name('perusahaan.setting');
 });
 
 

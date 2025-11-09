@@ -136,13 +136,50 @@ class LaporanController extends Controller
     }
     public function laporanlabarugipdf(Request $request){
 
+        // Ambil parameter filter
+        $periode = $request->query('periode');
         $bulan = $request->query('bulan', date('m'));
         $tahun = $request->query('tahun', date('Y'));
+        $tahun_bulan = $request->query('tahun_bulan');
+        $tahun_tahun = $request->query('tahun_tahun');
+        $tanggal_awal = $request->query('tanggal_awal');
+        $tanggal_akhir = $request->query('tanggal_akhir');
+
+        // Jika ada filter periode bulanan, gunakan bulan dan tahun_bulan
+        if ($periode === 'bulanan' && $tahun_bulan) {
+            $tahun = (int) $tahun_bulan;
+        }
+
+        // Jika ada filter periode tahunan, gunakan tahun_tahun dan set bulan ke null
+        if ($periode === 'tahunan' && $tahun_tahun) {
+            $tahun = (int) $tahun_tahun;
+            $bulan = null;
+        }
+
         // Ambil semua transaksi bulan ini beserta kedua akun
-        $items = KeuanganTable::with(['akun.kategori', 'akunSecond.kategori'])
-            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
-            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-            ->get();
+        $query = KeuanganTable::with(['akun.kategori', 'akunSecond.kategori'])
+            ->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') IS NOT NULL");
+
+        // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
+        if ($tanggal_awal && $tanggal_akhir) {
+            try {
+                $fromDate = \Carbon\Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+            } catch (\Exception $e) {
+                // Abaikan jika format salah
+            }
+        } else {
+            // Filter berdasarkan tahun
+            $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            // Filter berdasarkan bulan jika ada
+            if ($bulan) {
+                $query->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
+            }
+        }
+
+        $items = $query->get();
 
         // Inisialisasi array Laba Rugi
         $labaRugi = [
@@ -236,6 +273,9 @@ class LaporanController extends Controller
             'tahun'       => $tahun,
             'perusahaan'  => $perusahaan,
             'logo'        => $logo,
+            'periode'     => $periode,
+            'tanggal_awal' => $tanggal_awal,
+            'tanggal_akhir' => $tanggal_akhir,
         ])->setPaper('A4', 'portrait');
 
         return $pdf->stream("LAPORAN-LABA-RUGI-{$bulan}-{$tahun}.pdf");
@@ -258,5 +298,6 @@ class LaporanController extends Controller
 
         return $pdf->stream("LAPORAN-NERACA-{$bulan}-{$tahun}.pdf");
     }
+    
 
 }
