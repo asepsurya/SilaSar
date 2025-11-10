@@ -21,7 +21,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach ($logs as $index => $log)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50">a
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $index + 1 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $log->kode_produk }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $log->produk->nama_produk ?? 'N/A' }}</td>
