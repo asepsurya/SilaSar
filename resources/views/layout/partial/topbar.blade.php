@@ -149,66 +149,90 @@
                     <li>
                         <div x-data="{ open: false }">
                             <!-- Trigger -->
-                            <a href="javascript:;" class="flex items-center" @click="open = true">
+                            <a href="javascript:;" class="flex items-center" @click="window.dispatchEvent(new CustomEvent('pass'))">
                                 <x-icon name="gear" class="text-gray-600" />
                                 Ubah Password
                             </a>
-
-                            <!-- Modal -->
-                            <div x-show="open" x-transition @click.self="open = false"
-                                class="fixed inset-0 flex items-center justify-center"
-                                style="z-index: 2147483647; background-color: rgba(0, 0, 0, 0.5); position: fixed;">
-
-                                <!-- Modal Box -->
-                                <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md z-[10000]">
-                                    <h2 class="text-xl font-semibold mb-4">Ubah Password</h2>
-                                    <form x-data="{ showPassword: false }" action="{{ route('passChange') }}" method="POST">
-                                        @csrf
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700 font-medium mb-2">Password Baru</label>
-                                            <div class="relative">
-                                                <input type="hidden" name="id" value="{{ auth()->user()->id }}">
-                                                <input :type="showPassword ? 'text' : 'password'"  placeholder="Masukan Password Baru" name="password"
-                                                    class="w-full border px-3 py-2 rounded pr-10 focus:outline-none focus:ring focus:border-blue-300" />
-
-                                                    <button type="button" @click="showPassword = !showPassword"
-                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-                                                    tabindex="-1">
-                                                    <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                        stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.07.238-.152.47-.244.696M15 12a3 3 0 01-6 0m9.75 5.25L4.5 4.5" />
-                                                    </svg>
-
-                                                    <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                                        stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.24-3.67M9.88 9.88a3 3 0 104.24 4.24M6.12 6.12l11.76 11.76" />
+                             <div x-data="{ open: false }" @pass.window="open = true" @close-modal.window="open = false" s>
+                                <!-- Overlay -->
+                                <div
+                                    class="fixed inset-0 bg-black/60 dark:bg-white/10hidden overflow-y-auto" style="z-index: 2147483647;"
+                                    :class="{ 'block': open, 'hidden': !open }">
+                                    <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
+                                        <!-- Modal Box -->
+                                        <div
+                                            x-show="open"
+                                            x-transition
+                                            x-transition.duration.300
+                                            class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8"
+                                            style="display: none;"
+                                        >
+                                            <!-- Header -->
+                                            <div class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
+                                                <h5 class="font-semibold text-lg">Ubah Password</h5>
+                                                <button
+                                                    type="button"
+                                                    class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
+                                                    @click="open = false"
+                                                >
+                                                    <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
+                                                        <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
                                                     </svg>
                                                 </button>
-
                                             </div>
-                                             <small>*) Pastikan Password yang anda masukan sudah benar.</small>
+                                            <div class="p-5">
+                                               <form x-data="{ showPassword: false }" action="{{ route('passChange') }}" method="POST">
+                                                    @csrf
+                                                    <div class="mb-4">
+                                                        <label class="block  font-medium mb-2">Password Baru</label>
+                                                        <div class="relative">
+                                                            <input type="hidden" name="id" value="{{ auth()->user()->id }}">
+                                                            <input :type="showPassword ? 'text' : 'password'"  placeholder="Masukan Password Baru" name="password"
+                                                                class="w-full border dark:bg-black px-3 py-2 rounded pr-10 focus:outline-none focus:ring focus:border-blue-300" />
+
+                                                                <button type="button" @click="showPassword = !showPassword"
+                                                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+                                                                tabindex="-1">
+                                                                <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg"
+                                                                    class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.07.238-.152.47-.244.696M15 12a3 3 0 01-6 0m9.75 5.25L4.5 4.5" />
+                                                                </svg>
+
+                                                                <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg"
+                                                                    class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 012.24-3.67M9.88 9.88a3 3 0 104.24 4.24M6.12 6.12l11.76 11.76" />
+                                                                </svg>
+                                                            </button>
+
+                                                        </div>
+                                                        <small>*) Pastikan Password yang anda masukan sudah benar.</small>
+                                                    </div>
+                                                    <div class="flex justify-end space-x-2">
+                                                        <button type="button" @click="open = false"
+                                                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                            Batal
+                                                        </button>
+                                                        <button type="submit"
+                                                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                            Simpan
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
-                                        <div class="flex justify-end space-x-2">
-                                            <button type="button" @click="open = false"
-                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                Batal
-                                            </button>
-                                            <button type="submit"
-                                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                                Simpan
-                                            </button>
-                                        </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
+                        
                         </div>
 
 

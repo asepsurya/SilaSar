@@ -192,7 +192,7 @@ class AkunSeeder extends Seeder
         foreach ($data as $akun) {
             $kategori = KategoriAkun::where('nama_kategori', $akun[2])->first();
 
-            AkunTable::firstOrCreate([
+            AkunTable::updateOrCreate([
                 'kode_akun'   => $akun[0],
             ],[
                 'nama_akun'   => $akun[1],

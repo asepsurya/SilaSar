@@ -167,9 +167,10 @@ class KeuanganController extends Controller
     }
 
     public function akunDelete($id){
+       
         $akun = AkunTable::findOrFail($id);
         $akun->delete();
-
+        
         activity('ikm')
             ->performedOn($akun)
             ->causedBy(auth()->user())

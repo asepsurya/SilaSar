@@ -93,7 +93,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/management/stok/delete/{id}', [ProdukController::class, 'manajemenStokDelete'])->name('manajemenStok.delete');
         Route::get('/management/stok/transaksi/delete/{id}', [ProdukController::class, 'manajemenStokDeleteItem'])->name('manajemenStok.deleteItem');
         Route::get('/produk/stok/logs', [ProdukController::class, 'logstok'])->name('manajemenStok.logstok');
-        Route::get('/produk/log-detail/{id}', [ProdukController::class, 'showLogDetail'])->name('produk.log.detail');
+        Route::post('/produk/log-detail', [ProdukController::class, 'logstok'])->name('produk.log.detail');
 
         // ------------------------------------------------
         // Route  Transaksi Induk Mitra
@@ -161,7 +161,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/data_akun', [KeuanganHarianController::class, 'IndexAkun'])->name('index.akun.harian');
         Route::post('/single/akun/create', [KeuanganHarianController::class, 'akunCreate'])->name('akun.create.harian');
         Route::post('/single/akun/update', [KeuanganHarianController::class, 'akunUpdate'])->name('akun.update.harian');
-        Route::get('/single/akun/delete/{id}', [KeuanganHarianController::class, 'akunDelete'])->name('akun.delete.harian');
+        Route::get('/single/akun/delete/harian/{id}', [KeuanganHarianController::class, 'akunDelete'])->name('akun.delete.harian');
         Route::get('/data_rekening', [KeuanganHarianController::class, 'rekeningIndex'])->name('akun.rekening.harian');
         Route::post('/single/rekening', [KeuanganHarianController::class, 'rekeningAdd'])->name('rekening.add.harian');
         Route::post('/single/rekening/update', [KeuanganHarianController::class, 'rekeningUpdate'])->name('rekening.update.harian');

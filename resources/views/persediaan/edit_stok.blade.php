@@ -566,7 +566,7 @@
             <div class="grid grid-cols-2 gap-3 text-sm">
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Jumlah</label>
-                    <input type="number" value="${jumlah}" 
+                    <input type="text" value="${jumlah}" 
                         class="jumlahMobile form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg"
                         data-index="${i}">
                 </div>

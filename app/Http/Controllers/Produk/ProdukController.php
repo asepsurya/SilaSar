@@ -7,10 +7,12 @@ use App\Models\Produk;
 use App\Models\Satuan;
 use App\Models\StokLog;
 use App\Models\StokItem;
+use App\Models\Penawaran;
 use Illuminate\Http\Request;
 use App\Models\StokTransaksi;
 use Illuminate\Support\Carbon;
 use App\Models\CategoryProduct;
+use App\Models\TransaksiProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Activity;
@@ -20,13 +22,17 @@ class ProdukController extends Controller
     public function index()
     {
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        $produk = Produk::where('auth', auth()->user()->id)
+       $produk = Produk::where('auth', auth()->user()->id)
+            ->when(request('kategori'), function ($query) {
+                $query->where('kategori', request('kategori'));
+            })
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->simplePaginate(25);
+        $kategori = CategoryProduct::all();
         return view('produk.index',[
             'activeMenu' => 'produk',
             'active' => 'produk',
-        ],compact('produk','logs'));
+        ],compact('produk','logs','kategori'));
     }
     public function category()
     {
@@ -125,6 +131,22 @@ class ProdukController extends Controller
             'persediaan_id'=> $request->persediaan_id,
             'beban_non_inventory_id'=> $request->beban_non_inventory_id,
         ]);
+          if (!$produk) {
+            return back()->with("error", "Produk gagal disimpan!");
+        }
+          StokLog::updateOrCreate(
+                [
+                    'kode_produk' => $produk->kode_produk,
+                    'sumber' => 'manajemen_stok',
+                    'referensi' => '0',
+                    'auth' => auth()->id(),
+                ],
+                [
+                    'tipe' => 'masuk',
+                    'jumlah' => $request->stok, // Update dengan jumlah akhir, bukan selisih
+                    'keterangan' => 'stok awal produk saat penambahan produk'
+                ]
+            );
         activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Menambahkan Produk Baru '.$request->nama_produk);
         return back()->with("success", "Data has been saved successfully!");
     }
@@ -197,18 +219,46 @@ class ProdukController extends Controller
 
     public function deleteaction($id)
     {
-        $produk = Produk::findOrFail($id);
-        activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Menghapus Produk '.$produk->nama_produk);
+            $produk = Produk::findOrFail($id);
+            // Cek di Penawaran dan TransaksiProduct
+            $penawaranTerkait = Penawaran::where('kode_produk', $produk->kode_produk)->get();
+            $transaksiTerkait = TransaksiProduct::where('kode_produk', $produk->kode_produk)->get();
 
-        // Hapus gambar produk jika ada
-        if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
-            Storage::disk('public')->delete($produk->gambar);
+            if ($penawaranTerkait->count() > 0 || $transaksiTerkait->count() > 0) {
+                // Simpan ke session untuk ditampilkan di modal
+                return redirect()->route('index.produk')->with([
+                    'produk_error' => [
+                        'nama' => $produk->nama_produk,
+                        'penawaran' => $penawaranTerkait->map(function ($p) {
+                            return [
+                                'kode' => $p->kode_mitra,
+                                'tanggal' => $p->created_at->format('d M Y'),
+                            ];
+                        }),
+                        'transaksi' => $transaksiTerkait->map(function ($t) {
+                            return [
+                                'kode' => $t->kode_transaksi,
+                                'tanggal' => $t->created_at->format('d M Y'),
+                            ];
+                        }),
+                    ]
+                ]);
+            }
+
+            // Jika aman untuk dihapus
+            activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Menghapus Produk ' . $produk->nama_produk);
+
+            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
+                Storage::disk('public')->delete($produk->gambar);
+            }
+
+            $produk->delete();
+
+            return redirect()->route('index.produk')->with('success', 'Produk berhasil dihapus!');
         }
 
-        $produk->delete();
-        return redirect()->route('index.produk')->with("success", "Data has been deleted successfully!");
-    }
-      public function list()
+
+    public function list()
     {
         return response()->json(CategoryProduct::orderBy('id', 'desc')->get());
     }
@@ -490,7 +540,7 @@ class ProdukController extends Controller
     }
     public function manajemenStokDelete($id){
      $stok = StokItem::find($id);
-
+        
         if ($stok) {
             $produk = Produk::where('kode_produk', $stok->kode_produk)->first();
 
@@ -506,7 +556,7 @@ class ProdukController extends Controller
 
             // hapus item stok
             $stok->delete();
-
+          
             return back()->with("success", "Data Berhasil dihapus");
         }
 
@@ -514,7 +564,8 @@ class ProdukController extends Controller
     }
     public function manajemenStokDeleteItem($id){
         $trans = StokTransaksi::with('items')->find($id);
-
+  
+        StokLog::where('referensi', $trans->no_transaksi)->delete();
         if ($trans) {
             foreach ($trans->items as $stok) {
                 $produk = Produk::where('kode_produk', $stok->kode_produk)->first();
@@ -539,69 +590,57 @@ class ProdukController extends Controller
         $activityLogs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
 
         // Query untuk stock logs dengan filter
-        $query = StokLog::with('produk')
-            ->where('auth', auth()->user()->id)
-            ->orderBy('created_at', 'desc');
+        $produk = StokLog::with('produk')
+            ->where('auth', auth()->user()->id);
 
-        // Filter berdasarkan produk
-        if ($request->filled('produk')) {
-            $query->where('kode_produk', $request->produk);
+        // Filter produk
+        if ($request->produk_id) {
+            $produk->where('kode_produk', $request->produk_id);
         }
 
-        // Filter berdasarkan tipe (masuk/keluar)
-        if ($request->filled('tipe')) {
-            $query->where('tipe', $request->tipe);
+        // Filter berdasarkan periode waktu
+       if ($request->periode) {
+            switch ($request->periode) {
+                case 'bulanan':
+                    if ($request->bulan && $request->tahun_bulan) {
+                        $produk->whereMonth('created_at', $request->bulan)
+                            ->whereYear('created_at', $request->tahun_bulan);
+                    }
+                    break;
+
+                case 'tahunan':
+                    if ($request->tahun_tahun) {
+                        $produk->whereYear('created_at', $request->tahun_tahun);
+                    }
+                    break;
+
+                case 'rentang':
+                    if ($request->tanggal_awal && $request->tanggal_akhir) {
+                        $tanggal_awal = Carbon::parse($request->tanggal_awal)->startOfDay()->format('Y-m-d H:i:s');
+                        $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay()->format('Y-m-d H:i:s');
+                        $produk->whereBetween('created_at', [$tanggal_awal, $tanggal_akhir]);
+                    }
+                    break;
+            }
+        } else {
+            // Default: filter data hari ini
+            $hariIni = Carbon::today();
+            $produk->whereBetween('created_at', [
+                $hariIni->copy()->startOfDay()->format('Y-m-d H:i:s'),
+                $hariIni->copy()->endOfDay()->format('Y-m-d H:i:s')
+            ]);
         }
 
-        // Filter berdasarkan tanggal
-        if ($request->filled('dari')) {
-            $query->whereDate('created_at', '>=', $request->dari);
-        }
-        if ($request->filled('sampai')) {
-            $query->whereDate('created_at', '<=', $request->sampai);
-        }
 
-        // Paginate results
-        $logs = $query->paginate(25)->appends($request->query());
+        $produk->orderBy('created_at', 'desc');
 
-        // Daftar produk untuk filter dropdown
-        $produkList = Produk::where('auth', auth()->user()->id)
-            ->select('kode_produk', 'nama_produk')
-            ->orderBy('nama_produk')
-            ->get();
-
-        // Hitung statistik
-        $statsQuery = StokLog::where('stok_logs.auth', auth()->user()->id);
-
-        // Terapkan filter yang sama untuk statistik
-        if ($request->filled('produk')) {
-            $statsQuery->where('stok_logs.kode_produk', $request->produk);
-        }
-        if ($request->filled('tipe')) {
-            $statsQuery->where('stok_logs.tipe', $request->tipe);
-        }
-        if ($request->filled('dari')) {
-            $statsQuery->whereDate('stok_logs.created_at', '>=', $request->dari);
-        }
-        if ($request->filled('sampai')) {
-            $statsQuery->whereDate('stok_logs.created_at', '<=', $request->sampai);
-        }
-
-        $stats = [
-            'total_masuk' => (clone $statsQuery)->where('stok_logs.tipe', 'masuk')->sum('stok_logs.jumlah'),
-            'total_keluar' => (clone $statsQuery)->where('stok_logs.tipe', 'keluar')->sum('stok_logs.jumlah'),
-            'total_item' => $statsQuery->count(),
-            'total_nilai' => $statsQuery->join('produks', 'stok_logs.kode_produk', '=', 'produks.kode_produk')
-                ->selectRaw('SUM(stok_logs.jumlah * produks.harga) as total')
-                ->value('total') ?? 0,
-        ];
-
+        $produkList = Produk::where('auth', auth()->user()->id)->get();
         return view('persediaan.logstok', [
             'activeMenu' => 'produk',
-            'active' => 'persediaan',
-            'logs' => $logs,
+            'active' => 'produk',
+            'logs' => $produk->get(),
             'produkList' => $produkList,
-            'stats' => $stats,
+            'produk_id' => $request->produk_id ?? '',
             'activityLogs' => $activityLogs,
         ]);
     }

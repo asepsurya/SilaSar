@@ -43,7 +43,7 @@
             <div class="w-full lg:w-1/2 space-y-3">
                 <div class="mb-3">
                     <label class="block mb-1 ">No Transaksi</label>
-                    <input type="text" value="{{ $noTransaksi }}" name="no_transaksi" class="form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg" readonly>
+                    <input type="text" value="{{ $noTransaksi }}" name="no_transaksi" class="form-input py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg" >
                 </div>
                 <div class="mb-3">
                     <label class="block mb-1 ">Tanggal</label>

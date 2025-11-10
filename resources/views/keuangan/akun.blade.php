@@ -369,10 +369,18 @@
                                                                         </select>
                                                                         <input type="hidden" name="jenis_akun" class="jenis" placeholder="Jenis akan muncul di sini" value="{{ $data->jenis_akun }}">
                                                                     </div>
-                                                                    <button type="submit"
+                                                                    <div class="flex flex-row gap-2">
+                                                                          <button type="submit"
                                                                         class=" w-full px-2 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
                                                                         Simpan
                                                                     </button>
+                                                                    @if(auth()->user()->role == 'admin' || auth()->user()->role == 'superadmin')
+                                                                        <a href="{{ route('akun.delete', $data->id) }}" 
+                                                                            class=" w-full px-2 py-2 text-sm text-center bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                                                                            Hapus Akun
+                                                                        </a>
+                                                                    @endif
+                                                                    </div>  
                                                                 </form>
                                                             
                                                         </div>
