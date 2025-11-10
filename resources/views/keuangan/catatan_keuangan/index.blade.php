@@ -62,7 +62,7 @@
 
     </style>
    <div class="flex items-center justify-between mb-4">
-        <p class="text-lg font-bold">Pengelola Keuangan</p>
+        <p class="text-lg font-bold">Catatan Keuangan</p>
        <a href="{{ route('keuangan.pdf.harian', request()->query()) }}" target="_blank">
         <button class="px-2 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2">
             PDF
@@ -278,7 +278,7 @@
             </div>
         </div>
     @endif
-    <div class="p-2 bg-lightwhite dark:bg-white/5 rounded-lg flex gap-2 justify-between mb-2 " >
+    <div class="p-2 rounded-lg flex gap-2 justify-between mb-2 " >
         <div class="flex items-center gap-4">
             <div class="flex gap-2 items-center">
                 <button
@@ -328,7 +328,7 @@
                                     <div x-data="{ tab: 'pengeluaran' }">
                                         <div class="flex mb-4">
                                             <button
-                                                :class="tab === 'pengeluaran' ? 'bg-purple-600 text-white' :
+                                                :class="tab === 'pengeluaran' ? 'bg-red-600 text-white' :
                                                     'bg-gray-100 text-black'"
                                                 class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-l-lg focus:outline-none transition-all duration-200 w-full"
                                                 @click="tab = 'pengeluaran'">
@@ -366,11 +366,11 @@
                                                             class="block text-xs text-black/40 dark:text-white/40 mb-1">Tanggal
                                                             <span style="color: red">*</span></label>
                                                         <input type="text" name="tanggal" class="form-input"
-                                                            id="tanggal">
+                                                            id="tanggal_keluar">
                                                         <!-- Pastikan flatpickr locale id sudah di-load -->
                                                         <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
                                                         <script>
-                                                            flatpickr("#tanggal", {
+                                                            flatpickr("#tanggal_keluar", {
                                                                 dateFormat: "d/m/Y", // Format yang diinginkan
                                                                 defaultDate: "today", // Menampilkan tanggal sekarang sebagai default
                                                                 locale: "id", // Menggunakan format lokal Indonesia (untuk bulan dan nama hari)
@@ -822,8 +822,8 @@
                         const filter = input.value.toLowerCase();
                         const trs = table.querySelectorAll('tbody tr');
                         trs.forEach(tr => {
-                            const text = tr.textContent.toLowerCase();
-                            tr.style.display = text.includes(filter) ? '' : 'none';
+                            const descriptions = Array.from(tr.querySelectorAll('.akun-nama')).map(el => el.textContent.toLowerCase()).join(' ');
+                            tr.style.display = descriptions.includes(filter) ? '' : 'none';
                         });
                     });
                 });
@@ -952,9 +952,6 @@
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
                 submitBtn.classList.remove('hover:bg-blue-700');
-
-                // Biarkan form lanjut submit (hapus preventDefault jika pakai action URL)
-                // e.preventDefault(); // hanya jika kamu tidak ingin submit form secara default
             });
         </script>
         <script>
@@ -969,9 +966,6 @@
                 submitBtn.disabled = true;
                 submitBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
                 submitBtn.classList.remove('hover:bg-blue-700');
-
-                // Biarkan form lanjut submit (hapus preventDefault jika pakai action URL)
-                // e.preventDefault(); // hanya jika kamu tidak ingin submit form secara default
             });
         </script>
         <script>
@@ -1379,4 +1373,5 @@
 
         </div>
     </div>
+</div>
 @endsection

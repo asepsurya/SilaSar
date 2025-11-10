@@ -25,7 +25,7 @@ class ProdukController extends Controller
             ->get();
         return view('produk.index',[
             'activeMenu' => 'produk',
-            'active' => 'produk', 
+            'active' => 'produk',
         ],compact('produk','logs'));
     }
     public function category()
@@ -47,7 +47,7 @@ class ProdukController extends Controller
 
         // Create the category (assuming you have a Category model)
         $ikm = CategoryProduct::create($request->all());
-        activity('ikm')->performedOn($ikm)->causedBy(auth()->user())->log('Menambahkan Kategori Baru'); 
+        activity('ikm')->performedOn($ikm)->causedBy(auth()->user())->log('Menambahkan Kategori Baru');
          return back()->with("success", "Data has been saved successfully!");
     }
     public function updateCategory(Request $request)
@@ -87,7 +87,7 @@ class ProdukController extends Controller
 
     public function store(Request $request)
     {
-       
+
         $request->validate([
             'nama_produk' => 'required|string|max:255',
             'harga' => 'required|numeric',
@@ -141,7 +141,7 @@ class ProdukController extends Controller
         ], compact('produk', 'category','logs','id','akun','satuans'));
     }
 
-    
+
     public function updateaction(Request $request)
     {
         $request->validate([
@@ -154,7 +154,7 @@ class ProdukController extends Controller
             'kategori' => 'required|string',
             'gambar' => 'nullable|image|max:2048',
         ]);
-    
+
         // Cari data produk yang akan diupdate
         $produk = Produk::findOrFail($request->id);
         activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Mengubah Produk '.$request->nama_produk);
@@ -164,11 +164,11 @@ class ProdukController extends Controller
             if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
                 Storage::disk('public')->delete($produk->gambar);
             }
-    
+
             // Simpan gambar baru
             $produk->gambar = $request->file('gambar')->store('produk', 'public');
         }
-    
+
         // Update data produk
         $produk->update([
             'kode_produk' => $request->kode_produk ?? $produk->kode_produk,
@@ -189,9 +189,9 @@ class ProdukController extends Controller
             'pendapatan_lainnya_id' => $request->pendapatan_lainnya_id,
             'persediaan_id'=> $request->persediaan_id,
             'beban_non_inventory_id'=> $request->beban_non_inventory_id,
-           
+
         ]);
-        
+
         return back()->with("success", "Data has been updated successfully!");
     }
 
@@ -199,12 +199,12 @@ class ProdukController extends Controller
     {
         $produk = Produk::findOrFail($id);
         activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Menghapus Produk '.$produk->nama_produk);
-        
+
         // Hapus gambar produk jika ada
         if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
             Storage::disk('public')->delete($produk->gambar);
         }
-        
+
         $produk->delete();
         return redirect()->route('index.produk')->with("success", "Data has been deleted successfully!");
     }
@@ -244,7 +244,7 @@ class ProdukController extends Controller
             'active' => 'produk',
         ],compact('logs','produk','noTransaksi','satuans'));
     }
-    
+
     private function unformatRupiah($value)
     {
         return (int) preg_replace('/[^\d]/', '', $value);
@@ -339,7 +339,69 @@ class ProdukController extends Controller
         $produk->harga_jual = $harga;
         $produk->save();
 
-        // 🔹 Log aktivitas
+        // 🔹 Log aktivitas stok masuk saja (keluar akan dihandle di transaksi)
+        if ($selisih > 0) {
+            // Stok masuk - update atau create log
+            StokLog::updateOrCreate(
+                [
+                    'kode_produk' => $kodeProduk,
+                    'sumber' => 'manajemen_stok',
+                    'referensi' => $transaksi->no_transaksi,
+                    'auth' => auth()->id(),
+                ],
+                [
+                    'tipe' => 'masuk',
+                    'jumlah' => $jumlahBaru, // Update dengan jumlah akhir, bukan selisih
+                    'keterangan' => 'Penambahan stok melalui manajemen stok'
+                ]
+            );
+        } elseif ($selisih < 0) {
+            // Jika stok berkurang, update log yang ada dengan jumlah baru
+            $existingLog = StokLog::where([
+                'kode_produk' => $kodeProduk,
+                'sumber' => 'manajemen_stok',
+                'referensi' => $transaksi->no_transaksi,
+                'auth' => auth()->id(),
+            ])->first();
+
+            if ($existingLog) {
+                $existingLog->update([
+                    'jumlah' => $jumlahBaru, // Update dengan jumlah akhir
+                    'keterangan' => 'Update stok melalui manajemen stok'
+                ]);
+            }
+        } else {
+            // Jika tidak ada perubahan stok, pastikan log tetap akurat
+            $existingLog = StokLog::where([
+                'kode_produk' => $kodeProduk,
+                'sumber' => 'manajemen_stok',
+                'referensi' => $transaksi->no_transaksi,
+                'auth' => auth()->id(),
+            ])->first();
+
+            if ($existingLog) {
+                $existingLog->update([
+                    'jumlah' => $jumlahBaru, // Update dengan jumlah akhir
+                    'keterangan' => 'Update data stok melalui manajemen stok'
+                ]);
+            }
+        }
+
+        // Selalu update keterangan pada log yang ada untuk menunjukkan update terakhir
+        $logToUpdate = StokLog::where([
+            'kode_produk' => $kodeProduk,
+            'sumber' => 'manajemen_stok',
+            'referensi' => $transaksi->no_transaksi,
+            'auth' => auth()->id(),
+        ])->first();
+
+        if ($logToUpdate) {
+            $logToUpdate->update([
+                'keterangan' => 'Update stok melalui manajemen stok - ' . now()->format('d/m/Y H:i')
+            ]);
+        }
+
+        // 🔹 Log aktivitas umum
         activity('ikm')
             ->causedBy(auth()->user())
             ->log("Update stok {$produk->nama_produk}: dari {$jumlahLama} → {$jumlahBaru} (selisih {$selisih})");
@@ -356,6 +418,7 @@ class ProdukController extends Controller
         if ($produk) {
             $produk->stok -= $item->jumlah;
             $produk->save();
+            // Stok keluar akan dilog di transaksi, bukan di sini
         }
 
         // Hapus item dari transaksi
@@ -370,14 +433,14 @@ class ProdukController extends Controller
         ->route('manajemenStok.update', $transaksi->id)
         ->with('success', 'Transaksi berhasil disimpan atau diperbarui!');
 
-         
+
 
         }
 
     public function manajemenStokIndex(){
         $stok = StokTransaksi::where('auth',auth()->id())->get();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        
+
         return view('persediaan.index',[
               'activeMenu' => 'persediaan',
             'active' => 'persediaan',
@@ -459,6 +522,7 @@ class ProdukController extends Controller
                 if ($produk) {
                     $produk->stok = max(0, $produk->stok - $stok->jumlah);
                     $produk->save();
+                    // Stok keluar akan dilog di transaksi, bukan di sini
                 }
 
                 $stok->delete();
@@ -470,4 +534,77 @@ class ProdukController extends Controller
 
         return back()->with("error", "Transaksi stok tidak ditemukan!");
     }
+    public function logstok(Request $request){
+        // Activity logs untuk sidebar
+        $activityLogs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+
+        // Query untuk stock logs dengan filter
+        $query = StokLog::with('produk')
+            ->where('auth', auth()->user()->id)
+            ->orderBy('created_at', 'desc');
+
+        // Filter berdasarkan produk
+        if ($request->filled('produk')) {
+            $query->where('kode_produk', $request->produk);
+        }
+
+        // Filter berdasarkan tipe (masuk/keluar)
+        if ($request->filled('tipe')) {
+            $query->where('tipe', $request->tipe);
+        }
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('dari')) {
+            $query->whereDate('created_at', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $query->whereDate('created_at', '<=', $request->sampai);
+        }
+
+        // Paginate results
+        $logs = $query->paginate(25)->appends($request->query());
+
+        // Daftar produk untuk filter dropdown
+        $produkList = Produk::where('auth', auth()->user()->id)
+            ->select('kode_produk', 'nama_produk')
+            ->orderBy('nama_produk')
+            ->get();
+
+        // Hitung statistik
+        $statsQuery = StokLog::where('stok_logs.auth', auth()->user()->id);
+
+        // Terapkan filter yang sama untuk statistik
+        if ($request->filled('produk')) {
+            $statsQuery->where('stok_logs.kode_produk', $request->produk);
+        }
+        if ($request->filled('tipe')) {
+            $statsQuery->where('stok_logs.tipe', $request->tipe);
+        }
+        if ($request->filled('dari')) {
+            $statsQuery->whereDate('stok_logs.created_at', '>=', $request->dari);
+        }
+        if ($request->filled('sampai')) {
+            $statsQuery->whereDate('stok_logs.created_at', '<=', $request->sampai);
+        }
+
+        $stats = [
+            'total_masuk' => (clone $statsQuery)->where('stok_logs.tipe', 'masuk')->sum('stok_logs.jumlah'),
+            'total_keluar' => (clone $statsQuery)->where('stok_logs.tipe', 'keluar')->sum('stok_logs.jumlah'),
+            'total_item' => $statsQuery->count(),
+            'total_nilai' => $statsQuery->join('produks', 'stok_logs.kode_produk', '=', 'produks.kode_produk')
+                ->selectRaw('SUM(stok_logs.jumlah * produks.harga) as total')
+                ->value('total') ?? 0,
+        ];
+
+        return view('persediaan.logstok', [
+            'activeMenu' => 'produk',
+            'active' => 'persediaan',
+            'logs' => $logs,
+            'produkList' => $produkList,
+            'stats' => $stats,
+            'activityLogs' => $activityLogs,
+        ]);
+    }
+
+
 }

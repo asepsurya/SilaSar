@@ -48,8 +48,10 @@ class AuthController extends Controller
       if ($user->hasRole('admin') || $user->hasRole('superadmin')) {
         // Jika role adalah admin atau superadmin, arahkan ke dashboard keuangan
         return redirect()->route('dashboard')->with('success', 'Berhasil Login, Selamat Datang');
+      }else{
+        return redirect()->route('index.keuangan.harian')->with('success', 'Berhasil Login, Selamat Datang');
       }
-      return redirect()->route('index.keuangan')->with('success', 'Berhasil Login, Selamat Datang');
+
     }
 
     // Login gagal

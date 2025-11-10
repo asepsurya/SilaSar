@@ -23,7 +23,7 @@
                     @endphp
 
                     <li>
-                        <a href="{{ url('/dashboard') }}"
+                        <a href="{{ url('/') }}"
                             class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">
                             Home
                         </a>
@@ -45,7 +45,7 @@
                                 $label = ucwords(str_replace('-', ' ', $segment));
                             }
 
-                            $isLinkable = !$isLast && $segment !== ['update', 'detail'];
+                            $isLinkable = !$isLast && !in_array($segment, ['update', 'detail']);
                         @endphp
 
                         <li class="flex items-center space-x-1">
@@ -86,7 +86,7 @@
                     <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-black dark:bg-white"></span>
                 </span>
             </button>
-            
+
            @if (auth()->user()->role === 'gold')
                <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightyellow text-black">Gold</div>
             @elseif (auth()->user()->role === 'platinum')
@@ -97,7 +97,7 @@
                <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightgreen-100 text-black">Superadmin</div>
             @endif
 
-           
+
             <div class="profile" x-data="dropdown" @click.outside="open = false">
                 <button type="button" class="flex items-center gap-1.5 xl:gap-0" @click="toggle()">
                     <img class="h-7 w-7 rounded-full xl:mr-2"
@@ -139,7 +139,7 @@
                     </li>
 
                     <li class="h-px bg-black/5 block my-1"></li>
-                    
+
                     <li>
                         <a href="{{ route('ikm.update', auth()->user()->ikm->id) }}" class="flex items-center">
                             <x-icon name="user-rounded" class="text-gray-600" />

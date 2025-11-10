@@ -82,7 +82,7 @@ date_default_timezone_set('Asia/Jakarta');
      </span>
    </div>
 <div class="flex items-center justify-between mb-6" x-data="{ showFilterModal: false, filterType: 'bulanan', selectedMonth: '{{ date('m') }}', selectedYear: '{{ date('Y') }}', startDate: '', endDate: '' }">
-    <h2 class="text-lg sm:text-xl font-bold ">Ringkasan Keuangan</h2>
+    <h2 class="text-lg sm:text-xl font-bold ">Catatan Keuangan</h2>
     <div class="flex items-center gap-2">
       <!-- Filter Bulanan -->
 
@@ -91,7 +91,7 @@ date_default_timezone_set('Asia/Jakarta');
             class="flex items-center gap-x-2 px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
             <span>Filter</span>
         </button>
-        <a href="{{ route('index.keuangan') }}"
+        <a href="{{ route('index.keuangan.harian') }}"
             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
             Lihat Transaksi
             <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -451,7 +451,6 @@ date_default_timezone_set('Asia/Jakarta');
         </p>
     </div>
 </div>
-
 <script>
 window.addEventListener('load', function () {
     const boundariesChartCanvas = document.getElementById('boundariesLineChart');
@@ -657,6 +656,4 @@ window.addEventListener('load', function () {
     }
 });
 </script>
-
-
 @endsection

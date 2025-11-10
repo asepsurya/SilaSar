@@ -17,8 +17,8 @@ class StokLog extends Model
         'keterangan'
     ];
 
-    public function produk()
+   public function produk()
     {
-        return $this->belongsTo(Produk::class);
+        return $this->belongsTo(Produk::class, 'kode_produk', 'kode_produk');
     }
 }

@@ -18,7 +18,7 @@
             + Tambah Mitra Baru
         </button>
     </div>
-       
+
     <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto" :class="open &amp;&amp; '!block'">
         <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
             <div x-show="open" x-transition="" x-transition.duration.300="" class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8" style="display: none;">
@@ -45,7 +45,7 @@
                                     <label class="block text-xs text-black/40 dark:text-white/40 mb-1">Nama Mitra</label>
                                     <input type="text"  placeholder="Masukan Nama Mitra " class="form-input" name="nama_mitra" id="nama_mitra" required>
                                 </div>
-                            </div>                     
+                            </div>
                             <!-- Tombol Submit -->
                             <div class="flex justify-end">
                               <button type="submit"
@@ -55,7 +55,7 @@
                             </div>
                           </form>
                     </div>
-                   
+
                 </div>
             </div>
         </div>
@@ -237,6 +237,15 @@
             </div>
         </div>
     @endforeach
+
+    @if($mitraData->isEmpty())
+    <div class="text-center py-8">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+        </svg>
+        <p class="text-gray-500 dark:text-gray-400">Tidak ada data mitra tersedia.</p>
+    </div>
+    @endif
 </div>
 
 

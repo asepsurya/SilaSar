@@ -16,7 +16,7 @@
                     @endphp
 
                     <li>
-                        <a href="{{ url('/dashboard') }}"
+                        <a href="{{ url('/') }}"
                             class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">
                             Home
                         </a>
@@ -44,10 +44,10 @@
                         <li class="flex items-center space-x-1">
                             <span class="text-black/40 dark:text-white/40">/</span>
                             @if ($isLinkable)
-                                <a href="{{ url($url) }}"
+                                <span
                                     class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">
                                     {{ $label }}
-                                </a>
+                            </span>
                             @else
                                 <span class="text-black dark:text-white">{{ $label }}</span>
                             @endif
@@ -130,7 +130,7 @@
 
                     <li class="h-px bg-black/5 block my-1"></li>
 
-                 
+
                     <li>
                         <a href="{{ route('ikm.update', auth()->user()->ikm->id) }}" class="flex items-center">
                             <x-icon name="user-rounded" class="" />
@@ -223,38 +223,33 @@
     </div>
 </div>
 <div class="hidden sm:block">
-    <style>
-        .border-bottom {
-            border-color: #0846c2; /* Tailwind's gray-200 */
-        }
-    </style>
 <ul class="flex space-x-2 border-b border-black/10 dark:border-white/10 pb-2 g-2 pl-5">
-    <a href="/keuangan">
-        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('keuangan')) border-b-2 border-bottom @endif">
+    <a href="{{ route('index.keuangan.harian') }}">
+        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('keuangan')) border-b-2 border-blue-600 @endif">
             <!-- Ikon Kiri -->
             <x-icon name="forms" class=" w-6 h-6 mr-2" />
             <span class="pl-2">Keuangan</span>
         </li>
     </a>
 
-    <a href="/akun">
-        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('akun')) border-b-2 border-bottom @endif">
+    <a href="{{ route('index.akun.harian') }}">
+        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('akun')) border-b-2 border-blue-600 @endif">
             <!-- Ikon Kiri -->
             <x-icon name="forms" class=" w-6 h-6 mr-2" />
             <span class="pl-2">Akun</span>
         </li>
     </a>
 
-    <a href="/rekening">
-        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('rekening')) border-b-2 border-bottom @endif">
+    <a href="{{ route('akun.rekening.harian') }}">
+        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('rekening')) border-b-2 border-blue-600 @endif">
             <!-- Ikon Kiri -->
             <x-icon name="layer" class=" w-6 h-6 mr-2" />
             <span class="pl-2">Rekening</span>
         </li>
     </a>
 
-    <a href="{{ route('dashboard.keuangan') }}">
-        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->routeIs('dashboard.keuangan')) border-b-2 border-bottom @endif" onclick="openTab(event, 'tab1')">
+    <a href="{{ route('dashboard.keuangan.harian') }}">
+        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->routeIs('dashboard.keuangan')) border-b-2 border-blue-600 @endif" onclick="openTab(event, 'tab1')">
             <!-- Ikon Kiri -->
             <x-icon name="dashboard" class=" w-6 h-6 mr-2" />
             <span class="pl-2">Grafik</span>
@@ -262,7 +257,7 @@
     </a>
 
     <a href="/setelan">
-        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('setelan')) border-b-2 border-bottom @endif">
+        <li class="tab-link cursor-pointer px-4 py-2  hover:text-blue-500 font-semibold flex items-center @if(request()->is('setelan')) border-b-2 border-blue-600 @endif">
             <!-- Ikon Kiri -->
             <x-icon name="gear" class=" w-6 h-6 mr-2" />
             <span class="pl-2">Perusahaan Saya</span>
@@ -272,11 +267,11 @@
 
 </div>
 
-<nav class="w-full fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-black  border-t border-gray-200 dark:border-white/10  md:hidden" >
-    <div class="relative flex justify-between">
+<nav class="w-full fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-black border-t border-gray-200 dark:border-white/10 md:hidden">
+    <div class="relative flex justify-between items-center">
 
         <!-- Keuangan -->
-        <a href="{{ route('index.keuangan') }}"
+        <a href="{{ route('index.keuangan.harian') }}"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'keuangan' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
             <svg class="w-5 h-5 mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                  stroke="currentColor">
@@ -287,21 +282,33 @@
         </a>
 
         <!-- Grafik -->
-        <a href="{{ route('dashboard.keuangan') }}"
+        <a href="{{ route('dashboard.keuangan.harian') }}"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'grafik' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
             <x-icon name="dashboard" class="w-5 h-5 mb-1" />
             <span class="text-[10px]">Grafik</span>
         </a>
 
-        <!-- Akun -->
-        <a href="/akun"
-           class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'akun' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
-            <x-icon name="forms" class="w-6 h-6 mb-1" />
-            <span class="text-[10px]">Akun</span>
-        </a>
+        @if (Request::is('keuangan') || Request::is('catatan/keuangan'))
+            <!-- Tombol + (Floating di tengah) -->
+            <div class="flex flex-col items-center justify-center w-full py-2 text-xs  ">
+                <button @click="$dispatch('transaksi')"
+                    class="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full  shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </div>
+        @else
+            <!-- Akun -->
+            <a href="{{ route('index.akun.harian') }}"
+               class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'akun' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
+                <x-icon name="forms" class="w-6 h-6 mb-1" />
+                <span class="text-[10px]">Akun</span>
+            </a>
+        @endif
 
         <!-- Rekening -->
-        <a href="/rekening"
+        <a href="{{ route('akun.rekening.harian') }}"
            class="flex flex-col items-center justify-center w-full py-2 text-xs {{ $active === 'rekening' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-white/60' }}">
             <x-icon name="layer" class="w-6 h-6 mb-1" />
             <span class="text-[10px]">Rekening</span>
@@ -313,22 +320,6 @@
             <x-icon name="user-1" class="w-6 h-6 mb-1" />
             <span class="text-[10px]">Usaha Saya</span>
         </a>
-
-        <!-- Tombol + (absolute, di atas) -->
-        @if(Request::is('keuangan'))
-        <a href="#"
-           @click.prevent="$dispatch('transaksi')"
-           class="absolute -top-5 left-1/2 transform -translate-x-1/2
-                  flex items-center justify-center w-12 h-12
-                  bg-blue-600 hover:bg-blue-700 text-white
-                  rounded-full shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-        </a>
-        @endif
-
     </div>
-
 </nav>
+

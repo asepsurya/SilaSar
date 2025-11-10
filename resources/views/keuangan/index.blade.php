@@ -477,7 +477,7 @@
                                     (Rp) <span style="color: red">*</span></label>
                                 <input type="text" name="total" class="currency form-input" placeholder="Rp(0)" autocomplete="off" inputmode="numeric" id="total_pengeluaran">
                             </div>
-                       
+
                             <!-- Kotak Rekening dengan Icon -->
                             <div x-data="{ openRekening: false, selectedRekening: '', selectedRekeningName: '' }" class="relative">
                                 <button type="button" @click="openRekening = !openRekening" class="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-100 dark:bg-black dark:border hover:bg-gray-200 transition">
@@ -486,10 +486,10 @@
                                         <path d="M16 3v4M8 3v4M3 11h18" stroke="currentColor" />
                                     </svg>
 
-                                    <span  class="hidden sm:inline-block" x-text="selectedRekeningName 
-                                                                    ? selectedRekeningName 
-                                                                    : `{{ optional($rekening->firstWhere('kode_rekening', app('settings')['default_rekening']))->nama_rekening ?? ($rekening->first()->nama_rekening ?? '') }}`">
-                                        {{ optional($rekening->firstWhere('kode_rekening', app('settings')['default_rekening']))->nama_rekening ?? ($rekening->first()->nama_rekening ?? '') }}
+                                    <span  class="hidden sm:inline-block" x-text="selectedRekeningName
+                                                                    ? selectedRekeningName
+                                                                    : `{{ isset(app('settings')['default_rekening']) ? optional($rekening->firstWhere('kode_rekening', app('settings')['default_rekening']))->nama_rekening ?? '' : '' }}`">
+                                        {{ isset(app('settings')['default_rekening']) ? optional($rekening->firstWhere('kode_rekening', app('settings')['default_rekening']))->nama_rekening ?? '' : '' }}
                                     </span>
                                     <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path d="M19 9l-7 7-7-7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
@@ -532,9 +532,18 @@
 
                         {{-- BUTTON --}}
                         <div class="flex">
-                            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center">
-                                Simpan
-                            </button>
+                               <button id="submitBtn" type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+                                                    <span class="btn-text">Simpan</span>
+                                                    <span class="btn-spinner hidden ml-2">
+                                                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                                stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8v8z"></path>
+                                                        </svg>
+                                                    </span>
+                                                </button>
                         </div>
                     </form>
                 </div>
@@ -650,7 +659,7 @@
         </form>
 
 
-       
+
     </div>
 </div>
 
@@ -769,7 +778,7 @@
                         </span>
                     </td>
                 </tr>
-                
+
                             <div x-data="{ open: false }" @detail-{{ $item->id }}.window="open = true" @close-modal-{{ $item->id }}.window="open = false">
                                 <!-- Overlay -->
                                 <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto" :class="{ 'block': open, 'hidden': !open }">
@@ -859,13 +868,13 @@
                                                             </label>
                                                             <textarea name="deskripsi" class="form-input" rows="2">{{ $item->deskripsi }}</textarea>
                                                         </div>
-                                                        <div x-data="{ 
-                                                                fileName2: '{{ $item->foto ? basename($item->foto) : '' }}', 
-                                                                fileUrl2: '{{ $item->foto ? asset('storage/'.$item->foto) : '' }}' 
+                                                        <div x-data="{
+                                                                fileName2: '{{ $item->foto ? basename($item->foto) : '' }}',
+                                                                fileUrl2: '{{ $item->foto ? asset('storage/'.$item->foto) : '' }}'
                                                             }" class="relative">
-                                                            
-                                                            <label for="foto-upload-2-{{ $item->id }}" 
-                                                                :class="fileName2 ? 'bg-green-100 border-green-500' : 'bg-gray-100'" 
+
+                                                            <label for="foto-upload-2-{{ $item->id }}"
+                                                                :class="fileName2 ? 'bg-green-100 border-green-500' : 'bg-gray-100'"
                                                                 class="cursor-pointer flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed rounded-lg hover:bg-gray-200 transition-colors duration-200 relative">
 
                                                                 <!-- Preview image -->
@@ -882,11 +891,11 @@
                                                                 </template>
 
                                                                 <!-- File name truncated -->
-                                                                <span x-text="fileName2 ? fileName2.length > 10 ? fileName2.substring(0,10)+'...' : fileName2 : 'Upload Foto'" 
+                                                                <span x-text="fileName2 ? fileName2.length > 10 ? fileName2.substring(0,10)+'...' : fileName2 : 'Upload Foto'"
                                                                     class="text-xs text-gray-500 mt-1 text-center block truncate max-w-full"></span>
 
                                                                 <!-- File input -->
-                                                                <input id="foto-upload-2-{{ $item->id }}" type="file" name="foto" class="hidden" 
+                                                                <input id="foto-upload-2-{{ $item->id }}" type="file" name="foto" class="hidden"
                                                                     @change="
                                                                         fileName2 = $event.target.files[0]?.name || '';
                                                                         if ($event.target.files[0]) {
@@ -900,7 +909,7 @@
 
                                                                 <!-- Tombol hapus gambar -->
                                                                 <template x-if="fileUrl2">
-                                                                    <button type="button" @click="fileName2=''; fileUrl2=''; $refs.inputFile.value='';" 
+                                                                    <button type="button" @click="fileName2=''; fileUrl2=''; $refs.inputFile.value='';"
                                                                         class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600">
                                                                         &times;
                                                                     </button>
@@ -943,7 +952,7 @@
                                                             <label class="block text-xs text-black/40 dark:text-white/40 mb-1">Nominal <span style="color: red">*</span></label>
                                                             <input type="text" name="total" class="currency form-input" placeholder="Rp(0)" autocomplete="off" inputmode="numeric"  value="Rp. {{ number_format($item->total, 0, ',', '.') }}">
                                                         </div>
-                                                        
+
                                                         <!-- PILIH REKENING -->
                                                         <div x-data="{ openRekening: false, selectedRekening: '{{ $item->id_rekening }}', selectedRekeningName: '{{ optional($rekening->firstWhere('id',$item->id_rekening))->nama_rekening }}' }" class="relative">
                                                             <button type="button" @click="openRekening = !openRekening" class="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-100 dark:bg-black dark:border hover:bg-gray-200 transition">
@@ -1004,7 +1013,7 @@
             </tbody>
 
             @endforeach
-           
+
         </table>
         @if ($transaksi->isEmpty())
         <tbody>
@@ -1189,8 +1198,8 @@
                             .filter(a => a.tipe === kreditTipe)
                             .map(a => ({ id: a.id, text: `${a.kode_akun} | ${a.nama_akun}`, kategori: a.kategori }));
                           // isi ulang debit
-                       
-        
+
+
                         $('.akun_debit').empty().select2({
                             data: debitList,
                             templateResult: formatOption,
@@ -1242,7 +1251,7 @@
                             escapeMarkup: m => m
                         });
                     });
-                    
+
                 const jenisToTipe = {
                     pemasukan: 'pemasukan',
                     pengeluaran: 'pengeluaran',
@@ -1260,10 +1269,24 @@
                     const tipe = jenisToTipe[jenis] ?? '';
                     $('.tipe').val(tipe);
                 });
-                    
+
                 });
             </script>
 
 
+        <script>
+            document.getElementById('formTransaksi').addEventListener('submit', function (e) {
+                const submitBtn = document.getElementById('submitBtn');
+                const btnText = submitBtn.querySelector('.btn-text');
+                const btnSpinner = submitBtn.querySelector('.btn-spinner');
+
+                // Tampilkan spinner dan ubah teks
+                btnText.textContent = 'Menyimpan...';
+                btnSpinner.classList.remove('hidden');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+                submitBtn.classList.remove('hover:bg-blue-700');
+            });
+        </script>
 @endsection
 @endsection

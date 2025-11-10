@@ -20,6 +20,24 @@
 
 <body class="antialiased relative font-inter bg-lightwhite dark:bg-black text-black dark:text-white text-sm font-normal overflow-x-hidden">
     <!-- Start Header -->
+    <header class="flex items-center justify-between px-6 py-3 bg-white/50 dark:bg-black/20 backdrop-blur-md border-b border-black/10 dark:border-white/10">
+  <!-- Logo -->
+  <a href="/" class="flex items-center space-x-2">
+        <button type="button" class=" text-black dark:text-white" >
+            <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130" class="block dark:hidden">
+            <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130" class="hidden dark:block">
+        </button>
+  </a>
+
+
+  <!-- Tombol kembali -->
+  <a
+    onclick="history.back()"
+    href="javascript:void(0);"
+    class="mt-0 py-1 px-3 inline-block bg-black/5 dark:bg-white/5 rounded-lg text-black/40 dark:text-white/40 border border-black/5 dark:border-white/5 hover:bg-transparent dark:hover:bg-transparent hover:text-black dark:hover:text-white transition-all duration-300">
+    Kembali
+  </a>
+</header>
 
     <!-- End Header -->
     <!-- Start Content -->
@@ -69,9 +87,14 @@
                         </svg>
             </center>
 
-            <a class=' mt-5 max-w-[149px] py-1 px-2 inline-block bg-black/5 dark:bg-white/5 w-full rounded-lg text-black/40 dark:text-white/40 border border-black/5 dark:border-white/5 hover:bg-transparent dark:hover:bg-transparent hover:text-black dark:hover:text-white transition-all duration-300' href='/'>
-                Kembali
+           <a
+            onclick="history.back()"
+            class="mt-5 max-w-[149px] py-1 px-2 inline-block bg-black/5 dark:bg-white/5 w-full rounded-lg text-black/40 dark:text-white/40 border border-black/5 dark:border-white/5 hover:bg-transparent dark:hover:bg-transparent hover:text-black dark:hover:text-white transition-all duration-300"
+            href="javascript:void(0);"
+            >
+            Kembali
             </a>
+
         </div>
     </div>
     <!-- End Content -->
@@ -79,7 +102,7 @@
     <footer class="p-7 flex items-center justify-center">
         <p class="text-xs text-black/40 dark:text-white/40">&copy; 2025 SiLasar</p>
     </footer>
-  
+
 </body>
 
 </html>

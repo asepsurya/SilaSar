@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Akun;
+use App\Models\AkunTable;
 use App\Models\KategoriAkun;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -191,7 +192,7 @@ class AkunSeeder extends Seeder
         foreach ($data as $akun) {
             $kategori = KategoriAkun::where('nama_kategori', $akun[2])->first();
 
-            Akun::firstOrCreate([
+            AkunTable::firstOrCreate([
                 'kode_akun'   => $akun[0],
             ],[
                 'nama_akun'   => $akun[1],
@@ -200,7 +201,55 @@ class AkunSeeder extends Seeder
             ]);
         }
 
+        // AKun Harian
+        $pemasukan = [
+            'Bantuan Sosial',
+            'Bonus',
+            'Pemasukan Lainnya',
+            'Uang dari Hutang',
+            'Pembayaran Piutang',
+            'Kas Anggota MML',
+            'Gaji Bulanan/Usaha Pribadi',
+            'Nafkah dari Suami',
+        ];
 
-        
+        $pengeluaran = [
+            'Belanja Dapur',
+            'Listrik/Pulsa',
+            'Pendidikan Anak',
+            'Jajan Anak',
+            'Zakat/ Sedekah/ Sosial',
+            'Kesehatan',
+            'Tabungan',
+            'Hiburan',
+            'Belanja / Jajan Lainnya',
+            'Cicilan',
+            'Modal Usaha',
+            'Bayar Hutang',
+            'Piutang',
+            'Pengeluaran tidak terduga',
+            'Perlengkapan Rumah Tangga',
+            'Transportasi',
+            'Upah',
+            'Iuran Keluar',
+            'Arisan',
+        ];
+
+        foreach ($pemasukan as $nama) {
+            Akun::updateOrCreate(
+                ['nama_akun' => $nama],
+                ['jenis_akun' => 'pemasukan']
+            );
+        }
+
+        foreach ($pengeluaran as $nama) {
+            Akun::updateOrCreate(
+                ['nama_akun' => $nama],
+                ['jenis_akun' => 'pengeluaran']
+            );
+        }
+
+
+
     }
 }

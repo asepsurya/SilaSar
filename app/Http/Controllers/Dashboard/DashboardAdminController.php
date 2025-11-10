@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Dashboard;
 use App\Models\Akun;
 use App\Models\Mitra;
 use App\Models\Keuangan;
+use App\Models\AkunTable;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use App\Models\KeuanganTable;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Spatie\Activitylog\Models\Activity;
@@ -14,7 +16,7 @@ use Spatie\Activitylog\Models\Activity;
 class DashboardAdminController extends Controller
 {
 
- 
+
     public function index()
     {
         $transaksi = Transaksi::where('auth', auth()->user()->id)->get();
@@ -71,16 +73,33 @@ $kerugian = DB::table('transaksis')
         'keuntungan',
         'kerugian'));
     }
-    public function dashboardKeuangan()
+    public function dashboardKeuangan(Request $request)
     {
+        $periode = $request->query('periode');
+        $tahun_tahun = $request->query('tahun_tahun');
+        $bulan = $request->query('bulan');
+        $tahun_bulan = $request->query('tahun_bulan');
+        $tanggal_awal = $request->query('tanggal_awal');
+        $tanggal_akhir = $request->query('tanggal_akhir');
+
         $bulanLabels = [];
         $pemasukanPerBulan = [];
         $pengeluaranPerBulan = [];
 
         // Ambil data pemasukan & pengeluaran per bulan berdasarkan field total dan tipe, hanya untuk user saat ini
-        $keuangan = Keuangan::select(DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) as bulan'), 'tipe', DB::raw('SUM(total) as total'))
+        $keuangan = KeuanganTable::select(DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) as bulan'), DB::raw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) as tahun'), 'tipe', DB::raw('SUM(total) as total'))
             ->where('auth', auth()->user()->id)
-            ->groupBy(DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y"))'), 'tipe')
+            ->when($periode == 'bulanan' && $bulan && $tahun_bulan, function($q) use ($bulan, $tahun_bulan) {
+                return $q->whereRaw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                         ->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_bulan]);
+            })
+            ->when($periode == 'tahunan' && $tahun_tahun, function($q) use ($tahun_tahun) {
+                return $q->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_tahun]);
+            })
+            ->when($periode == 'rentang' && $tanggal_awal && $tanggal_akhir, function($q) use ($tanggal_awal, $tanggal_akhir) {
+                return $q->whereRaw('STR_TO_DATE(tanggal, "%d/%m/%Y") BETWEEN ? AND ?', [$tanggal_awal, $tanggal_akhir]);
+            })
+            ->groupBy(DB::raw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y"))'), DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y"))'), 'tipe')
             ->get();
 
         // Nama bulan dalam bahasa Indonesia
@@ -90,17 +109,31 @@ $kerugian = DB::table('transaksis')
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
+        // Tentukan tahun untuk chart berdasarkan filter
+        $tahunChart = $tahun_tahun ?: ($tahun_bulan ?: date('Y'));
+
         // Siapkan array pemasukan & pengeluaran per bulan (Januari-Desember)
         for ($i = 1; $i <= 12; $i++) {
             $bulanLabels[] = $namaBulan[$i];
-            $pemasukan = $keuangan->where('bulan', $i)->where('tipe', 'pemasukan')->first();
-            $pengeluaran = $keuangan->where('bulan', $i)->where('tipe', 'pengeluaran')->first();
+            $pemasukan = $keuangan->where('bulan', $i)->where('tahun', $tahunChart)->where('tipe', 'pemasukan')->first();
+            $pengeluaran = $keuangan->where('bulan', $i)->where('tahun', $tahunChart)->where('tipe', 'pengeluaran')->first();
             $pemasukanPerBulan[] = $pemasukan ? (float) $pemasukan->total : 0;
             $pengeluaranPerBulan[] = $pengeluaran ? (float) $pengeluaran->total : 0;
         }
 
-        $akun  = Akun::all();
-        $transaksi = Keuangan::with(['akun','rekening'])->where('auth', auth()->user()->id)->get();
+        $akun  = AkunTable::all();
+        $transaksi = KeuanganTable::with(['akun','rekening'])->where('auth', auth()->user()->id)
+            ->when($periode == 'bulanan' && $bulan && $tahun_bulan, function($q) use ($bulan, $tahun_bulan) {
+                return $q->whereRaw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                         ->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_bulan]);
+            })
+            ->when($periode == 'tahunan' && $tahun_tahun, function($q) use ($tahun_tahun) {
+                return $q->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_tahun]);
+            })
+            ->when($periode == 'rentang' && $tanggal_awal && $tanggal_akhir, function($q) use ($tanggal_awal, $tanggal_akhir) {
+                return $q->whereRaw('STR_TO_DATE(tanggal, "%d/%m/%Y") BETWEEN ? AND ?', [$tanggal_awal, $tanggal_akhir]);
+            })
+            ->get();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('dashboard.keuangan', array_merge([
             'activeMenu' => 'dashboard',
@@ -138,5 +171,71 @@ $kerugian = DB::table('transaksis')
             'activeMenu' => 'dashboard',
             'active' => 'peta',
         ],compact('logs','mitras','jumlahPerKota'));
+    }
+    public function dashboardKeuanganSaya(request $request){
+         $periode = $request->query('periode');
+        $tahun_tahun = $request->query('tahun_tahun');
+        $bulan = $request->query('bulan');
+        $tahun_bulan = $request->query('tahun_bulan');
+        $tanggal_awal = $request->query('tanggal_awal');
+        $tanggal_akhir = $request->query('tanggal_akhir');
+
+        $bulanLabels = [];
+        $pemasukanPerBulan = [];
+        $pengeluaranPerBulan = [];
+
+        // Ambil data pemasukan & pengeluaran per bulan berdasarkan field total dan tipe, hanya untuk user saat ini
+        $keuangan = Keuangan::select(DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) as bulan'), DB::raw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) as tahun'), 'tipe', DB::raw('SUM(total) as total'))
+            ->where('auth', auth()->user()->id)
+            ->when($periode == 'bulanan' && $bulan && $tahun_bulan, function($q) use ($bulan, $tahun_bulan) {
+                return $q->whereRaw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                         ->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_bulan]);
+            })
+            ->when($periode == 'tahunan' && $tahun_tahun, function($q) use ($tahun_tahun) {
+                return $q->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_tahun]);
+            })
+            ->when($periode == 'rentang' && $tanggal_awal && $tanggal_akhir, function($q) use ($tanggal_awal, $tanggal_akhir) {
+                return $q->whereRaw('STR_TO_DATE(tanggal, "%d/%m/%Y") BETWEEN ? AND ?', [$tanggal_awal, $tanggal_akhir]);
+            })
+            ->groupBy(DB::raw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y"))'), DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y"))'), 'tipe')
+            ->get();
+
+        // Nama bulan dalam bahasa Indonesia
+        $namaBulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
+        // Tentukan tahun untuk chart berdasarkan filter
+        $tahunChart = $tahun_tahun ?: ($tahun_bulan ?: date('Y'));
+
+        // Siapkan array pemasukan & pengeluaran per bulan (Januari-Desember)
+        for ($i = 1; $i <= 12; $i++) {
+            $bulanLabels[] = $namaBulan[$i];
+            $pemasukan = $keuangan->where('bulan', $i)->where('tahun', $tahunChart)->where('tipe', 'pemasukan')->first();
+            $pengeluaran = $keuangan->where('bulan', $i)->where('tahun', $tahunChart)->where('tipe', 'pengeluaran')->first();
+            $pemasukanPerBulan[] = $pemasukan ? (float) $pemasukan->total : 0;
+            $pengeluaranPerBulan[] = $pengeluaran ? (float) $pengeluaran->total : 0;
+        }
+
+        $akun  = Akun::all();
+        $transaksi = Keuangan::with(['akun','rekening'])->where('auth', auth()->user()->id)
+            ->when($periode == 'bulanan' && $bulan && $tahun_bulan, function($q) use ($bulan, $tahun_bulan) {
+                return $q->whereRaw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$bulan])
+                         ->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_bulan]);
+            })
+            ->when($periode == 'tahunan' && $tahun_tahun, function($q) use ($tahun_tahun) {
+                return $q->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_tahun]);
+            })
+            ->when($periode == 'rentang' && $tanggal_awal && $tanggal_akhir, function($q) use ($tanggal_awal, $tanggal_akhir) {
+                return $q->whereRaw('STR_TO_DATE(tanggal, "%d/%m/%Y") BETWEEN ? AND ?', [$tanggal_awal, $tanggal_akhir]);
+            })
+            ->get();
+        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        return view('dashboard.keuangan_saya', array_merge([
+            'activeMenu' => 'dahboardkeuangansaya',
+            'active' => 'catatan',
+        ], compact('logs','transaksi','akun','bulanLabels','pemasukanPerBulan','pengeluaranPerBulan')));
     }
 }
