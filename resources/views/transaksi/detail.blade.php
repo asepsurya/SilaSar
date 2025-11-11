@@ -369,7 +369,7 @@
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
-                                            </table>       
+                                            </table>
                                         </div>
                                         <button type="button" style="margin-top: 20px;"
                                             onclick="updateKodeTransaksi('{{ $transaksi->kode_transaksi }}','{{ $mitra->kode_mitra }}')"
@@ -572,8 +572,8 @@
                                         </td>
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <span>Rp. </span>
-                                         <input type="text" 
-                                                name="barang_keluar_display[]" 
+                                         <input type="text"
+                                                name="barang_keluar_display[]"
                                                 class="harga-hidden form-input w-28 text-center border-gray-300 rounded-md harga-input"
                                                 value="{{ number_format($harga ?? 0, 0, ',', '.') }}"
                                                 data-index="{{ $index }}"
@@ -876,7 +876,7 @@
                             });
                         </script>
                     </form>
-               
+
 
                         <script>
                         document.addEventListener('DOMContentLoaded', function () {
@@ -1067,7 +1067,7 @@
                                             $eventId = str_replace(['/', ' ', '.'], '-', strtolower($row->produk->kode_produk ?? ''));
                                         @endphp
                                         <!-- Nama Produk -->
-                                       <button 
+                                       <button
                                             type="button"
                                             @click="window.dispatchEvent(new CustomEvent('detail-{{ $eventId }}'))"
                                             class="text-sm font-semibold text-gray-800 hover:text-blue-600"
@@ -1124,8 +1124,8 @@
                                                                 Harga <span class="text-red-600">*</span>
                                                             </td>
                                                             <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="text" 
-                                                                    name="barang_keluar_display[]" 
+                                                                <input type="text"
+                                                                    name="barang_keluar_display[]"
                                                                     class="harga-mobile form-input w-full  border-gray-300 dark:border-white/10 rounded-md harga-input"
                                                                     value="{{ number_format($harga_mobile ?? 0, 0, ',', '.') }}"
                                                                     data-index="{{ $index }}"
@@ -1155,8 +1155,8 @@
                                                                 Barang Keluar <span class="text-red-600">*</span>
                                                             </td>
                                                             <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="number" 
-                                                                    name="barang_keluar[]" 
+                                                                <input type="number"
+                                                                    name="barang_keluar[]"
                                                                     class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-keluar-input-mobile"
                                                                     value="{{ $barang_keluar_mobile }}"
                                                                     data-harga="{{ $harga_mobile }}"
@@ -1169,8 +1169,8 @@
                                                                 Barang Terjual <span class="text-red-600">*</span>
                                                             </td>
                                                             <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="number" 
-                                                                    name="barang_terjual[]" 
+                                                                <input type="number"
+                                                                    name="barang_terjual[]"
                                                                     class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-terjual-input-mobile"
                                                                     value="{{ $barang_terjual_mobile }}"
                                                                     data-index="{{ $myindex }}"
@@ -1182,8 +1182,8 @@
                                                                 Barang Retur <span class="text-red-600">*</span>
                                                             </td>
                                                             <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="number" 
-                                                                    name="barang_retur[]" 
+                                                                <input type="number"
+                                                                    name="barang_retur[]"
                                                                     class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-retur-input-mobile"
                                                                     value="{{ $barang_retur_mobile }}"
                                                                     data-index="{{ $myindex }}"
@@ -1195,18 +1195,18 @@
                                                                 Total
                                                             </td>
                                                             <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                Rp. <input type="text" 
-                                                                    name="total_item[]" 
-                                                                    value="{{ number_format($total_mobile, 0, ',', '.') }}" 
+                                                                Rp. <input type="text"
+                                                                    name="total_item[]"
+                                                                    value="{{ number_format($total_mobile, 0, ',', '.') }}"
                                                                     class="form-input harga-input w-full  border-gray-300 dark:border-white/10 rounded-md total-harga-input-mobile"
-                                                                    data-index="{{ $myindex }}" 
+                                                                    data-index="{{ $myindex }}"
                                                                     readonly>
                                                             </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
 
-                                                                                                
+
                                                                                                     <div class="mt-5 p-2">
                                                                                                         <button type="button" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" @click="open = false">
                                                                                                             Oke
@@ -1219,7 +1219,7 @@
                                                                                 </div>
 
 
-            
+
                                 <!-- JS Modal Handler -->
                                 <script>
                                     function showProductDetail2(kode) {

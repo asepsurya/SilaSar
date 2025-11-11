@@ -149,7 +149,7 @@ class TransaksiController extends Controller
             'log_name' => 'ikm'
         ])->latest()->take(10)->get();
         $penawaran = Penawaran::with('produk')->where('kode_mitra', $id_mitra)->with('produk')->get();
-        $product = TransaksiProduct::where('kode_mitra', $id_mitra)->with('produk')->get();
+        $product = TransaksiProduct::where('kode_mitra', $id_mitra)->with(['penawaran','produk'])->get();
 
         return view('transaksi.detail', [
             'activeMenu' => 'transaksi',
@@ -185,10 +185,10 @@ class TransaksiController extends Controller
                     'barang_retur'    => 0,
                     'total'           => 0,
                 ]);
-            
+
             }
         }
-       
+
         // Catat aktivitas
         activity('ikm')
             ->causedBy(auth()->user())
@@ -201,7 +201,7 @@ class TransaksiController extends Controller
 
     public function transaksiUpdate(Request $request)
     {
-        
+
         $request->validate([
             'kode_mitra' => 'required|exists:mitras,kode_mitra',
             'nomor_transaksi' => 'required',
@@ -223,7 +223,7 @@ class TransaksiController extends Controller
         $transaksi->total = str_replace(['.', ','], '', $request->grand_total);
         $transaksi->status_bayar = $request->status_bayar;
         $transaksi->auth = auth()->user()->id;
-        
+
        foreach ($request->kode_produk as $index => $kode_produk) {
 
                 $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
@@ -312,7 +312,7 @@ class TransaksiController extends Controller
                 }
             }
 
-            
+
         $transaksi->update();
 
 
@@ -339,7 +339,7 @@ class TransaksiController extends Controller
                 'info'    => $info,
             ]);
 
-       
+
 
     }
 
@@ -554,7 +554,7 @@ class TransaksiController extends Controller
             'active' => 'laporan_penjualan',
         ], compact('laporan', 'logs','awal','akhir'));
     }
-    
+
        public function exportPDF()
     {
         $awal = request('awal');
@@ -587,14 +587,14 @@ class TransaksiController extends Controller
 
         $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
         $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
-        
+
         $pdf = Pdf::loadView('report.transaksi', [
             'laporan' => $laporan,
             'awal' => $awal,
             'akhir' => $akhir
         ])->setPaper('a4', 'portrait');
 
-                    
+
             $random = rand(1000, 9999);
             $namaFile = 'laporan-penjualan-detail-' . Carbon::now()->format('Ymd_His') . '-' . $random . '.pdf';
 
