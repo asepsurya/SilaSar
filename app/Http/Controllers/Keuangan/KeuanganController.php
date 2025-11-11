@@ -8,9 +8,9 @@ use App\Models\AkunTable;
 use App\Models\KategoriAkun;
 use App\Models\UserActivity;
 use Illuminate\Http\Request;
-use App\Models\KeuanganTable;
 use App\Models\RekeningTable;
 use Illuminate\Support\Carbon;
+use App\Models\KeuanganTableku;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,7 @@ class KeuanganController extends Controller
         $bulan = request('bulan', date('m'));
         $tahun = request('tahun', date('Y'));
 
-        $query = KeuanganTable::with(['akun', 'rekening'])
+        $query = KeuanganTableku::with(['akun', 'rekening'])
             ->where('auth', auth()->id());
 
         if (request('periode')) {
@@ -207,7 +207,7 @@ class KeuanganController extends Controller
             'saldo' => $validated['jumlah'],
         ]);
 
-        KeuanganTable::create([
+        KeuanganTableku::create([
             'tanggal' => now()->format('d/m/Y'),
             'deskripsi' => 'Modal Awal',
             'id_akun' => 5,
@@ -353,7 +353,7 @@ class KeuanganController extends Controller
             $data['foto'] = null;
         }
 
-        $keuangan = KeuanganTable::create($data);
+        $keuangan = KeuanganTableku::create($data);
 
         activity('ikm')
             ->performedOn($keuangan)
@@ -379,7 +379,7 @@ class KeuanganController extends Controller
         ]);
 
 
-        $keuangan = KeuanganTable::findOrFail($request->id);
+        $keuangan = KeuanganTableku::findOrFail($request->id);
         $oldTotal = $keuangan->total;
         $oldTipe = $keuangan->tipe;
         $oldRekeningId = $keuangan->id_rekening;
@@ -455,7 +455,7 @@ class KeuanganController extends Controller
     }
 
     public function keuanganDelete($id){
-        $keuangan = KeuanganTable::findOrFail($id);
+        $keuangan = KeuanganTableku::findOrFail($id);
         $oldTotal = $keuangan->total;
         $oldTipe = $keuangan->tipe;
         $oldRekeningId = $keuangan->id_rekening;
@@ -528,7 +528,7 @@ class KeuanganController extends Controller
             'saldo' => $validated['jumlah'],
             ]);
 
-            KeuanganTable::create([
+            KeuanganTableku::create([
             'tanggal' => now()->format('d/m/Y'),
             'deskripsi' => 'Update Saldo Rekening',
             'id_akun' => 5, // sesuaikan id akun jika perlu
@@ -552,7 +552,7 @@ class KeuanganController extends Controller
         $rekening = RekeningTable::findOrFail($id);
 
         // Hapus semua transaksi keuangan terkait rekening ini
-        $transaksis = KeuanganTable::where('id_rekening', $rekening->id)->get();
+        $transaksis = KeuanganTableku::where('id_rekening', $rekening->id)->get();
         foreach ($transaksis as $transaksi) {
             // Hapus foto jika ada
             if ($transaksi->foto) {
@@ -602,7 +602,7 @@ class KeuanganController extends Controller
     $id_user = $request->filled('ip') ? $request->ip : auth()->id();
 
     // 🔹 Mulai query
-    $query = KeuanganTable::with(['akun', 'rekening'])
+    $query = KeuanganTableku::with(['akun', 'rekening'])
         ->where('auth', $id_user);
 
     // 🔹 Filter tipe (pemasukan/pengeluaran)
@@ -691,7 +691,7 @@ class KeuanganController extends Controller
     return $pdf->download($filename);
     }
  public function kelenderIndex(){
-        $data = KeuanganTable::where('auth',auth()->user()->id)->get();
+        $data = KeuanganTableku::where('auth',auth()->user()->id)->get();
          $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('keuangan.bulan',[
             'activeMenu' => 'keuangan',
@@ -1207,7 +1207,7 @@ public function neraca()
 
         $auth = auth()->id(); // lebih ringkas daripada auth()->user()->id
 
-        $query = KeuanganTable::with([
+        $query = KeuanganTableku::with([
             'akun.kategori',
             'akunSecond.kategori'
         ])
@@ -1321,7 +1321,7 @@ public function neraca()
         $tahun = $request->input('tahun', date('Y'));
         $auth = auth()->user()->id;
         // Ambil transaksi bulan & tahun tersebut
-        $transaksi = KeuanganTable::with(['akun', 'akunsecond', 'rekening'])
+        $transaksi = KeuanganTableku::with(['akun', 'akunsecond', 'rekening'])
             ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
             ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
             ->where("auth", $auth)
