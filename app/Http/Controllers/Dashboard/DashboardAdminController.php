@@ -9,6 +9,7 @@ use App\Models\AkunTable;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use App\Models\KeuanganTable;
+use App\Models\KeuanganTableku;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Spatie\Activitylog\Models\Activity;
@@ -87,7 +88,7 @@ $kerugian = DB::table('transaksis')
         $pengeluaranPerBulan = [];
 
         // Ambil data pemasukan & pengeluaran per bulan berdasarkan field total dan tipe, hanya untuk user saat ini
-        $keuangan = KeuanganTable::select(DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) as bulan'), DB::raw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) as tahun'), 'tipe', DB::raw('SUM(total) as total'))
+        $keuangan = KeuanganTableku::select(DB::raw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) as bulan'), DB::raw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) as tahun'), 'tipe', DB::raw('SUM(total) as total'))
             ->where('auth', auth()->user()->id)
             ->when($periode == 'bulanan' && $bulan && $tahun_bulan, function($q) use ($bulan, $tahun_bulan) {
                 return $q->whereRaw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$bulan])
@@ -122,7 +123,7 @@ $kerugian = DB::table('transaksis')
         }
 
         $akun  = AkunTable::all();
-        $transaksi = KeuanganTable::with(['akun','rekening'])->where('auth', auth()->user()->id)
+        $transaksi = KeuanganTableku::with(['akun','rekening'])->where('auth', auth()->user()->id)
             ->when($periode == 'bulanan' && $bulan && $tahun_bulan, function($q) use ($bulan, $tahun_bulan) {
                 return $q->whereRaw('MONTH(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$bulan])
                          ->whereRaw('YEAR(STR_TO_DATE(tanggal, "%d/%m/%Y")) = ?', [$tahun_bulan]);
