@@ -591,27 +591,36 @@ class KeuanganHarianController extends Controller
 
     public function keuanganPDF(Request $request)
 {
+     $id_user = $request->filled('ip') ? $request->ip : auth()->id();
     // Base query
-    $keuangan = Keuangan::where('auth', auth()->user()->id);
+    $keuangan = Keuangan::where('auth', $id_user);
 
-   if ($request->filled('from') && $request->filled('to')) {
-    try {
-        $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
-        $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
-
-        $keuangan->whereRaw("
-            STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
-        ", [$from, $to]);
-
-
-        $periode = "{$request->from} s.d. {$request->to}";
-    } catch (\Exception $e) {
-        $periode = 'Semua Data';
-    }
-} else {
     $periode = 'Semua Data';
-}
 
+    if ($request->filled('periode')) {
+        [$tahun, $bulan] = explode('-', $request->periode);
+        $keuangan->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+        $periode = "Bulan {$bulan} Tahun {$tahun}";
+    } elseif ($request->filled('from') && $request->filled('to')) {
+        try {
+            $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
+            $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
+
+            $keuangan->whereRaw("
+                STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
+            ", [$from, $to]);
+
+            $periode = "{$request->from} s.d. {$request->to}";
+        } catch (\Exception $e) {
+            $periode = 'Semua Data';
+        }
+    }
+
+    // Filter tipe transaksi
+    if ($request->filled('tipe')) {
+        $keuangan->where('tipe', $request->tipe);
+    }
 
     // Ambil data keuangan
     $data = [
@@ -622,11 +631,15 @@ class KeuanganHarianController extends Controller
     // Buat dan kirim PDF
     $pdf = Pdf::loadView('keuangan.catatan_keuangan.pdf', $data)->setPaper('a4', 'portrait');
 
-    $periode = $request->filled('from') && $request->filled('to')
-    ? str_replace('/', '-', $request->from) . '_sd_' . str_replace('/', '-', $request->to)
-    : 'semua-periode';
+    $periode_filename = 'semua-periode';
+    if ($request->filled('periode')) {
+        $periode_filename = $request->periode;
+    } elseif ($request->filled('from') && $request->filled('to')) {
+        $periode_filename = str_replace('/', '-', $request->from) . '_sd_' . str_replace('/', '-', $request->to);
+    }
 
-    $filename = "laporan-keuangan-{$periode}.pdf";
+    $tipe_str = $request->filled('tipe') ? "-{$request->tipe}" : '';
+    $filename = "laporan-keuangan-{$periode_filename}{$tipe_str}.pdf";
 
     return $pdf->download($filename);
 }
@@ -641,23 +654,60 @@ class KeuanganHarianController extends Controller
 
  public function cetakHistoryPDF($id_rekening)
 {
-    $histories = HistoryRekening::where('id_rekening', $id_rekening)
-        ->orderBy('tanggal', 'desc')
-        ->get();
+   $histories = HistoryRekening::where('id_rekening', $id_rekening);
 
-    $rekening = Rekening::where('kode_rekening',$id_rekening)->first();
+    // Ambil parameter dari request
+    $periode = request('periode');
+    $bulan = request('bulan');
+    $tahun_bulan = request('tahun_bulan');
+    $tahun_tahun = request('tahun_tahun');
+    $tanggal_awal = request('tanggal_awal');
+    $tanggal_akhir = request('tanggal_akhir');
 
-    if (!$rekening) {
-        abort(404, 'Rekening tidak ditemukan');
+    // Pastikan bulan dalam format 2 digit
+    if ($bulan) {
+        $bulan = str_pad($bulan, 2, '0', STR_PAD_LEFT);
     }
 
+    // Filter tanggal (format dd/mm/YYYY)
+    if ($tanggal_awal && $tanggal_akhir) {
+        try {
+            $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+            $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+
+            $histories->whereRaw("
+                STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
+            ", [$fromDate, $toDate]);
+        } catch (\Exception $e) {
+            // Jika format tanggal salah, lewati filter
+        }
+    } elseif ($periode == 'bulanan' && $bulan && $tahun_bulan) {
+        // Filter berdasarkan bulan & tahun
+        $histories->whereRaw("
+            MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? 
+            AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+        ", [$bulan, $tahun_bulan]);
+    } elseif ($tahun_tahun) {
+        // Filter berdasarkan tahun
+        $histories->whereRaw("
+            YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+        ", [$tahun_tahun]);
+    }
+
+    // Urutkan berdasarkan tanggal terbaru
+    $histories = $histories->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') DESC")->get();
+
+    // Ambil data rekening
+    $rekening = Rekening::where('kode_rekening', $id_rekening)->firstOrFail();
+
+    // Generate PDF
     $pdf = Pdf::loadView('keuangan.catatan_keuangan.pdfHistory', [
         'histories' => $histories,
         'name' => $rekening
     ])->setPaper('a4', 'portrait');
 
-    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rekening->nama_rekening); // sanitasi nama file
-
+    // Sanitasi nama file agar aman
+    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rekening->nama_rekening);
     $filename = "CetakHistory-keuangan-dari-{$safeName}.pdf";
 
     return $pdf->download($filename);

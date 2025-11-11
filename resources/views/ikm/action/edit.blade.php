@@ -683,11 +683,26 @@
                                 <td class="px-4 py-2 mobile">{{ $item->no_telp_mitra }}</td>
                             </tr>
                         @endforeach
-                        @if ($mitra->isEmpty())
-                            <tr>
-                                <td colspan="5" class="text-center text-gray-500 py-4">Data tidak ditemukan</td>
-                            </tr>
-                        @endif
+                       @if ($mitra->isEmpty())
+                        <tr>
+                            <td colspan="5" class="py-10">
+                                <div class="flex flex-col items-center justify-center text-gray-400">
+                                    <!-- Ikon catatan kosong -->
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="w-14 h-14 mb-2 text-gray-300"
+                                        fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2
+                                                2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                                    </svg>
+
+                                    <p class="text-sm text-gray-500">Tidak ada data mitra ditemukan</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
+
 
                     </tbody>
                 </table>
@@ -756,8 +771,23 @@
                         @endforeach
                         @if ($produk->isEmpty())
                             <tr>
-                                <td colspan="5" class="text-center text-gray-500 py-4">Data tidak ditemukan</td>
+                                <td colspan="5" class="py-10">
+                                    <div class="flex flex-col items-center justify-center text-gray-400">
+                                        <!-- Ikon catatan kosong -->
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="w-14 h-14 mb-2 text-gray-300"
+                                            fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2
+                                                    2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                                        </svg>
+
+                                        <p class="text-sm text-gray-500">Data tidak ditemukan</p>
+                                    </div>
+                                </td>
                             </tr>
+
                         @endif
                     </tbody>
                 </table>
@@ -798,8 +828,21 @@
                             </tr>
                         @endforeach
                         @if ($transaksi2->isEmpty())
-                            <tr>
-                                <td colspan="5" class="text-center text-gray-500 py-4">Data tidak ditemukan</td>
+                             <tr>
+                                <td colspan="5" class="py-10">
+                                    <div class="flex flex-col items-center justify-center text-gray-400">
+                                        <!-- Ikon catatan kosong -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" 
+                                            class="w-16 h-16 mb-3 text-gray-300" 
+                                            fill="none" viewBox="0 0 24 24" 
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 
+                                                    2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="text-sm">Tidak ada riwayat transaksi ditemukan</p>
+                                    </div>
+                                </td>
                             </tr>
                         @endif
                     </tbody>
@@ -913,7 +956,7 @@
                 <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
             </select>
                 </form>
-                <a  href="{{ route('keuangan.pdf', request()->query()) }}" target="_blank" type="button"
+                <a  href="{{ route('keuangan.pdf.harian', request()->query()) }}" target="_blank" type="button"
                         @click="openFilter = !openFilter"
                         class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-auto">
                     <i class="fas fa-file-pdf"></i>
@@ -923,9 +966,24 @@
         
         <div class="table-responsive">
             @if($keuangan->isEmpty())
-                <div class="text-center py-6 text-gray-400">
-                    Tidak ada data keuangan yang tersedia.
+                <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <!-- Ikon catatan keuangan kosong -->
+                    <svg xmlns="http://www.w3.org/2000/svg" 
+                        class="w-16 h-16 mb-3 text-gray-300" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor" 
+                        stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" 
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 
+                                2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                    </svg>
+
+                    <div class="text-center text-sm">
+                        Tidak ada data keuangan yang tersedia.
+                    </div>
                 </div>
+
             @else
             <table class="w-full border-collapse text-sm table-auto" id="produkTable">
                 @php
@@ -1004,9 +1062,23 @@
                 </div>
             @endforeach
             <div class="text-center dark:text-gray-400 text-sm">
-                @if ($Ikmlogs->count() === 0)
-                    <p class="text-gray-500 dark:text-gray-400">Tidak ada aktivitas terbaru.</p>
+               @if ($Ikmlogs->count() === 0)
+                    <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                        <!-- Ikon aktivitas kosong -->
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="w-14 h-14 mb-2 text-gray-300"
+                            fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 13a4 4 0 014-4h3l3-3v12l-3-3H7a4 4 0 01-4-4z" />
+                        </svg>
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Tidak ada aktivitas terbaru.
+                        </p>
+                    </div>
                 @endif
+
             </div>
             </div>
         </div>

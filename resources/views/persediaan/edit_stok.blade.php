@@ -182,7 +182,7 @@
                                         <input type="number" 
                                             name="items[{{ $i }}][harga]" 
                                             value="{{ number_format($item->harga, 0, '', '') }}" 
-                                            class="harga w-full border-0 dark:bg-transparent dark:text-white focus:outline-none focus:ring-0">
+                                            class="harga w-full border-0 dark:bg-transparent dark:text-white focus:outline-none focus:ring-0" readonly>
 
                                     </td>
 

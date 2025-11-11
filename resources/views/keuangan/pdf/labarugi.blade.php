@@ -8,67 +8,94 @@
             font-family: Arial, Helvetica, sans-serif;
             font-size: 12px;
             color: #333;
-            margin: 30px;
+            margin: 0;
+            padding: 30px;
+            background: #fff;
         }
-     .header {
-    display: flex;
-    justify-content: space-between; /* kiri - kanan */
-    align-items: center;            /* sejajarin vertikal */
-   margin-bottom: 20px;
 
-}
+        /* Header mirip rekening Mandiri */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #ffd700;
+            padding-bottom: 8px;
+            margin-bottom: 25px;
+        }
 
-.header-left h2 {
-    margin: 0;
-    font-size: 20px;
-}
-.header-left .periode {
-    font-size: 14px;
-    color: #666;
-}
+        .header-left h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #003399;
+            font-weight: bold;
+        }
 
-.header-right img {
-    height: 50px;
-    object-fit: contain;
-}
-        .periode {
+        .header-left .subtitle {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            color: #000;
+        }
+
+        .header-left .periode {
             font-size: 12px;
-            color: #666;
+            color: #555;
         }
-        .table {
+
+        .header-right {
+            text-align: right;
+        }
+
+        /* Tabel utama */
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
         }
-        .table td {
+
+        th, td {
             padding: 6px 8px;
-            border-bottom: 1px solid #eee;
+            text-align: left;
+            border-bottom: 1px solid #e5e5e5;
         }
-        .table .section-title {
+
+        th {
+            background-color: #003399;
+            color: #fff;
             font-weight: bold;
-            background: #f3f3f3;
+            font-size: 12px;
+        }
+
+        tr.section-title td {
+            background: #dbe4f3;
+            font-weight: bold;
+            color: #003366;
             text-transform: uppercase;
         }
-        .table .subtotal {
+
+        tr.subtotal td {
+            background: #eef2fb;
             font-weight: bold;
-            background: #fafafa;
         }
-        .table td:first-child {
-            width: 70%;
+
+        tr.final-total td {
+            background: #d1d9f0;
+            font-weight: bold;
+            border-top: 2px solid #003399;
         }
-        .table td:last-child {
+
+        td:last-child {
             text-align: right;
             white-space: nowrap;
         }
-        .final-total {
-            font-weight: bold;
-            background: #e9e9e9;
-        }
+
         .footer {
-            margin-top: 20px;
+            margin-top: 25px;
+            text-align: right;
             font-size: 11px;
             color: #666;
-            text-align: right;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
         }
     </style>
 </head>
@@ -76,15 +103,16 @@
 
     <!-- Header -->
     <div class="header">
-         <div class="header-right">
-            {{-- logo perusahaan --}}
-          @if($logo)
-            <img src="{{ $logo }}" alt="Logo" style="height:100px;">
-        @endif
-        </div>
         <div class="header-left">
-            <h2>{{ $perusahaan->nama_perusahaan }}</h2>
-            <div>Laporan Laba Rugi</div>
+              @php
+                    $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id ?? null);
+                    $logoPerusahaan = $perusahaan && $perusahaan->logo
+                        ? public_path('storage/' . $perusahaan->logo)
+                        : public_path('assets/default_logo.png');
+                @endphp
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($logoPerusahaan)) }}" alt="Logo Perusahaan" width="100">
+            <h2>{{ strtoupper($perusahaan->nama_perusahaan) }}</h2>
+            <div class="subtitle">LAPORAN LABA RUGI</div>
             <div class="periode">
                 Periode:
                 @if($periode === 'tahunan')
@@ -96,19 +124,15 @@
                 @endif
             </div>
         </div>
-
+       
     </div>
 
     <!-- Pendapatan -->
-    <table class="table">
-        <tr class="section-title">
-            <td>Pendapatan</td><td></td>
-        </tr>
+    <table>
+        <tr class="section-title"><td>Pendapatan</td><td></td></tr>
         @foreach($labaRugi['pendapatan'] ?? [] as $item)
-        <tr>
-            <td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
-            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td>
-        </tr>
+        <tr><td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
+            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td></tr>
         @endforeach
         <tr class="subtotal">
             <td>Total Pendapatan</td>
@@ -117,15 +141,11 @@
     </table>
 
     <!-- HPP -->
-    <table class="table">
-        <tr class="section-title">
-            <td>Harga Pokok Penjualan</td><td></td>
-        </tr>
+    <table>
+        <tr class="section-title"><td>Harga Pokok Penjualan</td><td></td></tr>
         @foreach($labaRugi['hpp'] ?? [] as $item)
-        <tr>
-            <td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
-            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td>
-        </tr>
+        <tr><td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
+            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td></tr>
         @endforeach
         <tr class="subtotal">
             <td>Total Harga Pokok Penjualan</td>
@@ -134,23 +154,17 @@
     </table>
 
     <!-- Laba Kotor -->
-    <table class="table">
-        <tr class="final-total">
-            <td>Laba Kotor</td>
-            <td>Rp {{ number_format($labaRugi['laba_kotor'] ?? 0,2,',','.') }}</td>
-        </tr>
+    <table>
+        <tr class="final-total"><td>Laba Kotor</td>
+            <td>Rp {{ number_format($labaRugi['laba_kotor'] ?? 0,2,',','.') }}</td></tr>
     </table>
 
     <!-- Beban Operasional -->
-    <table class="table">
-        <tr class="section-title">
-            <td>Beban Operasional</td><td></td>
-        </tr>
+    <table>
+        <tr class="section-title"><td>Beban Operasional</td><td></td></tr>
         @foreach($labaRugi['beban_operasional'] ?? [] as $item)
-        <tr>
-            <td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
-            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td>
-        </tr>
+        <tr><td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
+            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td></tr>
         @endforeach
         <tr class="subtotal">
             <td>Total Beban Operasional</td>
@@ -159,29 +173,21 @@
     </table>
 
     <!-- Laba Operasional -->
-    <table class="table">
-        <tr class="final-total">
-            <td>Laba Operasional</td>
-            <td>Rp {{ number_format($labaRugi['laba_operasional'] ?? 0,2,',','.') }}</td>
-        </tr>
+    <table>
+        <tr class="final-total"><td>Laba Operasional</td>
+            <td>Rp {{ number_format($labaRugi['laba_operasional'] ?? 0,2,',','.') }}</td></tr>
     </table>
 
     <!-- Pendapatan / Beban Lainnya -->
-    <table class="table">
-        <tr class="section-title">
-            <td>Pendapatan / Beban Lainnya</td><td></td>
-        </tr>
+    <table>
+        <tr class="section-title"><td>Pendapatan / Beban Lainnya</td><td></td></tr>
         @foreach($labaRugi['pendapatan_lainnya'] ?? [] as $item)
-        <tr>
-            <td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
-            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td>
-        </tr>
+        <tr><td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
+            <td>Rp {{ number_format($item->saldo,2,',','.') }}</td></tr>
         @endforeach
         @foreach($labaRugi['beban_lainnya'] ?? [] as $item)
-        <tr>
-            <td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
-            <td>(Rp {{ number_format($item->saldo,2,',','.') }})</td>
-        </tr>
+        <tr><td>{{ $item->kode_akun ?? '' }} {{ $item->nama_akun }}</td>
+            <td>(Rp {{ number_format($item->saldo,2,',','.') }})</td></tr>
         @endforeach
         <tr class="subtotal">
             <td>Total Pendapatan / Beban Lainnya</td>
@@ -190,7 +196,7 @@
     </table>
 
     <!-- Laba (Rugi) Bersih -->
-    <table class="table">
+    <table>
         <tr class="final-total">
             <td>Laba (Rugi) Bersih</td>
             <td>Rp {{ number_format($labaRugi['laba_bersih'] ?? 0,2,',','.') }}</td>
@@ -198,7 +204,7 @@
     </table>
 
     <div class="footer">
-        Laporan Laba Rugi : {{ $periode ?? '' }}
+        Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}
     </div>
 
 </body>

@@ -313,7 +313,7 @@ class ProdukController extends Controller
         'total_akhir'  => 'required',
         'items'        => 'required|array|min:1',
     ]);
-
+dd($request->all());
     // 🔹 Validasi tiap item
     foreach ($request->items as $index => $item) {
         $request->validate([
@@ -386,7 +386,7 @@ class ProdukController extends Controller
         // 🔹 Update stok produk
         $produk->stok += $selisih;
         $produk->satuan_id = $satuan;
-        $produk->harga_jual = $harga;
+        $produk->harga = $harga;
         $produk->save();
 
         // 🔹 Log aktivitas stok masuk saja (keluar akan dihandle di transaksi)

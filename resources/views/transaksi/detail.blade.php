@@ -441,7 +441,7 @@
                                         Nama Produk</th>
                                     <th
                                         class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 w-1/3 text-center">
-                                       Harga</th>
+                                       Harga Jual</th>
                                     <th
                                         class="border dark:border-white/10 border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 text-center">
                                         Barang Keluar</th>
@@ -571,10 +571,35 @@
 
                                         </td>
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                            <input type="text" name="barang_keluar[]"
-                                                class="form-input w-20 text-center border-gray-300 rounded-md "
-                                                value="Rp. {{ number_format($harga ?? 0, 0, ',', '.') }}" data-index="{{ $index }}"
-                                                data-harga="{{ $harga }}" disabled>
+                                            <span>Rp. </span>
+                                         <input type="text" 
+                                                name="barang_keluar_display[]" 
+                                                class="harga-hidden form-input w-28 text-center border-gray-300 rounded-md harga-input"
+                                                value="{{ number_format($harga ?? 0, 0, ',', '.') }}"
+                                                data-index="{{ $index }}"
+                                                placeholder="0">
+
+                                            <input type="hidden" name="harga_dekstop[]" class="harga-hidden" value="{{ $harga }}">
+
+
+                                            <script>
+                                          document.querySelectorAll('.harga-input').forEach((input) => {
+                                                input.addEventListener('input', function (e) {
+                                                    const angka = e.target.value.replace(/[^\d]/g, '');
+                                                    e.target.value = formatRupiah(angka);
+
+                                                    // isi hidden input di bawahnya
+                                                    const hidden = e.target.nextElementSibling;
+                                                    hidden.value = angka;
+                                                });
+                                            });
+
+                                            function formatRupiah(angka) {
+                                                if (!angka) return 'Rp. 0';
+                                                return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                                            }
+                                            </script>
+
                                         </td>
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
                                             <input type="number" name="barang_keluar[]"
@@ -851,6 +876,130 @@
                             });
                         </script>
                     </form>
+               
+
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const form = document.getElementById('form-transaksi');
+
+                            // Tambahkan data-default ke setiap input harga
+                            document.querySelectorAll('.harga-hidden').forEach(input => {
+                                input.dataset.default = input.value; // simpan harga awal
+                            });
+
+                            async function kirimData(event) {
+                                const input = event.target;
+                                const isDark = document.documentElement.classList.contains('dark');
+
+                                const result = await Swal.fire({
+                                    title: 'Ubah Penawaran Harga?',
+                                    text: 'Perubahan ini akan memperbarui data penawaran harga di sistem.',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Ya, ubah sekarang',
+                                    cancelButtonText: 'Batal',
+                                    reverseButtons: true,
+                                    background: isDark ? '#0f172a' : '#fff',
+                                    color: isDark ? '#e2e8f0' : '#374151',
+                                    customClass: {
+                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                        title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                        htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                        confirmButton: (isDark
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none'),
+                                        cancelButton: (isDark
+                                            ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg ml-2'
+                                            : 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2'),
+                                    },
+                                    buttonsStyling: false,
+                                });
+
+                                // Jika user klik "Batal", kembalikan ke harga default
+                                if (!result.isConfirmed) {
+                                    const defaultValue = input.dataset.default || '0';
+                                    input.value = defaultValue;
+                                    console.log('Batal diubah. Kembali ke harga default:', defaultValue);
+                                    return;
+                                }
+
+                                // Proses update harga ke server
+                                const formData = new FormData(form);
+
+                                try {
+                                    const res = await fetch('{{ route("transaksi.update") }}', {
+                                        method: 'POST',
+                                        body: formData,
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                                        },
+                                    });
+
+                                    const data = await res.json();
+
+                                    if (data.success) {
+                                        // Simpan harga baru sebagai default
+                                        input.dataset.default = input.value;
+
+                                        await Swal.fire({
+                                            icon: 'success',
+                                            title: 'Harga diperbarui!',
+                                            text: data.message || 'Data penawaran berhasil diperbarui.',
+                                            timer: 1500,
+                                            showConfirmButton: false,
+                                            background: isDark ? '#0f172a' : '#fff',
+                                            color: isDark ? '#e2e8f0' : '#374151',
+                                            customClass: {
+                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                                title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                                htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                            }
+                                        });
+                                        location.reload();
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Gagal!',
+                                            text: data.message || 'Tidak dapat memperbarui harga.',
+                                            confirmButtonText: 'Tutup',
+                                            background: isDark ? '#0f172a' : '#fff',
+                                            color: isDark ? '#e2e8f0' : '#374151',
+                                            customClass: {
+                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                                confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
+                                                title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                                htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                            },
+                                            buttonsStyling: false
+                                        });
+                                    }
+
+                                } catch (err) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Koneksi gagal',
+                                        text: 'Tidak dapat menghubungi server. Pastikan koneksi stabil.',
+                                        confirmButtonText: 'OK',
+                                        background: isDark ? '#0f172a' : '#fff',
+                                        color: isDark ? '#e2e8f0' : '#374151',
+                                        customClass: {
+                                            popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
+                                            title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                            htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                        },
+                                        buttonsStyling: false
+                                    });
+                                }
+                            }
+
+                            document.querySelectorAll('.harga-hidden').forEach(input => {
+                                input.addEventListener('change', kirimData);
+                            });
+                        });
+                        </script>
+
                 </div>
                 <form action="{{ route('transaksi.update') }}" method="POST" id="form-transaksi-mobile">
                     @csrf
@@ -913,13 +1062,19 @@
                                                     m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
                                             </svg>
                                         </button>
-
+                                        @php
+                                            // Ubah kode produk agar aman untuk dipakai di event name
+                                            $eventId = str_replace(['/', ' ', '.'], '-', strtolower($row->produk->kode_produk ?? ''));
+                                        @endphp
                                         <!-- Nama Produk -->
-                                        <button type="button"
-                                            onclick="showProductDetail2('{{ $row->produk->kode_produk ?? '-' }}')"
-                                            class="text-sm font-semibold text-gray-800 hover:text-blue-600">
+                                       <button 
+                                            type="button"
+                                            @click="window.dispatchEvent(new CustomEvent('detail-{{ $eventId }}'))"
+                                            class="text-sm font-semibold text-gray-800 hover:text-blue-600"
+                                        >
                                             {{ $row->produk->nama_produk ?? '-' }}
                                         </button>
+
                                     </div>
 
                                     <!-- Kanan: Harga -->
@@ -927,89 +1082,128 @@
                                         Rp.{{ number_format($total_mobile ?? 0, 0, ',', '.') }}
                                     </p>
                                 </div>
+                                <!-- Modal -->
+                                <div x-data="{ open: false }" @detail-{{ $eventId }}.window="open = true" @close-modal.window="open = false">
+                                    <!-- Overlay -->
+                                    <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto" :class="{ 'block': open, 'hidden': !open }">
+                                        <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
+                                            <!-- Modal Box -->
+                                            <div x-show="open" x-transition x-transition.duration.300 class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8" style="display: none;">
+                                                <!-- Header -->
+                                                <div class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
+                                                    <h5 class="font-semibold text-lg">Detail Transaksi</h5>
+                                                    <button type="button" class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white" @click="open = false">
+                                                        <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
+                                                            <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div class="p-0">
+                                                   <table class="w-full text-sm border border-gray-300 dark:border-white/10 rounded-lg overflow-hidden">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 w-1/3 px-3 py-2 font-medium">
+                                                                    Kode
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 w-2/3 px-3 py-2">
+                                                                    {{ $row->produk->kode_produk ?? '-' }}
+                                                                    <input type="hidden" name="kode_produk[]" value="{{ $row->produk->kode_produk ?? '-' }}">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                    Nama
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                    {{ $row->produk->nama_produk ?? '-' }}
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                    Harga <span class="text-red-600">*</span>
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                    <input type="text" 
+                                                                        name="barang_keluar_display[]" 
+                                                                        class="harga-mobile form-input w-full  border-gray-300 dark:border-white/10 rounded-md harga-input"
+                                                                        value="{{ number_format($harga_mobile ?? 0, 0, ',', '.') }}"
+                                                                        data-index="{{ $index }}"
+                                                                        placeholder="0">
+
+                                                                    <input type="hidden" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                    Barang Keluar <span class="text-red-600">*</span>
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                    <input type="number" 
+                                                                        name="barang_keluar[]" 
+                                                                        class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-keluar-input-mobile"
+                                                                        value="{{ $barang_keluar_mobile }}"
+                                                                        data-harga="{{ $harga_mobile }}"
+                                                                        data-index="{{ $myindex }}"
+                                                                        min="0">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                    Barang Terjual <span class="text-red-600">*</span>
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                    <input type="number" 
+                                                                        name="barang_terjual[]" 
+                                                                        class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-terjual-input-mobile"
+                                                                        value="{{ $barang_terjual_mobile }}"
+                                                                        data-index="{{ $myindex }}"
+                                                                        min="0">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                    Barang Retur <span class="text-red-600">*</span>
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                    <input type="number" 
+                                                                        name="barang_retur[]" 
+                                                                        class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-retur-input-mobile"
+                                                                        value="{{ $barang_retur_mobile }}"
+                                                                        data-index="{{ $myindex }}"
+                                                                        min="0">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                    Total
+                                                                </td>
+                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                    Rp. <input type="text" 
+                                                                        name="total_item[]" 
+                                                                        value="{{ number_format($total_mobile, 0, ',', '.') }}" 
+                                                                        class="form-input harga-input w-full  border-gray-300 dark:border-white/10 rounded-md total-harga-input-mobile"
+                                                                        data-index="{{ $myindex }}" 
+                                                                        readonly>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                                                                    
+                                                                                                        <div class="mt-5 p-5">
+                                                                                                            <button type="button" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" @click="open = false">
+                                                                                                                Oke
+                                                                                                            </button>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
 
 
-
-                                <div id="modal-detail2-{{ $row->produk->kode_produk ?? '' }}"
-                                    class="fixed inset-0 z-40 hidden overflow-y-auto bg-black/40 flex items-center justify-center">
-
-                                    <div class="relative bg-white dark:bg-black dark:border-white/10 w-11/12 max-w-sm mx-auto rounded-lg shadow-lg p-5 z-10 space-y-3 animate-fadeIn">
-                                        <!-- Header Modal -->
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h3 class="text-lg font-bold">Detail Produk</h3>
-                                            <button type="button"
-                                                class="text-gray-500 hover:text-red-600 text-2xl leading-none"
-                                                onclick="closeProductDetail2('{{ $row->produk->kode_produk ?? '-' }}')">
-                                                &times;
-                                            </button>
-                                        </div>
-
-                                        <!-- Tabel Detail -->
-                                        <table class="w-full text-sm border border-gray-300">
-                                            <tbody>
-                                                <tr>
-                                                    <td class="border px-2 py-1 font-medium">Kode</td>
-                                                    <td class="border px-2 py-1">{{ $row->produk->kode_produk ?? '-' }}</td>
-                                                    <input type="hidden" name="kode_produk[]"
-                                                    value="{{ $row->produk->kode_produk ?? '-' }}">
-                                                </tr>
-                                                <tr>
-                                                    <td class="border px-2 py-1 font-medium">Nama</td>
-                                                    <td class="border px-2 py-1">{{ $row->produk->nama_produk ?? '-' }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="border px-2 py-1 font-medium">Barang Keluar <span class="text-red-600">*</span></td>
-                                                    <td class="border px-2 py-1">
-                                                        <input type="number" name="barang_keluar[]"
-                                                            class="form-input w-20 text-center border-gray-300 rounded-md barang-keluar-input-mobile"
-                                                            value="{{ $barang_keluar_mobile }}"
-                                                            data-harga="{{ $harga_mobile }}"
-                                                            data-index="{{ $myindex }}"
-                                                            min="0">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="border px-2 py-1 font-medium">Barang Terjual <span class="text-red-600">*</span></td>
-                                                    <td class="border px-2 py-1">
-                                                        <input type="number" name="barang_terjual[]"
-                                                            class="form-input w-20 text-center border-gray-300 rounded-md barang-terjual-input-mobile"
-                                                            value="{{ $barang_terjual_mobile }}"
-                                                            data-index="{{ $myindex }}"
-                                                            min="0">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="border px-2 py-1 font-medium">Barang Retur <span class="text-red-600">*</span></td>
-                                                    <td class="border px-2 py-1">
-                                                        <input type="number" name="barang_retur[]"
-                                                            class="form-input w-20 text-center border-gray-300 rounded-md barang-retur-input-mobile"
-                                                            value="{{ $barang_retur_mobile }}"
-                                                            data-index="{{ $myindex }}"
-                                                            min="0">
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="border px-2 py-1 font-medium">Total</td>
-                                                    <td class="border px-2 py-1">Rp.
-                                                        <input type="text" name="harga[]"
-                                                            value="{{ number_format($total_mobile, 0, ',', '.') }}"
-                                                            class="form-input harga-input w-24 text-right border-gray-300 rounded-md total-harga-input-mobile"
-                                                            data-index="{{ $myindex }}"
-                                                            readonly>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <small><span class="text-red-600">*</span> : Form yang bisa di isi</small>
-                                        <!-- Tombol Tutup -->
-                                        <button type="button"
-                                            class="w-full mt-3 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-                                            onclick="closeProductDetail2('{{ $row->produk->kode_produk ?? '-' }}')">
-                                            Simpan
-                                        </button>
-                                    </div>
-                                </div>
-
+            
                                 <!-- JS Modal Handler -->
                                 <script>
                                     function showProductDetail2(kode) {
@@ -1101,7 +1295,126 @@
                                 </td>
                             </tr>
                         </table>
+                            <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                        const form = document.getElementById('form-transaksi-mobile');
+                                const isDark = document.documentElement.classList.contains('dark');
 
+                                // 💰 Format input ke ribuan (Rupiah-style)
+                                document.querySelectorAll('.harga-mobile').forEach(input => {
+                                    input.dataset.default = input.value; // simpan nilai awal
+
+                                    input.addEventListener('input', e => {
+                                        const angka = e.target.value.replace(/\D/g, '');
+                                        e.target.value = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+                                    });
+
+                                    input.addEventListener('change', async (e) => {
+                                        const angkaBersih = e.target.value.replace(/\D/g, '');
+
+                                        const result = await Swal.fire({
+                                            title: 'Ubah Penawaran Harga?',
+                                            text: 'Perubahan ini akan memperbarui data penawaran harga di sistem.',
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Ya, ubah sekarang',
+                                            cancelButtonText: 'Batal',
+                                            reverseButtons: true,
+                                            background: isDark ? '#0f172a' : '#fff',
+                                            color: isDark ? '#e2e8f0' : '#374151',
+                                            customClass: {
+                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                                confirmButton: (isDark
+                                                    ? 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg'
+                                                    : 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg'),
+                                                cancelButton: (isDark
+                                                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg ml-2'
+                                                    : 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2'),
+                                            },
+                                            buttonsStyling: false,
+                                        });
+
+                                        // ❌ Batal ubah
+                                        if (!result.isConfirmed) {
+                                            e.target.value = e.target.dataset.default; // kembalikan harga semula
+                                            return;
+                                        }
+
+                                        // 📨 Kirim data ke server via AJAX
+                                        const formData = new FormData(form);
+                                        formData.set(e.target.name, angkaBersih); // pastikan nilai bersih dikirim
+
+                                        try {
+                                            const res = await fetch(form.action, {
+                                                method: 'POST',
+                                                body: formData,
+                                                headers: {
+                                                    'X-Requested-With': 'XMLHttpRequest',
+                                                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                                                },
+                                            });
+
+                                            const data = await res.json();
+
+                                            if (data.success) {
+                                                e.target.dataset.default = e.target.value; // simpan harga baru
+
+                                                await Swal.fire({
+                                                    icon: 'success',
+                                                    title: 'Harga diperbarui!',
+                                                    text: data.message || 'Data penawaran berhasil diperbarui.',
+                                                    timer: 1500,
+                                                    showConfirmButton: false,
+                                                    background: isDark ? '#0f172a' : '#fff',
+                                                    color: isDark ? '#e2e8f0' : '#374151',
+                                                    customClass: {
+                                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                                    }
+                                                });
+
+                                                location.reload();
+                                            } else {
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: 'Gagal!',
+                                                    text: data.message || 'Tidak dapat memperbarui harga.',
+                                                    confirmButtonText: 'Tutup',
+                                                    background: isDark ? '#0f172a' : '#fff',
+                                                    color: isDark ? '#e2e8f0' : '#374151',
+                                                    customClass: {
+                                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
+                                                    },
+                                                    buttonsStyling: false
+                                                });
+                                            }
+
+                                        } catch (err) {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Koneksi gagal',
+                                                text: 'Tidak dapat menghubungi server. Pastikan koneksi stabil.',
+                                                confirmButtonText: 'OK',
+                                                background: isDark ? '#0f172a' : '#fff',
+                                                color: isDark ? '#e2e8f0' : '#374151',
+                                                customClass: {
+                                                    popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
+                                                },
+                                                buttonsStyling: false
+                                            });
+                                        }
+                                    });
+                                });
+
+                                // Sebelum submit form (jaga-jaga kalau submit manual)
+                                form.addEventListener('submit', () => {
+                                    document.querySelectorAll('.harga-hidden').forEach(el => {
+                                        el.value = el.value.replace(/\D/g, '');
+                                    });
+                                });
+                            });
+                            </script>
                         <script>
                             // Format angka ke format Rupiah (mis: 15000 → 15.000)
                             function formatRupiah(angka) {

@@ -201,6 +201,7 @@ class TransaksiController extends Controller
 
     public function transaksiUpdate(Request $request)
     {
+      
         $request->validate([
             'kode_mitra' => 'required|exists:mitras,kode_mitra',
             'nomor_transaksi' => 'required',
@@ -222,7 +223,7 @@ class TransaksiController extends Controller
         $transaksi->total = str_replace(['.', ','], '', $request->grand_total);
         $transaksi->status_bayar = $request->status_bayar;
         $transaksi->auth = auth()->user()->id;
-
+        
        foreach ($request->kode_produk as $index => $kode_produk) {
 
                 $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
@@ -253,6 +254,8 @@ class TransaksiController extends Controller
                 }
 
                 // Update transaksi_product
+                $harga = $request->harga_dekstop[$index] ?? $request->harga_mobile[$index] ?? '0';
+                $barangTerjual = $request->barang_terjual[$index] ?? 0;
                 $transaksiProduct = TransaksiProduct::updateOrCreate(
                     [
                         'kode_produk'    => $kode_produk,
@@ -260,13 +263,23 @@ class TransaksiController extends Controller
                         'kode_mitra'     => $kode_mitra,
                     ],
                     [
+                        'harga'           => $harga,
                         'barang_keluar'  => $barangKeluarBaru,
-                        'barang_terjual' => $request->barang_terjual[$index] ?? 0,
+                        'barang_terjual' => $barangTerjual,
                         'barang_retur'   => $barangReturBaru,
-                        'total'          => str_replace(['.', ','], '', $request->harga[$index] ?? 0),
+                        'total'          => $harga * $barangTerjual,
                     ]
                 );
-
+                Penawaran::updateOrCreate(
+                    [
+                        'kode_mitra'  => $kode_mitra,
+                        'kode_produk' => $kode_produk,
+                    ],
+                    [
+                        'harga'       => $harga,
+                        'updated_at'  => now(),
+                    ]
+                );
                 // Update stok
                 if ($selisihKeluar != 0) {
                     Produk::where('kode_produk', $kode_produk)
@@ -299,7 +312,7 @@ class TransaksiController extends Controller
                 }
             }
 
-
+            
         $transaksi->update();
 
 
@@ -307,8 +320,27 @@ class TransaksiController extends Controller
             ->causedBy(auth()->user())
             ->performedOn($transaksi)
             ->log('Memperbarui transaksi');
+            $success = true;
+            $message = 'Data transaksi berhasil diperbarui!';
+            $info = 'Harga penawaran juga telah disesuaikan berdasarkan kode mitra dan produk.';
 
-        return redirect()->route('transaksi.detail', ['id' => $transaksi->id])->with("success", "Data has been updated successfully!");
+            // Jika request datang dari AJAX, kembalikan JSON
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => $success,
+                    'message' => $message,
+                    'info'    => $info,
+                ]);
+            }
+
+            // Jika request biasa (non-AJAX), redirect dengan flash message
+            return back()->with([
+                'success' => $message,
+                'info'    => $info,
+            ]);
+
+       
+
     }
 
     public function konsinyasi($id){

@@ -701,23 +701,60 @@ class KeuanganController extends Controller
 
  public function cetakHistoryPDF($id_rekening)
 {
-    $histories = HistoryRekeningTable::where('id_rekening', $id_rekening)
-        ->orderBy('tanggal', 'desc')
-        ->get();
+    $histories = HistoryRekeningTable::where('id_rekening', $id_rekening);
 
-    $rekening = RekeningTable::where('kode_rekening',$id_rekening)->first();
+    // Ambil parameter dari request
+    $periode = request('periode');
+    $bulan = request('bulan');
+    $tahun_bulan = request('tahun_bulan');
+    $tahun_tahun = request('tahun_tahun');
+    $tanggal_awal = request('tanggal_awal');
+    $tanggal_akhir = request('tanggal_akhir');
 
-    if (!$rekening) {
-        abort(404, 'Rekening tidak ditemukan');
+    // Pastikan bulan dalam format 2 digit
+    if ($bulan) {
+        $bulan = str_pad($bulan, 2, '0', STR_PAD_LEFT);
     }
 
+    // Filter tanggal (format dd/mm/YYYY)
+    if ($tanggal_awal && $tanggal_akhir) {
+        try {
+            $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+            $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+
+            $histories->whereRaw("
+                STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
+            ", [$fromDate, $toDate]);
+        } catch (\Exception $e) {
+            // Jika format tanggal salah, lewati filter
+        }
+    } elseif ($periode == 'bulanan' && $bulan && $tahun_bulan) {
+        // Filter berdasarkan bulan & tahun
+        $histories->whereRaw("
+            MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? 
+            AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+        ", [$bulan, $tahun_bulan]);
+    } elseif ($tahun_tahun) {
+        // Filter berdasarkan tahun
+        $histories->whereRaw("
+            YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
+        ", [$tahun_tahun]);
+    }
+
+    // Urutkan berdasarkan tanggal terbaru
+    $histories = $histories->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') DESC")->get();
+
+    // Ambil data rekening
+    $rekening = RekeningTable::where('kode_rekening', $id_rekening)->firstOrFail();
+
+    // Generate PDF
     $pdf = Pdf::loadView('keuangan.pdfHistory', [
         'histories' => $histories,
         'name' => $rekening
     ])->setPaper('a4', 'portrait');
 
-    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rekening->nama_rekening); // sanitasi nama file
-
+    // Sanitasi nama file agar aman
+    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rekening->nama_rekening);
     $filename = "CetakHistory-keuangan-dari-{$safeName}.pdf";
 
     return $pdf->download($filename);

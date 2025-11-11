@@ -8,131 +8,131 @@
             font-family: Arial, Helvetica, sans-serif;
             font-size: 12px;
             color: #333;
-            margin: 30px;
+            margin: 0;
+            padding: 30px;
+            background: #fff;
         }
+
+        /* HEADER */
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
+            align-items: flex-start;
+            border-bottom: 3px solid #ffd700; /* garis bawah kuning */
             padding-bottom: 10px;
+            margin-bottom: 25px;
         }
-        .header-left {
-            flex: 2;
-        }
-        .header-left img {
-            height: 60px;
-            object-fit: contain;
-            margin-bottom: 20px;
-        }
-        .header-center {
 
-            flex: 2;
+        .header-left {
             text-align: left;
         }
-        .header-center h2 {
+
+        .header-left h2 {
             margin: 0;
-            font-size: 24px;
+            font-size: 18px;
+            color: #003399;
             font-weight: bold;
         }
-        .header-center .title {
-            font-size: 16px;
-            margin: 5px 0;
+
+        .header-left .title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #000;
+            margin-top: 3px;
         }
-        .header-center .periode {
-            font-size: 14px;
+
+        .header-left .periode {
+            font-size: 13px;
             color: #666;
             margin-top: 5px;
         }
-        .header-right {
-            flex: 1;
-            text-align: right;
+
+        .header-right img {
+            height: 50px;
+            object-fit: contain;
         }
-        .table {
+
+        /* TABEL */
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }
-        .table th, .table td {
-            padding: 8px 10px;
-            border: 1px solid #ddd;
+
+        th, td {
+            padding: 6px 8px;
+          
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        th {
             text-align: left;
-        }
-        .table th {
-            background: #f0f0f0;
+            background-color: #003399;
+            color: #fff;
             font-weight: bold;
-            text-align: center;
+            font-size: 12px;
+           
         }
-        .table td:nth-child(1) {
-            width: 15%;
-            text-align: center;
-        }
-        .table td:nth-child(2) {
-            width: 45%;
-        }
-        .table td:nth-child(3), .table td:nth-child(4) {
-            width: 20%;
-            text-align: right;
-        }
-        .table .subtotal {
+
+
+        tr.subtotal td {
             font-weight: bold;
-            background: #fafafa;
+            background-color: #eef2fb;
         }
-        .table .final-total {
+
+        tr.final-total td {
             font-weight: bold;
-            background: #e9e9e9;
+            background-color: #d1d9f0;
+            border-top: 2px solid #003399;
         }
+
         .balance-ok {
             color: green;
             font-weight: bold;
         }
+
         .balance-error {
             color: red;
             font-weight: bold;
         }
+
+        /* FOOTER */
         .footer {
             margin-top: 30px;
             font-size: 11px;
             color: #666;
-            text-align: center;
+            text-align: right;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding-top: 8px;
         }
-
     </style>
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- HEADER -->
     <div class="header">
         <div class="header-left">
-            {{-- logo perusahaan --}}
-            @if(isset($logo) && $logo)
-                <img src="{{ $logo }}" alt="Logo">
+             @if(isset($logo) && $logo)
+                <img src="{{ $logo }}" alt="Logo" width="100">
             @endif
-        </div>
-        <div class="header-center">
-            <h2>{{ isset($perusahaan) ? $perusahaan->nama_perusahaan : 'Perusahaan' }}</h2>
-            <div class="title">Laporan Neraca Saldo</div>
+            <h2>{{ strtoupper($perusahaan->nama_perusahaan ?? 'PERUSAHAAN') }}</h2>
+            <div class="title">LAPORAN NERACA SALDO</div>
             <div class="periode">
                 Periode:
                 @if(isset($periode) && $periode === 'tahunan')
-                    Tahunan {{ isset($tahun) ? $tahun : date('Y') }}
+                    Tahunan {{ $tahun ?? date('Y') }}
                 @elseif(isset($periode) && $periode === 'rentang' && isset($tanggal_awal) && isset($tanggal_akhir))
                     {{ $tanggal_awal }} s.d. {{ $tanggal_akhir }}
                 @else
-                    {{ isset($bulan) ? \Carbon\Carbon::createFromFormat('m', $bulan)->translatedFormat('F') : \Carbon\Carbon::now()->translatedFormat('F') }} {{ isset($tahun) ? $tahun : date('Y') }}
+                    {{ isset($bulan) ? \Carbon\Carbon::createFromFormat('m', $bulan)->translatedFormat('F') : \Carbon\Carbon::now()->translatedFormat('F') }}
+                    {{ $tahun ?? date('Y') }}
                 @endif
             </div>
         </div>
-        <div class="header-right">
-            {{-- Kosongkan untuk balance --}}
-        </div>
     </div>
 
-    <!-- Table -->
-    <table class="table">
+    <!-- TABLE -->
+    <table>
         <thead>
             <tr>
                 <th>Kode</th>
@@ -152,17 +152,17 @@
                 </tr>
                 @endforeach
 
-                {{-- Total --}}
+                {{-- TOTAL --}}
                 <tr class="subtotal">
-                    <td colspan="2" style="text-align: center; font-weight: bold;">Total</td>
-                    <td style="text-align: right; font-weight: bold;">{{ number_format($data->sum('saldo_debit'), 0, ',', '.') }}</td>
-                    <td style="text-align: right; font-weight: bold;">{{ number_format($data->sum('saldo_kredit'), 0, ',', '.') }}</td>
+                    <td colspan="2" >Total</td>
+                    <td>{{ number_format($data->sum('saldo_debit'), 0, ',', '.') }}</td>
+                    <td>{{ number_format($data->sum('saldo_kredit'), 0, ',', '.') }}</td>
                 </tr>
 
-                {{-- Balance --}}
+                {{-- BALANCE --}}
                 <tr class="final-total">
-                    <td colspan="2" style="text-align: center; font-weight: bold;">Balance</td>
-                    <td colspan="2" style="text-align: center; font-weight: bold;">
+                    <td colspan="2" >Balance</td>
+                    <td colspan="2" ">
                         @php
                             $totalDebit = $data->sum('saldo_debit');
                             $totalKredit = $data->sum('saldo_kredit');
@@ -173,16 +173,18 @@
                         @else
                             <span class="balance-error">Tidak Seimbang (Selisih: {{ number_format($selisih, 0, ',', '.') }})</span>
                         @endif
+                    </td>
+                </tr>
             @else
                 <tr>
-                    <td colspan="4" style="text-align: center; padding: 20px;">Tidak ada data transaksi untuk periode ini</td>
+                    <td colspan="4" style="text-align:center; padding:20px;">Tidak ada data transaksi untuk periode ini</td>
                 </tr>
             @endif
         </tbody>
     </table>
 
     <div class="footer">
-        Laporan Neraca Saldo - {{ isset($perusahaan) ? $perusahaan->nama_perusahaan : 'Perusahaan' }}
+        Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}
     </div>
 
 </body>

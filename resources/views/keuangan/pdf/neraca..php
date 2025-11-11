@@ -15,21 +15,38 @@
             border-radius: 8px;
             overflow: hidden;
         }
+        /* ===== HEADER ===== */
         .header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             padding: 12px 20px;
             border-bottom: 1px solid #ccc;
         }
-        .header h2 {
-            font-size: 18px;
-            margin: 0;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .header span {
+        .header-left img {
+            height: 45px;
+            width: auto;
+            border-radius: 6px;
+        }
+        .header-title {
+            text-align: left;
+        }
+        .header-title h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .header-title span {
             font-size: 12px;
             color: #666;
         }
+
+        /* ===== BOX RINGKASAN ===== */
         .ringkasan {
             display: flex;
             justify-content: space-between;
@@ -45,6 +62,7 @@
             background: #f5f9ff;
         }
         .box:nth-child(2) { background: #f8f5ff; }
+        .box:nth-child(3) { background: #f5fff7; }
         .box .label {
             font-size: 12px;
             color: #666;
@@ -54,6 +72,8 @@
             font-weight: bold;
             margin-top: 4px;
         }
+
+        /* ===== TABLE-LIKE SECTION ===== */
         .table-header {
             display: flex;
             justify-content: space-between;
@@ -98,13 +118,27 @@
 <body>
     <div class="container">
 
-        {{-- Header --}}
+        {{-- HEADER --}}
         <div class="header">
-            <h2>Laporan Neraca <span>(Dalam Rupiah)</span></h2>
-            <small>Periode: {{ $bulan }}/{{ $tahun }}</small>
+            <div class="header-title">
+                <h2>LAPORAN NERACA</h2>
+                <span>Periode: {{ $bulan }}/{{ $tahun }}</span><br>
+                <span>(Dalam Rupiah)</span>
+            </div>
+
+            <div class="header-left">
+                @php
+                    $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id ?? null);
+                    $logoPerusahaan = $perusahaan && $perusahaan->logo
+                        ? public_path('storage/' . $perusahaan->logo)
+                        : public_path('assets/default_logo.png');
+                @endphp
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($logoPerusahaan)) }}" alt="Logo Perusahaan">
+                <img src="{{ public_path('assets/app_logo.png') }}" alt="Logo Aplikasi">
+            </div>
         </div>
 
-        {{-- Ringkasan --}}
+        {{-- RINGKASAN --}}
         <div class="ringkasan">
             <div class="box">
                 <div class="label">Total Aset</div>
@@ -120,7 +154,7 @@
             </div>
         </div>
 
-        {{-- Table header --}}
+        {{-- HEADER KOLOM --}}
         <div class="table-header">
             <span>DESKRIPSI</span>
             <span>SALDO</span>
@@ -165,7 +199,7 @@
             <span>Rp {{ number_format(($neraca['ekuitas'] ?? collect())->sum('saldo'),0,',','.') }}</span>
         </div>
 
-        {{-- =================== TOTAL =================== --}}
+        {{-- =================== GRAND TOTAL =================== --}}
         <div class="grand-total">
             <span>JUMLAH HUTANG DAN EKUITAS</span>
             <span>Rp {{ number_format(

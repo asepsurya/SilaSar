@@ -345,7 +345,7 @@ class IkmController extends Controller
         "provinsi" => $provinsi,
         "percentage" => $percentage,
         "emptyFields" => $emptyFields,
-        "id" => $id,
+        "id" => $user->id,
         "logs" => $logs,
         "mitra" => $mitra,
         "produk" => $produk,

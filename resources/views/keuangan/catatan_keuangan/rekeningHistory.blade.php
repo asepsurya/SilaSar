@@ -27,7 +27,7 @@
             <span>Filter</span>
         </button>
 
-        <a href="{{ route('history.cetakpdf.harian', $id_rekening) }}" target="_blank"
+        <a href="{{ route('history.cetakpdf.harian', $id_rekening) . '?' . http_build_query(request()->query()) }}" target="_blank"
             class="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.828a2 2 0 0 0-.586-1.414l-4.828-4.828A2 2 0 0 0 13.172 2H6zm7 1.414L19.586 10H15a2 2 0 0 1-2-2V3.414zM8 15h8v2H8v-2zm0-4h8v2H8v-2z"/>
