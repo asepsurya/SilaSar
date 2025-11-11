@@ -61,7 +61,7 @@
         .select2-container--default .select2-dropdown {
             width: 200px !important;
         }
-        
+
         /* Mobile: kecil */
         @media (max-width: 768px) {
             .select2-container--default .select2-selection--single {
@@ -78,7 +78,7 @@
                 grid-template-columns: 1fr 1.5fr;
             }
         }
-       
+
         @media (max-width: 640px) { /* misal max-width 640px untuk mobile */
             .select2 {
                 width: 90% !important; /* paksa lebar 50% di mobile */
@@ -105,10 +105,10 @@
                 </button>
                 <button
                     type="submit"
-                    class="fixed right-4 bottom-0 z-50 
-                           w-12 h-12 sm:w-auto sm:h-auto 
-                           flex items-center justify-center 
-                           bg-blue-600 hover:bg-blue-700 text-white font-medium 
+                    class="fixed right-4 bottom-0 z-50
+                           w-12 h-12 sm:w-auto sm:h-auto
+                           flex items-center justify-center
+                           bg-blue-600 hover:bg-blue-700 text-white font-medium
                            rounded-full sm:rounded-lg shadow-lg transition duration-150
                            px-0 sm:px-4 py-0 sm:py-2 text-sm sm:text-base"
                 style="margin-bottom:100px;" >
@@ -194,7 +194,7 @@
             </script>
 
             <script>
-                
+
             function confirmDelete(url) {
                 Swal.fire({
                 title: 'Yakin ingin menghapus?',
@@ -220,7 +220,7 @@
             }
             </script>
         </div>
-    
+
 
         <div class="grid grid-cols-1 gap-7 lg:grid-cols-2">
               <div class="border border-black/10 dark:border-white/10 rounded-lg mb-2">
@@ -310,9 +310,19 @@
                 </div>
             </div>
         </div>
-
-            <div>
-                <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-3 rounded-md mb-5">
+        <style>
+            .scroll-box {
+    border: 1px solid rgba(0,0,0,0.1); /* border mirip border-black/10 */
+    background-color: #f9f9f9; /* ganti sesuai bg-lightwhite */
+    padding: 1rem; /* setara p-3 */
+    border-radius: 0.5rem; /* rounded-md */
+    max-height: 500px; /* tinggi maksimum */
+    overflow-y: auto; /* scroll jika konten melebihi max-height */
+     height: 500px;
+}
+        </style>
+            <div class="">
+                <div class="scroll-box border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-3 rounded-md mb-5">
                     <div class="">
                         <div class="px-2 py-1 mb-4 flex items-center justify-between">
                             <p class="text-sm font-semibold">Daftar Barang yang Dijual</p>
@@ -332,7 +342,7 @@
                                        </svg>
                                    </button>
 
-                                   
+
                                     <select class="select2 text-sm w-full " onchange="updateHarga(this)" name="kode_produk[]" required>
                                         <option value="">Pilih Produk</option>
                                         @foreach ($produk as $item)
@@ -345,9 +355,9 @@
                                 </div>
                               <div class="flex items-center gap-2">
                                     <div class="text-sm ">Rp.</div>
-                                    <input type="number" name="harga[]"
-                                        value="{{ $row->harga ? number_format($row->harga, 0, ',', '.') : '' }}"
-                                        oninput="formatCurrency(this)"
+                                    <input type="text" name="harga[]"
+                                        value="{{ $row->harga ? number_format($row->harga, 0, '.', '.') : '' }}"
+                                        oninput="formatCurrency(this)" inputmode="numeric"
                                         class="harga-input text-sm rounded border border-black/10 px-2 py-1 dark:bg-white/5 " style="width: 90px;"
                                         placeholder="0">
                                 </div>
@@ -358,57 +368,14 @@
                         @endforelse
                     </div>
 
-                        {{-- <div class="table-responsive">
-                            <table id="productTable" class="table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th width="80%">Nama Produk</th>
-                                        <th>Harga Penawaran</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($penawaran as $index => $row)
-                                        <tr class="group text-xs border-b border-black/20">
-                                            <td class="row-number">{{ $index + 1 }}</td>
-                                            <td>
-                                                <select class="select2 w-full" name="kode_produk[]"
-                                                    onchange="updateHarga(this)">
-                                                    <option value="">Pilih Produk</option>
-                                                    @foreach ($produk as $item)
-                                                        <option value="{{ $item->kode_produk }}"
-                                                            data-harga="{{ $item->harga }}" @selected($item->kode_produk == $row->kode_produk)>
-                                                            {{ $item->nama_produk }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td>
-                                                Rp.
-                                                <input type="text" name="harga[]"
-                                                    value="{{ number_format($row->harga, 0, ',', '.') }}"
-                                                    oninput="formatCurrency(this)" class="form-input harga-input" style="border:none;">
-                                            </td>
-                                            <td><button type="button" class="text-red-600 hover:text-red-800"
-                                                    onclick="removeRow(this)" data-id="{{ $row->id }}">Hapus</button>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr id="noDataRow">
-                                            <td colspan="4" class="text-center text-gray-500">Belum ada produk yang
-                                                ditawarkan.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div> --}}
+
                     </div>
                 </div>
             </div>
         </div>
     </form>
-   
+
+
     @if(session('reload'))
     <script>
         setTimeout(() => {
@@ -514,7 +481,7 @@
                                         class="harga-input text-sm rounded border border-black/10 px-2 py-1 dark:bg-white/5" style="width: 90px;"
                                         placeholder="0">
                                 </div>
-                
+
             `;
 
             productList.appendChild(div);
@@ -583,47 +550,92 @@
         });
     </script>
 
-    <script>
-        function removeRow(button) {
-            const row = button.closest('div[data-index]');
-            const penawaranId = button.getAttribute('data-id');
+   <script>
+function removeRow(button) {
+    const row = button.closest('div[data-index]');
+    const penawaranId = button.getAttribute('data-id');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const isDark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark');
 
+    Swal.fire({
+        title: 'Yakin mau hapus?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, hapus',
+        cancelButtonText: 'Batal',
+        buttonsStyling: false,
+        background: isDark ? '#1f2937' : '#ffffff',
+        color: isDark ? '#e5e7eb' : '#111827',
+        customClass: {
+            popup: 'rounded-lg shadow-lg border ' + (isDark ? 'border-gray-700' : 'border-gray-200'),
+            title: 'text-lg font-semibold ' + (isDark ? 'text-gray-100' : 'text-gray-800'),
+            htmlContainer: isDark ? 'text-gray-300' : 'text-gray-600',
+            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md focus:ring-2 focus:ring-red-400 transition',
+            cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md ml-2 focus:ring-2 focus:ring-gray-300 transition dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
             if (penawaranId) {
-                // Hapus dari database via API
                 fetch(`/mitra/produk/delete/${penawaranId}`, {
                     method: 'DELETE',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
                 })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.json()) // parse JSON
+                .then(data => {
+                    if (data.success) {
                         row.remove();
                         renumberRows();
-                        console.log('Data penawaran telah dihapus.');
+                        showSwalMessage('success', 'Berhasil!', 'Data penawaran telah dihapus.', isDark);
                     } else {
-                        alert('Gagal menghapus data.');
+                        // tampilkan pesan dari JSON
+                        showSwalMessage('error', 'Gagal!', data.message || 'Tidak dapat menghapus data.', isDark);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menghapus.');
+                    showSwalMessage('error', 'Error!', 'Terjadi kesalahan saat menghapus data.', isDark);
                 });
             } else {
-                // Jika belum tersimpan ke DB, cukup hapus dari UI
                 row.remove();
                 renumberRows();
+                showSwalMessage('success', 'Dihapus!', 'Baris berhasil dihapus.', isDark);
             }
         }
+    });
+}
 
 
-        function renumberRows() {
-            document.querySelectorAll('#productTable tbody tr .row-number').forEach((td, index) => {
-                td.textContent = index + 1;
-            });
+function showSwalMessage(icon, title, text, isDark) {
+    Swal.fire({
+        icon,
+        title,
+        text,
+        buttonsStyling: false,
+        background: isDark ? '#1f2937' : '#ffffff',
+        color: isDark ? '#e5e7eb' : '#111827',
+        customClass: {
+            popup: 'rounded-lg shadow-lg border ' + (isDark ? 'border-gray-700' : 'border-gray-200'),
+            title: 'text-lg font-semibold ' + (isDark ? 'text-gray-100' : 'text-gray-800'),
+            confirmButton: (icon === 'success'
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-red-600 hover:bg-red-700')
+                + ' text-white font-medium py-2 px-4 rounded-md focus:ring-2 transition'
         }
-    </script>
+    });
+}
+
+function renumberRows() {
+    document.querySelectorAll('#productTable tbody tr .row-number').forEach((td, index) => {
+        td.textContent = index + 1;
+    });
+}
+</script>
+
 
     <script>
         document.getElementById('gmaps-link').addEventListener('input', function () {

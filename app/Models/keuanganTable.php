@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class KeuanganTable extends Model
 {
-    protected $guarded=['id'];
+
     protected $table = 'keuangan_tables';
+      protected $guarded=['id'];
     public function akun(){
         return $this->belongsTo('App\Models\AkunTable','id_akun','id');
     }

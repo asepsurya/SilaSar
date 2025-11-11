@@ -114,7 +114,7 @@
      class="mb-4 w-full">
     <input type="text" id="produkTableSearch"
            placeholder="Cari transaksi..."
-           class="w-full form-input !rounded-full py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 placeholder:text-black/40 dark:placeholder:text-white/40 focus:border-blue-500 dark:focus:border-white/20 focus:ring focus:ring-blue-100 dark:focus:ring-white/5 shadow-sm"
+           class="w-full dark:bg-black form-input !rounded-full py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 placeholder:text-black/40 dark:placeholder:text-white/40 focus:border-blue-500 dark:focus:border-white/20 focus:ring focus:ring-blue-100 dark:focus:ring-white/5 shadow-sm"
            autocomplete="off">
 </div>
 

@@ -862,84 +862,80 @@
             });
             @endphp
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3 p-2">
+         <div class="flex flex-row md:flex-row gap-2 w-full md:w-auto">
+        <!-- Filter -->
+        <div x-data="{ openFilter: false }" class="w-auto md:w-auto relative">
+            <button type="button"
+                    @click="openFilter = !openFilter"
+                    class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-full md:w-auto">
+                <i class="fas fa-filter"></i>
+                <span class="hidden sm:inline">Filter</span>
+            </button>
 
-            {{-- Tombol Filter --}}
-            <div class="flex flex-row md:flex-row gap-2 w-full md:w-auto">
-                <!-- Filter -->
-                <div x-data="{ openFilter: false }" class="w-auto md:w-auto relative">
-                    <button type="button"
-                            @click="openFilter = !openFilter"
-                            class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-full md:w-auto">
-                        <i class="fas fa-filter"></i>
-                        <span class="hidden sm:inline">Filter</span>
-                    </button>
+            <!-- Dropdown Filter -->
+            <div x-show="openFilter"
+                 @click.away="openFilter = false"
+                 x-transition
+                 class="absolute z-50 mt-2 left-0 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg shadow-lg p-4 min-w-[320px]">
+                <form method="GET" id="filterForm" class="flex flex-col gap-3">
+                    <h3 class="font-semibold text-sm">Filter Transaksi</h3>
 
-                    <!-- Dropdown Filter -->
-                    <div x-show="openFilter"
-                         @click.away="openFilter = false"
-                         x-transition
-                         class="absolute z-50 mt-2 left-0 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg shadow-lg p-4 min-w-[320px]">
-                        <form method="GET" id="filterForm" class="flex flex-col gap-3">
-                            <h3 class="font-semibold text-sm">Filter Transaksi</h3>
-
-                            <div class="flex items-center gap-2">
-                                <label class="text-sm w-16">Dari:</label>
-                                <input type="text" name="from" id="from_date"
-                                       value="{{ $from }}"
-                                       class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
-                                       placeholder="dd/mm/yyyy" autocomplete="off">
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <label class="text-sm w-16">Sampai:</label>
-                                <input type="text" name="to" id="to_date"
-                                       value="{{ $to }}"
-                                       class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
-                                       placeholder="dd/mm/yyyy" autocomplete="off">
-                            </div>
-
-                            <div class="flex gap-2 mt-3">
-                                <button type="submit"
-                                        class="submitBtn flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition w-full">
-                                    <span class="btn-text">Terapkan</span>
-                                    <span class="btn-spinner hidden animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
-                                </button>
-
-                                <a href="{{ route('index.keuangan') }}"
-                                   class="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition w-full text-center">
-                                    Reset
-                                </a>
-                            </div>
-                        </form>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm w-16">Dari:</label>
+                        <input type="text" name="from" id="from_date"
+                               value="{{ $from }}"
+                               class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
+                               placeholder="dd/mm/yyyy" autocomplete="off">
                     </div>
-                </div>
 
-                <!-- Pilih Bulan -->
-               <form method="GET" class="flex flex-row flex-wrap items-center gap-3 w-full">
-                    <!-- Input bulan -->
-                    <input type="month"
-                        name="periode"
-                        value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
-                        onchange="this.form.submit()"
-                        class="flex-1 bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 min-w-[150px]">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm w-16">Sampai:</label>
+                        <input type="text" name="to" id="to_date"
+                               value="{{ $to }}"
+                               class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
+                               placeholder="dd/mm/yyyy" autocomplete="off">
+                    </div>
 
-                    <!-- Select tipe -->
-                    <select name="tipe"
-                        id="tipe"
-                        onchange="this.form.submit()"
-                        class="bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 w-auto"
-                        style="min-width: 140px;">
-                        <option value="" {{ request('tipe') == '' ? 'selected' : '' }}>Semua Tipe</option>
-                        <option value="pemasukan" {{ request('tipe') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
-                        <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
-                    </select>
+                    <div class="flex gap-2 mt-3">
+                        <button type="submit"
+                                class="submitBtn flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition w-full">
+                            <span class="btn-text">Terapkan</span>
+                            <span class="btn-spinner hidden animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                        </button>
+
+                        <a href="{{ route('index.keuangan') }}"
+                           class="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition w-full text-center">
+                            Reset
+                        </a>
+                    </div>
                 </form>
-
-
-
             </div>
         </div>
+
+        <!-- Pilih Bulan -->
+       <form method="GET" class="flex flex-row flex-wrap items-center gap-3 w-full">
+            <!-- Input bulan -->
+            <input type="month"
+                name="periode"
+                value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
+                onchange="this.form.submit()"
+                class="flex-1 bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 min-w-[150px]">
+
+            <!-- Select tipe -->
+            <select name="tipe"
+                id="tipe"
+                onchange="this.form.submit()"
+                class="bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 w-auto"
+                style="min-width: 140px;">
+                <option value="" {{ request('tipe') == '' ? 'selected' : '' }}>Semua Tipe</option>
+                <option value="pemasukan" {{ request('tipe') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
+                <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
+            </select>
+        </form>
+
+
+
+    </div>
         <script>
             document.getElementById('myForm').addEventListener('submit', function (e) {
                 const submitBtn = document.getElementById('submitBtnPengeluaran');

@@ -10,6 +10,7 @@ use App\Models\Penawaran;
 use App\Models\Transaksi;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\TransaksiProduct;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
@@ -66,7 +67,7 @@ class MitraController extends Controller
         ]);
         // Log aktivitas
         activity('ikm')->performedOn($mitra)->causedBy(auth()->user())->log('Menambahkan Mitra Baru ' . $request->nama_mitra);
-        
+
         return redirect()->route('detail.mitra', $mitra->id)->with('reload', true);
     }
     public function mitraDetail($id)
@@ -98,7 +99,7 @@ class MitraController extends Controller
                     'id_kota' => $request->id_kota,
                     'longitude' => $request->longitude,
                     'latitude' => $request->latitude,
-                  
+
                 ]
             );
 
@@ -126,13 +127,13 @@ class MitraController extends Controller
                             'harga' => (int) str_replace('.', '', $request->harga[$index]),
                         ]);
 
-                        
+
                     }
                 }
             }
 
             DB::commit();
-        
+
             return redirect()->route('detail.mitra',$request->id)->with('reload', true);
         } catch (\Exception $e) {
             DB::rollback();
@@ -142,10 +143,31 @@ class MitraController extends Controller
 
     public function mitaProdukDelete($id)
     {
-        $produk = Penawaran::findOrFail($id);
-        $produk->delete();
-        activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Menghapus Produk Mitra ' . $produk->nama_produk);
-        return response()->json(['success' => true]);
+      $produk = Penawaran::with('produk')->findOrFail($id);
+
+    $transaksi = TransaksiProduct::where('kode_produk', $produk->kode_produk)
+                    ->where('kode_mitra', $produk->kode_mitra)
+                    ->get();
+
+    $penawaran = Penawaran::where('kode_produk', $produk->kode_produk)
+                    ->where('kode_mitra', '!=', $produk->kode_mitra)
+                    ->get();
+
+    if ($transaksi->count() > 0 || $penawaran->count() > 0) {
+      return response()->json([
+            'success' => false,
+            'message' => 'Produk tidak bisa dihapus karena sudah ada transaksi atau penawaran lain.'
+        ]);
+    }
+
+    $produk->delete();
+
+    activity('ikm')
+        ->performedOn($produk)
+        ->causedBy(auth()->user())
+        ->log('Menghapus Produk Mitra ' . ($produk->produk->nama_produk ?? 'Tidak Diketahui'));
+
+    return response()->json(['success' => true]); // PENTING: JSON, bukan redirect
     }
 
     public function mitraDelete($id){
@@ -154,7 +176,7 @@ class MitraController extends Controller
         // Simpan nama dan kode mitra sebelum hapus
         $namaMitra = $mitra->nama_mitra;
         $kodeMitra = $mitra->kode_mitra;
-        
+
         // Hapus semua penawaran yang punya kode_mitra ini
         Penawaran::where('kode_mitra', $kodeMitra)->delete();
         // Hapus semua transaksi yang terkait dengan kode_mitra ini
@@ -163,12 +185,12 @@ class MitraController extends Controller
         activity('ikm')
             ->causedBy(auth()->user())
             ->log("Menghapus Mitra $namaMitra");
-        
+
         // Hapus mitra
         $mitra->delete();
 
-        return redirect()->route('index.mitra')->with("success", "Data mitra dan penawaran berhasil dihapus!");        
-        
+        return redirect()->route('index.mitra')->with("success", "Data mitra dan penawaran berhasil dihapus!");
+
     }
     public function resolve(request $request)
     {
