@@ -313,7 +313,6 @@ class ProdukController extends Controller
         'total_akhir'  => 'required',
         'items'        => 'required|array|min:1',
     ]);
-dd($request->all());
     // 🔹 Validasi tiap item
     foreach ($request->items as $index => $item) {
         $request->validate([
@@ -540,7 +539,7 @@ dd($request->all());
     }
     public function manajemenStokDelete($id){
      $stok = StokItem::find($id);
-        
+
         if ($stok) {
             $produk = Produk::where('kode_produk', $stok->kode_produk)->first();
 
@@ -556,7 +555,7 @@ dd($request->all());
 
             // hapus item stok
             $stok->delete();
-          
+
             return back()->with("success", "Data Berhasil dihapus");
         }
 
@@ -564,7 +563,7 @@ dd($request->all());
     }
     public function manajemenStokDeleteItem($id){
         $trans = StokTransaksi::with('items')->find($id);
-  
+
         StokLog::where('referensi', $trans->no_transaksi)->delete();
         if ($trans) {
             foreach ($trans->items as $stok) {
