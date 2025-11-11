@@ -1101,106 +1101,122 @@
                                                 </div>
                                                 <div class="p-0">
                                                    <table class="w-full text-sm border border-gray-300 dark:border-white/10 rounded-lg overflow-hidden">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 w-1/3 px-3 py-2 font-medium">
-                                                                    Kode
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 w-2/3 px-3 py-2">
-                                                                    {{ $row->produk->kode_produk ?? '-' }}
-                                                                    <input type="hidden" name="kode_produk[]" value="{{ $row->produk->kode_produk ?? '-' }}">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                    Nama
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                    {{ $row->produk->nama_produk ?? '-' }}
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                    Harga <span class="text-red-600">*</span>
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                    <input type="text" 
-                                                                        name="barang_keluar_display[]" 
-                                                                        class="harga-mobile form-input w-full  border-gray-300 dark:border-white/10 rounded-md harga-input"
-                                                                        value="{{ number_format($harga_mobile ?? 0, 0, ',', '.') }}"
-                                                                        data-index="{{ $index }}"
-                                                                        placeholder="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 w-1/3 px-3 py-2 font-medium">
+                                                                Kode
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 w-2/3 px-3 py-2">
+                                                                {{ $row->produk->kode_produk ?? '-' }}
+                                                                <input type="hidden" name="kode_produk[]" value="{{ $row->produk->kode_produk ?? '-' }}">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                Nama
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                {{ $row->produk->nama_produk ?? '-' }}
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                Harga <span class="text-red-600">*</span>
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                <input type="text" 
+                                                                    name="barang_keluar_display[]" 
+                                                                    class="harga-mobile form-input w-full  border-gray-300 dark:border-white/10 rounded-md harga-input"
+                                                                    value="{{ number_format($harga_mobile ?? 0, 0, ',', '.') }}"
+                                                                    data-index="{{ $index }}"
+                                                                    placeholder="0">
 
-                                                                    <input type="hidden" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                    Barang Keluar <span class="text-red-600">*</span>
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                    <input type="number" 
-                                                                        name="barang_keluar[]" 
-                                                                        class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-keluar-input-mobile"
-                                                                        value="{{ $barang_keluar_mobile }}"
-                                                                        data-harga="{{ $harga_mobile }}"
-                                                                        data-index="{{ $myindex }}"
-                                                                        min="0">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                    Barang Terjual <span class="text-red-600">*</span>
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                    <input type="number" 
-                                                                        name="barang_terjual[]" 
-                                                                        class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-terjual-input-mobile"
-                                                                        value="{{ $barang_terjual_mobile }}"
-                                                                        data-index="{{ $myindex }}"
-                                                                        min="0">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                    Barang Retur <span class="text-red-600">*</span>
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                    <input type="number" 
-                                                                        name="barang_retur[]" 
-                                                                        class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-retur-input-mobile"
-                                                                        value="{{ $barang_retur_mobile }}"
-                                                                        data-index="{{ $myindex }}"
-                                                                        min="0">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                    Total
-                                                                </td>
-                                                                <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                    Rp. <input type="text" 
-                                                                        name="total_item[]" 
-                                                                        value="{{ number_format($total_mobile, 0, ',', '.') }}" 
-                                                                        class="form-input harga-input w-full  border-gray-300 dark:border-white/10 rounded-md total-harga-input-mobile"
-                                                                        data-index="{{ $myindex }}" 
-                                                                        readonly>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
+                                                                <input type="hidden" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
+                                                                <script>
+                                                                        document.querySelectorAll('.harga-mobile').forEach(input => {
+                                                                            input.addEventListener('input', e => {
+                                                                                // Ambil angka murni tanpa titik atau huruf
+                                                                                const angka = e.target.value.replace(/[^\d]/g, '');
 
-                                                                                                    
-                                                                                                        <div class="mt-5 p-5">
-                                                                                                            <button type="button" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" @click="open = false">
-                                                                                                                Oke
-                                                                                                            </button>
-                                                                                                        </div>
+                                                                                // Format tampilan ribuan (misal: 15.000)
+                                                                                e.target.value = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+
+                                                                                // Ambil input hidden di bawahnya
+                                                                                const hidden = e.target.parentElement.querySelector('.harga-hidden');
+                                                                                if (hidden) hidden.value = angka; // update value-nya
+                                                                            });
+                                                                        });
+                                                                        </script>
+
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                Barang Keluar <span class="text-red-600">*</span>
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                <input type="number" 
+                                                                    name="barang_keluar[]" 
+                                                                    class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-keluar-input-mobile"
+                                                                    value="{{ $barang_keluar_mobile }}"
+                                                                    data-harga="{{ $harga_mobile }}"
+                                                                    data-index="{{ $myindex }}"
+                                                                    min="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                Barang Terjual <span class="text-red-600">*</span>
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                <input type="number" 
+                                                                    name="barang_terjual[]" 
+                                                                    class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-terjual-input-mobile"
+                                                                    value="{{ $barang_terjual_mobile }}"
+                                                                    data-index="{{ $myindex }}"
+                                                                    min="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                Barang Retur <span class="text-red-600">*</span>
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                <input type="number" 
+                                                                    name="barang_retur[]" 
+                                                                    class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-retur-input-mobile"
+                                                                    value="{{ $barang_retur_mobile }}"
+                                                                    data-index="{{ $myindex }}"
+                                                                    min="0">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                                Total
+                                                            </td>
+                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                                Rp. <input type="text" 
+                                                                    name="total_item[]" 
+                                                                    value="{{ number_format($total_mobile, 0, ',', '.') }}" 
+                                                                    class="form-input harga-input w-full  border-gray-300 dark:border-white/10 rounded-md total-harga-input-mobile"
+                                                                    data-index="{{ $myindex }}" 
+                                                                    readonly>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                                                                
+                                                                                                    <div class="mt-5 p-2">
+                                                                                                        <button type="button" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" @click="open = false">
+                                                                                                            Oke
+                                                                                                        </button>
                                                                                                     </div>
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
+                                                                                </div>
 
 
             

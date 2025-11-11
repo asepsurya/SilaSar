@@ -201,7 +201,7 @@ class TransaksiController extends Controller
 
     public function transaksiUpdate(Request $request)
     {
-      
+        
         $request->validate([
             'kode_mitra' => 'required|exists:mitras,kode_mitra',
             'nomor_transaksi' => 'required',
