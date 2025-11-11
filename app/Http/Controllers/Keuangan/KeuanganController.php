@@ -5,18 +5,18 @@ namespace App\Http\Controllers\Keuangan;
 use Storage;
 use App\Models\App;
 use App\Models\AkunTable;
-use App\Models\KeuanganTable;
-use App\Models\RekeningTable;
 use App\Models\KategoriAkun;
 use App\Models\UserActivity;
 use Illuminate\Http\Request;
+use App\Models\KeuanganTable;
+use App\Models\RekeningTable;
 use Illuminate\Support\Carbon;
-use App\Models\HistoryRekeningTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Flasher\Laravel\Facade\Flasher;
 use App\Http\Controllers\Controller;
+use App\Models\HistoryRekeningTable;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Models\Activity;
 
@@ -167,10 +167,10 @@ class KeuanganController extends Controller
     }
 
     public function akunDelete($id){
-       
+
         $akun = AkunTable::findOrFail($id);
         $akun->delete();
-        
+
         activity('ikm')
             ->performedOn($akun)
             ->causedBy(auth()->user())
@@ -731,7 +731,7 @@ class KeuanganController extends Controller
     } elseif ($periode == 'bulanan' && $bulan && $tahun_bulan) {
         // Filter berdasarkan bulan & tahun
         $histories->whereRaw("
-            MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? 
+            MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
             AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
         ", [$bulan, $tahun_bulan]);
     } elseif ($tahun_tahun) {

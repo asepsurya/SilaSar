@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\AkunTable;
 use Illuminate\Database\Eloquent\Model;
 
-class keuanganTable extends Model
+class KeuanganTables extends Model
 {
     protected $guarded=['id'];
-
+    protected $table = 'keuangan_tables';
     public function akun(){
         return $this->belongsTo('App\Models\AkunTable','id_akun','id');
     }
@@ -18,8 +17,6 @@ class keuanganTable extends Model
 
     public function akunSecond()
     {
-
         return $this->belongsTo(AkunTable::class, 'id_akun_second'); // <- ini wajib
     }
-
 }
