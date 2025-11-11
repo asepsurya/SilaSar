@@ -1131,7 +1131,7 @@
                                                                     data-index="{{ $index }}"
                                                                     placeholder="0">
 
-                                                                <input type="hidden" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
+                                                                <input type="" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
                                                                 <script>
                                                                         document.querySelectorAll('.harga-mobile').forEach(input => {
                                                                             input.addEventListener('input', e => {
