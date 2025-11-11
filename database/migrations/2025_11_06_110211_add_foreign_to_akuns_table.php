@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('akun_Tables', function (Blueprint $table) {
+        Schema::table('akun_tables', function (Blueprint $table) {
             $table->string('kode_akun')->unique()->nullable();
            $table->foreignId('kategori_id')
       ->nullable()
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('akun_Tables', function (Blueprint $table) {
+        Schema::table('akun_tables', function (Blueprint $table) {
             $table->string('kode_akun')->unique()->nullable();
             $table->foreignId('kategori_id')
       ->nullable()
