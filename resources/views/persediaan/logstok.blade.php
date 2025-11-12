@@ -53,9 +53,36 @@ box-shadow: none !important;
 background-color: #f3f4f6 !important; /* bg-gray-100 */
 color: #111827 !important; /* text-gray-900 */
 }
+@media (max-width: 768px) {
+    #print-area {
+        transform: scale(0.75);         /* perkecil tampilan 75% */
+        transform-origin: top center;   /* pusatkan tampilan */
+    }
+
+    #include-content {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    table {
+        font-size: 10px !important;
+    }
+
+    th, td {
+        padding: 3px 5px !important;
+    }
+
+    h2 {
+        font-size: 14px !important;
+    }
+
+    p {
+        font-size: 12px !important;
+    }
+}
 </style>
 <div class="px-2 py-1 mb-2 flex items-center justify-between  block md:hidden">
-        <h2 class="text-lg font-semibold">Alur Stok <span class="px-1 bg-lightgreen-100 text-xs text-black rounded ml-1">4</span></h2>
+        <h2 class="text-lg font-semibold">Alur Stok </h2>
             <a  href="{{ route('index.produk') }}" href="javascript:void(0);" class="mt-0 py-1 px-3 inline-block bg-black/5 dark:bg-white/5 rounded-lg text-black/40 dark:text-white/40 border border-black/5 dark:border-white/5 hover:bg-transparent dark:hover:bg-transparent hover:text-black dark:hover:text-white transition-all duration-300">
                 Kembali
             </a> 
