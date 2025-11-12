@@ -466,11 +466,12 @@
                                         $barang_keluar = (int) ($row->barang_keluar ?? 0);
                                         $barang_terjual = (int) ($row->barang_terjual ?? 0);
                                         $barang_retur = (int) ($row->barang_retur ?? 0);
-                                        $harga = (int) ($row->penawaran->harga ?? 0);
+                                        $harga = (int) ($row->harga ?? 0);
                                         $total_barang_keluar = $barang_terjual + $barang_retur;
                                         $total = $barang_keluar * $harga;
                                         $totalSemua += $total;
                                     @endphp
+                                
                                     <tr class="hover:bg-gray-50 dark:hover:bg-black">
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center" width="1%">
                                             <button type="button"
@@ -1041,12 +1042,12 @@
                                     $barang_keluar_mobile = (int) ($row->barang_keluar ?? 0);
                                     $barang_terjual_mobile = (int) ($row->barang_terjual ?? 0);
                                     $barang_retur_mobile = (int) ($row->barang_retur ?? 0);
-                                    $harga_mobile = (int) ($row->penawaran->harga ?? 0);
+                                    $harga_mobile = (int) ($row->harga ?? optional($row->penawaran)->harga ?? 0);
                                     $total_barang_keluar_mobile = $barang_terjual_mobile + $barang_retur_mobile;
                                     $total_mobile = $barang_keluar_mobile * $harga_mobile;
                                     $totalSemua_mobile += $total_mobile;
                                 @endphp
-
+                           
                                 <!-- Item Produk Mobile -->
                                 <div class="flex items-center justify-between border rounded-lg p-3 bg-white dark:bg-black shadow-sm dark:border-white/10">
                                     <!-- Kiri: Hapus + Nama Produk -->
@@ -1131,7 +1132,7 @@
                                                                     data-index="{{ $index }}"
                                                                     placeholder="0">
 
-                                                                <input type="" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
+                                                                <input type="hidden" name="harga_mobile[]" class="harga-hidden" value="{{ $harga_mobile }}">
                                                                 <script>
                                                                         document.querySelectorAll('.harga-mobile').forEach(input => {
                                                                             input.addEventListener('input', e => {

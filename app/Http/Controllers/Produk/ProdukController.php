@@ -594,29 +594,29 @@ class ProdukController extends Controller
 
         // Filter produk
         if ($request->produk_id) {
-            $produk->where('kode_produk', $request->produk_id);
+            $produk->where('kode_produk', request('produk_id'));
         }
 
-        // Filter berdasarkan periode waktu
-       if ($request->periode) {
-            switch ($request->periode) {
+                // Filter berdasarkan periode waktu
+        if ($request->has('periode')) {
+            switch ($request->query('periode')) {
                 case 'bulanan':
-                    if ($request->bulan && $request->tahun_bulan) {
-                        $produk->whereMonth('created_at', $request->bulan)
-                            ->whereYear('created_at', $request->tahun_bulan);
+                    if ($request->filled('bulan') && $request->filled('tahun_bulan')) {
+                        $produk->whereMonth('created_at', $request->query('bulan'))
+                            ->whereYear('created_at', $request->query('tahun_bulan'));
                     }
                     break;
 
                 case 'tahunan':
-                    if ($request->tahun_tahun) {
-                        $produk->whereYear('created_at', $request->tahun_tahun);
+                    if ($request->filled('tahun_tahun')) {
+                        $produk->whereYear('created_at', $request->query('tahun_tahun'));
                     }
                     break;
 
                 case 'rentang':
-                    if ($request->tanggal_awal && $request->tanggal_akhir) {
-                        $tanggal_awal = Carbon::parse($request->tanggal_awal)->startOfDay()->format('Y-m-d H:i:s');
-                        $tanggal_akhir = Carbon::parse($request->tanggal_akhir)->endOfDay()->format('Y-m-d H:i:s');
+                    if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+                        $tanggal_awal = Carbon::parse($request->query('tanggal_awal'))->startOfDay()->format('Y-m-d H:i:s');
+                        $tanggal_akhir = Carbon::parse($request->query('tanggal_akhir'))->endOfDay()->format('Y-m-d H:i:s');
                         $produk->whereBetween('created_at', [$tanggal_awal, $tanggal_akhir]);
                     }
                     break;
@@ -629,7 +629,7 @@ class ProdukController extends Controller
                 $hariIni->copy()->endOfDay()->format('Y-m-d H:i:s')
             ]);
         }
-
+       $stokSaatIni = Produk::where('kode_produk', request('produk_id'))->value('stok');
 
         $produk->orderBy('created_at', 'desc');
 
@@ -641,7 +641,7 @@ class ProdukController extends Controller
             'produkList' => $produkList,
             'produk_id' => $request->produk_id ?? '',
             'activityLogs' => $activityLogs,
-        ]);
+        ],compact('stokSaatIni'));
     }
 
 

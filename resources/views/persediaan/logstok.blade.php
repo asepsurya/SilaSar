@@ -53,9 +53,36 @@ box-shadow: none !important;
 background-color: #f3f4f6 !important; /* bg-gray-100 */
 color: #111827 !important; /* text-gray-900 */
 }
+@media (max-width: 768px) {
+    #print-area {
+        transform: scale(0.75);         /* perkecil tampilan 75% */
+        transform-origin: top center;   /* pusatkan tampilan */
+    }
+
+    #include-content {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    table {
+        font-size: 10px !important;
+    }
+
+    th, td {
+        padding: 3px 5px !important;
+    }
+
+    h2 {
+        font-size: 14px !important;
+    }
+
+    p {
+        font-size: 12px !important;
+    }
+}
 </style>
 <div class="px-2 py-1 mb-2 flex items-center justify-between  block md:hidden">
-        <h2 class="text-lg font-semibold">Alur Stok <span class="px-1 bg-lightgreen-100 text-xs text-black rounded ml-1">4</span></h2>
+        <h2 class="text-lg font-semibold">Alur Stok </h2>
             <a  href="{{ route('index.produk') }}" href="javascript:void(0);" class="mt-0 py-1 px-3 inline-block bg-black/5 dark:bg-white/5 rounded-lg text-black/40 dark:text-white/40 border border-black/5 dark:border-white/5 hover:bg-transparent dark:hover:bg-transparent hover:text-black dark:hover:text-white transition-all duration-300">
                 Kembali
             </a> 
@@ -63,8 +90,9 @@ color: #111827 !important; /* text-gray-900 */
 <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 rounded-md">
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center p-5 gap-4">
        <p class="text-sm font-semibold  hidden sm:block">Alur Stok</p>
-        <form id="filterForm" action="{{ route('produk.log.detail') }}" method="POST" class="flex flex-row items-center justify-center gap-2 section2">
+        <form id="filterForm" action="{{ route('produk.log.detail') }}" method="GET" class="flex flex-row items-center justify-center gap-2 section2">
             @csrf
+           
             <select name="produk_id" class="select form-select w-full py-2 px-3 text-sm border border-gray-300 dark:bg-blackrounded-md dark:bg-black bg-white dark:border-white/10 text-gray-900 dark:text-gray-100" onchange="this.form.submit()">
                 <option value="">Semua Produk</option>
                 @foreach($produkList as $produk)
@@ -108,7 +136,7 @@ color: #111827 !important; /* text-gray-900 */
                         </button>
                     </div>
                     <div class="p-5">
-                        <form method="POST" action="{{ route('produk.log.detail') }}" class="flex flex-col gap-5">
+                        <form method="GET" action="{{ route('produk.log.detail') }}" class="flex flex-col gap-5">
                             @csrf
                             <!-- Filter Waktu -->
                             <div>
@@ -184,6 +212,7 @@ color: #111827 !important; /* text-gray-900 */
         </div>
     </div>
 
+
 <div class="table-responsive">
     <table class="table-hover text-xs">
         <thead>
@@ -195,7 +224,7 @@ color: #111827 !important; /* text-gray-900 */
                 <th>Tanggal</th>
                 <th>Masuk</th>
                 <th>keluar</th>
-                <th class="mobile">Stok saat ini</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -229,7 +258,7 @@ color: #111827 !important; /* text-gray-900 */
                     -
                     @endif
                 </td>
-                <td class="mobile px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{{ $log->produk->stok ?? 0 }}</td>
+               
             </tr>
             @endforeach
             @if ($logs->isEmpty())
@@ -251,5 +280,23 @@ color: #111827 !important; /* text-gray-900 */
         </tbody>
     </table>
 </div>
+
 </div>
+<script>
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+}
+</script>
+<div class="mt-6 flex justify-center">
+    <div class=" dark:text-white rounded-xl px-6 py-3 shadow-md text-center w-full sm:w-auto">
+        <h3 class="text-lg sm:text-xl font-semibold tracking-wide">
+            📦 Stok Saat Ini:
+            <span class="ml-2 font-bold text-yellow-300">
+                {{ number_format($stokSaatIni, 0, ',', '.') }}
+            </span>
+        </h3>
+    </div>
+</div>
+
+ 
 @endsection

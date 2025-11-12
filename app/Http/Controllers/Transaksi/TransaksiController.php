@@ -180,6 +180,7 @@ class TransaksiController extends Controller
                     'kode_produk'     => $item->kode_produk,
                     'kode_transaksi'  => $transaksi->kode_transaksi,
                     'kode_mitra'      => $request->kode_mitra,
+                    'harga'            => $item->harga,
                     'barang_keluar'   => 0,
                     'barang_terjual'  => 0,
                     'barang_retur'    => 0,
@@ -514,6 +515,91 @@ class TransaksiController extends Controller
         $awal = request('awal');   // contoh: 2025-11-01
         $akhir = request('akhir'); // contoh: 2025-11-30
 
+        $periode = request('periode'); // 'bulanan' / 'tahunan' / null
+        $bulan = request('bulan');     // 1–12
+        $tahun_bulan = request('tahun_bulan'); // contoh: 2025
+        $tahun_tahun = request('tahun_tahun'); // contoh: 2025
+
+        $laporan = DB::table('transaksis as t')
+            ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+            ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+            ->leftJoin('satuans as s', 'p.satuan_id', '=', 's.id')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.kode_transaksi',
+                't.tanggal_transaksi',
+                't.kode_mitra',
+                'm.nama_mitra as nama_pelanggan',
+                'm.alamat_mitra as alamat',
+                'tp.kode_produk',
+                'p.nama_produk',
+                'tp.barang_keluar',
+                'tp.barang_retur',
+                'tp.barang_terjual as jumlah',
+                's.nama as satuan',
+                'tp.harga',
+                DB::raw('(tp.barang_terjual * tp.harga) as total')
+            )
+
+            // 🔹 Filter berdasarkan periode
+            ->when($periode === 'bulanan' && $bulan && $tahun_bulan, function ($query) use ($bulan, $tahun_bulan) {
+                $query->whereMonth('t.tanggal_transaksi', $bulan)
+                    ->whereYear('t.tanggal_transaksi', $tahun_bulan);
+            })
+            ->when($periode === 'tahunan' && $tahun_tahun, function ($query) use ($tahun_tahun) {
+                $query->whereYear('t.tanggal_transaksi', $tahun_tahun);
+            })
+
+            // 🔹 Filter berdasarkan tanggal manual (prioritas jika diisi)
+            ->when($awal && $akhir, function ($query) use ($awal, $akhir) {
+                $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+            })
+
+            ->get();
+
+
+        // 🔸 Perhitungan laba (optional)
+        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
+        $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
+
+        // 🔸 Ambil log aktivitas
+        $logs = Activity::where([
+            'causer_id' => auth()->user()->id,
+            'log_name' => 'ikm'
+        ])->latest()->take(10)->get();
+
+        // 🔸 Kirim ke view
+        return view('report.laporanTransaksi', [
+            'activeMenu' => 'laporan_penjualan',
+            'active' => 'laporan_penjualan',
+        ], compact('laporan', 'logs', 'awal', 'akhir', 'periode', 'bulan', 'tahun_bulan', 'tahun_tahun'));
+
+    }
+
+       public function exportPDF()
+    {
+$periode = request('periode');
+    $bulan = request('bulan');
+    $tahunBulan = request('tahun_bulan');
+    $tahunTahun = request('tahun_tahun');
+    $tanggalAwal = request('tanggal_awal');
+    $tanggalAkhir = request('tanggal_akhir');
+    $awal = request('awal');
+    $akhir = request('akhir');
+
+    // Tentukan range tanggal berdasarkan filter
+    if ($periode === 'bulanan' && $bulan && $tahunBulan) {
+        $awal = Carbon::createFromDate($tahunBulan, $bulan, 1)->startOfMonth()->format('Y-m-d');
+        $akhir = Carbon::createFromDate($tahunBulan, $bulan, 1)->endOfMonth()->format('Y-m-d');
+    } elseif ($periode === 'tahunan' && $tahunTahun) {
+        $awal = Carbon::createFromDate($tahunTahun, 1, 1)->startOfYear()->format('Y-m-d');
+        $akhir = Carbon::createFromDate($tahunTahun, 12, 31)->endOfYear()->format('Y-m-d');
+    } elseif ($periode === 'custom' && $tanggalAwal && $tanggalAkhir) {
+        $awal = $tanggalAwal;
+        $akhir = $tanggalAkhir;
+    }
+
+    // Query utama
     $laporan = DB::table('transaksis as t')
         ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
         ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
@@ -531,74 +617,38 @@ class TransaksiController extends Controller
             'tp.barang_retur',
             'tp.barang_terjual as jumlah',
             's.nama as satuan',
-            'p.harga',
-            DB::raw('(tp.barang_terjual * p.harga) as total')
+            'tp.harga',
+            DB::raw('(tp.barang_terjual * tp.harga) as total')
         )
         ->when($awal && $akhir, function ($query) use ($awal, $akhir) {
             $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
         })
         ->get();
 
+    // Laba (kalau ada variabelnya)
+    $pendapatan = 0;
+    $hpp = 0;
+    $bebanNonInventory = 0;
+    $labaKotor = $pendapatan - $hpp;
+    $labaBersih = $labaKotor - $bebanNonInventory;
 
-        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
-        $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
+    // Buat PDF
+    $pdf = Pdf::loadView('report.transaksi', [
+        'laporan' => $laporan,
+        'awal' => $awal,
+        'akhir' => $akhir,
+        'periode' => $periode,
+        'bulan' => $bulan,
+        'tahunBulan' => $tahunBulan,
+        'tahunTahun' => $tahunTahun,
+        'tanggalAwal' => $tanggalAwal,
+        'tanggalAkhir' => $tanggalAkhir,
+    ])->setPaper('a4', 'portrait');
 
+    $random = rand(1000, 9999);
+    $namaFile = 'laporan-penjualan-detail-' . Carbon::now()->format('Ymd_His') . '-' . $random . '.pdf';
 
-         $logs = Activity::where([
-            'causer_id' => auth()->user()->id,
-            'log_name' => 'ikm'
-        ])->latest()->take(10)->get();
-
-        return view('report.laporanTransaksi', [
-            'activeMenu' => 'laporan_penjualan',
-            'active' => 'laporan_penjualan',
-        ], compact('laporan', 'logs','awal','akhir'));
-    }
-
-       public function exportPDF()
-    {
-        $awal = request('awal');
-        $akhir = request('akhir');
-           $laporan = DB::table('transaksis as t')
-        ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
-        ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
-        ->leftJoin('satuans as s', 'p.satuan_id', '=', 's.id')
-        ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
-        ->select(
-            't.kode_transaksi',
-            't.tanggal_transaksi',
-            't.kode_mitra',
-            'm.nama_mitra as nama_pelanggan',
-            'm.alamat_mitra as alamat',
-            'tp.kode_produk',
-            'p.nama_produk',
-            'tp.barang_keluar',
-            'tp.barang_retur',
-            'tp.barang_terjual as jumlah',
-            's.nama as satuan',
-            'p.harga',
-            DB::raw('(tp.barang_terjual * p.harga) as total')
-        )
-        ->when($awal && $akhir, function ($query) use ($awal, $akhir) {
-            $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
-        })
-        ->get();
-
-
-        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
-        $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
-
-        $pdf = Pdf::loadView('report.transaksi', [
-            'laporan' => $laporan,
-            'awal' => $awal,
-            'akhir' => $akhir
-        ])->setPaper('a4', 'portrait');
-
-
-            $random = rand(1000, 9999);
-            $namaFile = 'laporan-penjualan-detail-' . Carbon::now()->format('Ymd_His') . '-' . $random . '.pdf';
-
-            return $pdf->download($namaFile);
+    return $pdf->download($namaFile);
     }
 
     public function savePdf(Request $request) {
