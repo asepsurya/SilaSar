@@ -218,7 +218,7 @@ width: 10%;
                                 <!-- Dropdown content -->
                             <div x-show="open" @click.away="open = false"
                                     class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-black/10 dark:border-white/10 rounded-lg shadow-lg py-1 z-20 text-left">
-                                    <form action="{{ route('produk.log.detail') }}" method="POST">
+                                    <form action="{{ route('produk.log.detail') }}" method="GET">
                                         @csrf
                                         <input type="text" name="produk_id" value="{{ $item->kode_produk }}" hidden>
                                         <button type="submit" class="block w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 

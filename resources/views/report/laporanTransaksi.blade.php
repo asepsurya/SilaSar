@@ -19,8 +19,10 @@
         }
     }
     @media (max-width: 640px) {
-  .table-responsive {
-    transform: scale(0.9);         /* zoom out */
+   body {
+    transform: scale(calc(100vw / 900));
+    transform-origin: top left;
+  }       /* zoom out */
 
            /* cegah side scroll */
   }
@@ -42,7 +44,7 @@ table thead tr th {
 }
 
 
-}
+
 </style>
 
 <div class="bg-lightwhite dark:bg-black">
@@ -180,7 +182,7 @@ table thead tr th {
             </div>
         </div>
 
-<div class="flex flex-1 overflow-hidden"> 
+<div class="flex flex-1 overflow-hidden content hidden md:flex "> 
         <!-- Workspace -->
         <div class="flex-1 overflow-auto flex items-start justify-center p-5"
             style="border: none; " id="print-area">
@@ -311,6 +313,23 @@ table thead tr th {
     </div>
 </div>
     
+<div class="flex md:hidden items-center justify-center min-h-screen  bg-yellow-50 dark:bg-yellow-900/20 px-6 text-center">
+    <div class="bg-white dark:bg-white/10  border dark:border-white/10 rounded-xl shadow-md p-6 max-w-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-yellow-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z" />
+        </svg>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
+            Dokumen ini hanya dapat ditampilkan di Desktop
+        </h2>
+        <p class="text-sm  dark:text-gray-300">
+            Untuk melihat laporan lengkap, silakan cetak PDF dari perangkat Desktop Anda.
+        </p>
+        <a href="/laporan/pdf?{{ http_build_query(request()->all()) }}" 
+           class="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg">
+            📄 Cetak PDF
+        </a>
+    </div>
+</div>
 
 
 
