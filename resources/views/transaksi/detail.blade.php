@@ -466,12 +466,16 @@
                                         $barang_keluar = (int) ($row->barang_keluar ?? 0);
                                         $barang_terjual = (int) ($row->barang_terjual ?? 0);
                                         $barang_retur = (int) ($row->barang_retur ?? 0);
-                                        $harga = (int) ($row->harga ?? 0);
+                                         $harga = DB::table('transaksi_products')
+                                        ->where('kode_transaksi', $transaksi->kode_transaksi)
+                                        ->where('kode_produk', $row->produk->kode_produk)
+                                        ->where('tanggal', $transaksi->tanggal_transaksi)
+                                        ->value('harga');
                                         $total_barang_keluar = $barang_terjual + $barang_retur;
                                         $total = $barang_keluar * $harga;
                                         $totalSemua += $total;
                                     @endphp
-                                
+                              
                                     <tr class="hover:bg-gray-50 dark:hover:bg-black">
                                         <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center" width="1%">
                                             <button type="button"
@@ -1042,7 +1046,11 @@
                                     $barang_keluar_mobile = (int) ($row->barang_keluar ?? 0);
                                     $barang_terjual_mobile = (int) ($row->barang_terjual ?? 0);
                                     $barang_retur_mobile = (int) ($row->barang_retur ?? 0);
-                                    $harga_mobile = (int) ($row->harga ?? optional($row->penawaran)->harga ?? 0);
+                                     $harga_mobile = DB::table('transaksi_products')
+                                        ->where('kode_transaksi', $transaksi->kode_transaksi)
+                                        ->where('kode_produk', $row->produk->kode_produk)
+                                        ->whereDate('tanggal', $transaksi->tanggal_transaksi)
+                                        ->value('harga');
                                     $total_barang_keluar_mobile = $barang_terjual_mobile + $barang_retur_mobile;
                                     $total_mobile = $barang_keluar_mobile * $harga_mobile;
                                     $totalSemua_mobile += $total_mobile;
