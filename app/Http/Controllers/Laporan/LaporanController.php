@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Laporan;
 
 use App\Models\Akun;
-use App\Models\KeuanganTable;
 use App\Models\AkunTable;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use App\Models\KeuanganTable;
+use App\Models\KeuanganTableku;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
 
@@ -157,7 +158,7 @@ class LaporanController extends Controller
         }
 
         // Ambil semua transaksi bulan ini beserta kedua akun
-        $query = KeuanganTable::with(['akun.kategori', 'akunSecond.kategori'])
+        $query = KeuanganTableku::with(['akun.kategori', 'akunSecond.kategori'])
             ->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') IS NOT NULL");
 
         // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada

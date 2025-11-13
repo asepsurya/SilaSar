@@ -177,6 +177,7 @@ class TransaksiController extends Controller
         if ($penawarans->count() > 0) {
             foreach ($penawarans as $item) {
                 TransaksiProduct::create([
+                    'tanggal'           =>now(),
                     'kode_produk'     => $item->kode_produk,
                     'kode_transaksi'  => $transaksi->kode_transaksi,
                     'kode_mitra'      => $request->kode_mitra,
@@ -263,8 +264,9 @@ class TransaksiController extends Controller
                         'kode_transaksi' => $transaksi->kode_transaksi,
                         'kode_mitra'     => $kode_mitra,
                     ],
-                    [
-                        'harga'           => $harga,
+                    [   
+                        'tanggal'        =>$request->tanggal_transaksi ?? $transaksi->tanggal_transaksi,
+                        'harga'          => $harga,
                         'barang_keluar'  => $barangKeluarBaru,
                         'barang_terjual' => $barangTerjual,
                         'barang_retur'   => $barangReturBaru,

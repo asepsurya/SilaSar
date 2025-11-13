@@ -20,7 +20,7 @@
             <span>Filter</span>
         </button>
 
-    <a id="pdfLink" href="{{ route('laporan.labarugipdf', ['bulan' => $bulan, 'tahun' => $tahun,'periode'=>request('periode')]) }}" target="_BLANK"
+    <a id="pdfLink" href="{{ route('laporan.labarugipdf',request()->query()) }}" target="_BLANK"
        class="btn ms-3 m-5">Cetak PDF</a>
 
 </form>
@@ -41,7 +41,7 @@
         </button>
 
         <a id="pdfLink"
-           href="{{ route('laporan.labarugipdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
+           href="{{ route('laporan.labarugipdf', request()->query()) }}"
            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-center">
            Cetak PDF
         </a>
