@@ -118,7 +118,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/laporan/konsinyasi/{id}', [LaporanController::class, 'laporankionsinyasi'])->name('laporan.konsinyasi');
         Route::get('/laporan/invoice/{id}', [LaporanController::class, 'laporaninvoice'])->name('laporan.invoice');
         Route::get('/laporan/kwitansi/{id}', [LaporanController::class, 'laporankwitansi'])->name('laporan.kwitansi');
-        Route::get('/laporan/labarugi', [LaporanController::class, 'laporanlabarugi'])->name('laporan.labarugi');
+        // Route::get('/laporan/labarugi', [LaporanController::class, 'laporanlabarugi'])->name('laporan.labarugi');
         Route::get('/laporan/pdf/labarugi', [LaporanController::class, 'laporanlabarugipdf'])->name('laporan.labarugipdf');
         Route::get('/laporan/pdf/neraca', [LaporanController::class, 'laporanneraca'])->name('laporan.nercapdf');
         Route::get('/laporan/pdf', [TransaksiController::class, 'exportPDF'])->name('laporan.exportPDF');
