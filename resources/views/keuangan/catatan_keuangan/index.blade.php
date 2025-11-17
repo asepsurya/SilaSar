@@ -913,7 +913,7 @@
         </div>
 
         <!-- Pilih Bulan -->
-       <form method="GET" class="flex flex-row flex-wrap items-center gap-3 w-full">
+       <form method="GET" class="flex flex-row flex-wrap items-center gap-3 mb-4">
             <!-- Input bulan -->
             <input type="month"
                 name="periode"
