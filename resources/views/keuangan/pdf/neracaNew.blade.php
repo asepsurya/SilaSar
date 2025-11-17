@@ -109,7 +109,36 @@
                 @endphp
                 <img src="data:image/png;base64,{{ base64_encode(file_get_contents($logoPerusahaan)) }}" alt="Logo Perusahaan">
                       <h2>LAPORAN NERACA</h2>
-                <span>Periode: {{ $bulan }}/{{ $tahun }}</span><br>
+                @php
+                    $periode = request('periode') ?? null;
+
+                    // Bulanan
+                    $bulan        = request('bulan');
+                    $tahun_bulan  = request('tahun_bulan');
+
+                    // Tahunan
+                    $tahun_tahun  = request('tahun_tahun');
+
+                    // Rentang tanggal
+                    $awal  = request('tanggal_awal');
+                    $akhir = request('tanggal_akhir');
+                @endphp
+
+                <span>
+                    @if ($periode === 'rentang' && $awal && $akhir)
+                        Periode: {{ $awal }} s/d {{ $akhir }}
+
+                    @elseif ($periode === 'bulanan' && $bulan && $tahun_bulan)
+                        Periode: {{ $bulan }}/{{ $tahun_bulan }}
+
+                    @elseif ($periode === 'tahunan' && $tahun_tahun)
+                        Periode: Tahun {{ $tahun_tahun }}
+
+                    @else
+                        Periode: Semua Data
+                    @endif
+                </span><br>
+
                 <span>(Dalam Rupiah)</span>
             </div>
         </div>

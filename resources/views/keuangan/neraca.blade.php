@@ -13,8 +13,12 @@
             <span>Filter</span>
         </button>
 
-    <a id="pdfLink" href="{{ route('laporan.neracaPdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_BLANK"
-       class="btn ms-3 m-5">Cetak PDF</a>
+   <a id="pdfLink"
+        href="{{ route('laporan.neracaPdf') . '?' . http_build_query(request()->query()) }}"
+        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-center">
+        Cetak PDF
+        </a>
+
 
 </form>
 
@@ -52,11 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <span>Filter</span>
         </button>
 
-        <a id="pdfLink"
-           href="{{ route('laporan.neracaPdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}"
-           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-center">
-           Cetak PDF
+       <a id="pdfLink"
+        href="{{ route('laporan.neracaPdf') . '?' . http_build_query(request()->query()) }}"
+        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-center">
+        Cetak PDF
         </a>
+
     </form>
 </div>
 

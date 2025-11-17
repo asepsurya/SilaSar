@@ -7,6 +7,7 @@ use App\Models\AkunTable;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use App\Models\KeuanganTable;
+use Illuminate\Support\Carbon;
 use App\Models\KeuanganTableku;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
@@ -167,13 +168,19 @@ class LaporanController extends Controller
         ->where('auth', $auth);
 
         // Filter tanggal
-        if ($tanggal_awal && $tanggal_akhir) {
+        if ($periode === 'rentang' && $tanggal_awal && $tanggal_akhir) {
+
+            // Format input menjadi YYYY-mm-dd
             try {
-                $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
-                $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
-                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
+                $fromDate = Carbon::parse($tanggal_awal)->format('Y-m-d');
+                $toDate   = Carbon::parse($tanggal_akhir)->format('Y-m-d');
+
+                $query->whereRaw(
+                    "STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?",
+                    [$fromDate, $toDate]
+                );
             } catch (\Exception $e) {
-                // abaikan error format
+                // Jika format tanggal salah, tidak memfilter
             }
         } else {
             // Filter berdasarkan tahun dan bulan
@@ -276,8 +283,22 @@ class LaporanController extends Controller
             'perusahaan'    => $perusahaan,
             'logo'          => $logo
         ])->setPaper('A4', 'portrait');
+            // Tentukan nama file berdasarkan periode
+        if ($periode === 'rentang' && $tanggal_awal && $tanggal_akhir) {
+            $fileName = "LAPORAN-LABA-RUGI-{$tanggal_awal}_sampai_{$tanggal_akhir}.pdf";
 
-        return $pdf->stream("LAPORAN-LABA-RUGI-{$bulan}-{$tahun}.pdf");
+        } elseif ($periode === 'bulanan' && $bulan && $tahun) {
+            $fileName = "LAPORAN-LABA-RUGI-BULAN-{$bulan}-{$tahun}.pdf";
+
+        } elseif ($periode === 'tahunan' && $tahun) {
+            $fileName = "LAPORAN-LABA-RUGI-TAHUN-{$tahun}.pdf";
+
+        } else {
+            $fileName = "LAPORAN-LABA-RUGI-SEMUA-DATA.pdf";
+        }
+
+        return $pdf->stream($fileName);
+
     }
     public function laporanneraca(Request $request){
 
