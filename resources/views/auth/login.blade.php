@@ -287,7 +287,7 @@
 
                     <!-- Forgot Password -->
                     <div class="flex justify-between mb-8 text-sm text-[#475569]">
-                        <a href="{{ asset('SiLasar_v1_1.apk') }}" target="_blank"
+                        <a href="{{ asset('SiLasar_v1.2.1.apk') }}" target="_blank"
                         class="rounded-lg 
                                 py-1 px-3  sm:py-2 
                                  w-max text-[#64748b] text-sm "> Download versi Mobile App
