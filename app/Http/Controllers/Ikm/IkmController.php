@@ -83,12 +83,12 @@ class IkmController extends Controller
   }
   public function getAktifData(Request $request)
   {
-        date_default_timezone_set('Asia/Jakarta');
+       date_default_timezone_set('Asia/Jakarta');
 
         $periode = $request->input('periode', 'harian');
-       $bulan = (int) $request->input('bulan', Carbon::now()->month);
-        $tahun = (int) $request->input('tahun', Carbon::now()->year);
-
+        $bulan   = (int) $request->input('bulan', Carbon::now()->month);
+        $tahun   = (int) $request->input('tahun', Carbon::now()->year);
+        $hari    = (int) $request->input('hari', Carbon::now()->day);
 
         $days = match ($periode) {
             'harian'   => 1,
@@ -99,23 +99,34 @@ class IkmController extends Controller
 
         $users = User::with('ikm')->get();
 
-        // Ambil user yang aktif di bulan & tahun yang dipilih
-        $aktifUserIds = UserActivity::whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->distinct('user_id')
-            ->pluck('user_id');
+        // Filter UserActivity sesuai periode
+        $queryAktif = UserActivity::query();
+
+        if ($periode === 'harian') {
+            $queryAktif->whereDate('created_at', Carbon::createFromDate($tahun, $bulan, $hari));
+        } else {
+            $queryAktif->whereMonth('created_at', $bulan)
+                    ->whereYear('created_at', $tahun);
+        }
+
+        $aktifUserIds = $queryAktif->distinct('user_id')->pluck('user_id');
 
         $totalUser      = $users->count();
         $userAktifCount = $aktifUserIds->count();
         $tidakAktif     = $totalUser - $userAktifCount;
 
-        $data = $users->map(function ($user) use ($bulan, $tahun, $days) {
-            $activityCount = UserActivity::where('user_id', $user->id)
-                ->whereMonth('created_at', $bulan)
-                ->whereYear('created_at', $tahun)
-                ->count();
+        $data = $users->map(function ($user) use ($periode, $bulan, $tahun, $hari, $days) {
+            $query = UserActivity::where('user_id', $user->id);
 
-            $percentage = $days > 0 ? min(100, ($activityCount / $days) * 100) : 0;
+            if ($periode === 'harian') {
+                $query->whereDate('created_at', Carbon::createFromDate($tahun, $bulan, $hari));
+            } else {
+                $query->whereMonth('created_at', $bulan)
+                    ->whereYear('created_at', $tahun);
+            }
+
+            $activityCount = $query->count();
+            $percentage    = $days > 0 ? min(100, ($activityCount / $days) * 100) : 0;
 
             $progressBar = '
                 <div class="w-60 bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -132,13 +143,14 @@ class IkmController extends Controller
         })->values();
 
         return response()->json([
-            'total_user'  => $totalUser,
-            'user_aktif'  => $userAktifCount,
-            'tidakaktif'  => $tidakAktif,
-            'data'        => $data,
-            'periode'     => $periode,
-            'bulan'       => $bulan,
-            'tahun'       => $tahun,
+            'total_user' => $totalUser,
+            'user_aktif' => $userAktifCount,
+            'tidakaktif' => $tidakAktif,
+            'data'       => $data,
+            'periode'    => $periode,
+            'bulan'      => $bulan,
+            'tahun'      => $tahun,
+            'hari'       => $hari,
         ]);
   }
 
