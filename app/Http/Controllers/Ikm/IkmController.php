@@ -257,7 +257,7 @@ class IkmController extends Controller
 
     // 🔹 Query dasar
     $transaksiQuery = Transaksi::where('auth', $user->id)->with('mitra');
-    $keuanganQuery = Keuangan::where('auth', $user->id);
+    $keuanganQuery = Keuangan::where('auth', $user->id)->orderBy('created_at', 'desc');
 
   if (request('tipe')) {
             $keuanganQuery->where('tipe', request('tipe'));
