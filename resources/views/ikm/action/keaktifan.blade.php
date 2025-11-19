@@ -58,70 +58,77 @@
 
     <!-- ============== TAB KEAKTIFAN ============== -->
     <div x-show="tab === 'harian'" class="p-4 rounded-lg" x-data="dataKeaktifan" x-init="init()">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between  border-gray-200 dark:border-white/10 px-5 mb-2">
-            <!-- Judul kiri -->
-            <h2 class="text-lg font-semibold mb-3 md:mb-0">Keaktifan Pengguna</h2>
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-gray-200 dark:border-white/10 px-5 mb-2">
+        <!-- Judul kiri -->
+        <h2 class="text-lg font-semibold text-center mb-3 md:mb-0 md:text-left w-full md:w-auto">
+            Keaktifan Pengguna
+        </h2>
 
-            <!-- Bagian kanan: tombol tab + filter bulan/tahun -->
-            <div class="flex flex-wrap items-center gap-3">
+        <!-- Bagian kanan: tombol tab + filter bulan/tahun -->
+        <div class="flex flex-col items-center w-full md:flex-row md:items-center md:w-auto gap-3">
+            <!-- Tombol tab -->
+            <div class="flex space-x-2 justify-center w-full md:w-auto md:justify-start">
+                @php
+                    $disableHarian = request()->has('bulan') && request()->has('tahun');
+                @endphp
 
-                <!-- Tombol tab -->
-                <div class="flex flex-wrap items-center gap-3">
+                <button @click="loadData('harian')"
+                        :class="periodeAktif === 'harian' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
+                        class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition
+                            {{ $disableHarian ? 'cursor-not-allowed opacity-50' : '' }}"
+                        {{ $disableHarian ? 'disabled' : '' }}>
+                    Harian
+                </button>
 
-                    <!-- Tombol tab -->
-                    <div class="flex space-x-2">
-                        <button @click="loadData('harian')" :class="periodeAktif === 'harian' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
-                            Harian
-                        </button>
-                        <button @click="loadData('mingguan')" :class="periodeAktif === 'mingguan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
-                            Mingguan
-                        </button>
-                        <button @click="loadData('bulanan')" :class="periodeAktif === 'bulanan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
-                            Bulanan
-                        </button>
-                    </div>
+                <button @click="loadData('mingguan')" :class="periodeAktif === 'mingguan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
+                    Mingguan
+                </button>
+                <button @click="loadData('bulanan')" :class="periodeAktif === 'bulanan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
+                    Bulanan
+                </button>
+            </div>
 
-                    <!-- Filter Bulan dan Tahun -->
-                    <form id="filterForm" method="GET" class="flex gap-0 items-center">
-                        <select name="bulan" id="bulanSelect" style="width: 150px;" class="form-select border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm" onchange="this.form.submit()">
-                            @foreach(range(1, 12) as $b)
-                            <option value="{{ $b }}" {{ $b == $bulan ? 'selected' : '' }}>
-                                {{ \Carbon\Carbon::createFromDate(null, (int)$b, 1)->translatedFormat('F') }}
-                            </option>
-                            @endforeach
-                        </select>
+            <!-- Filter Bulan dan Tahun -->
+            <form id="filterForm" method="GET" class="flex gap-0 items-center justify-center w-full md:w-auto md:justify-start">
+                <select name="bulan" id="bulanSelect" style="width: 150px;" class="form-select border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm" onchange="this.form.submit()">
+                    @foreach(range(1, 12) as $b)
+                    <option value="{{ $b }}" {{ $b == $bulan ? 'selected' : '' }}>
+                        {{ \Carbon\Carbon::createFromDate(null, (int)$b, 1)->translatedFormat('F') }}
+                    </option>
+                    @endforeach
+                </select>
+                <input type="text" name="periode" value="bulanan" hidden>
+                <input type="number" id="tahunInput" name="tahun" value="{{ $tahun }}" placeholder="Tahun" class="form-input w-20 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm" onchange="this.form.submit()">
+             <a href="/people/keaktifan" class="btn ms-5 rounded-none">Reset</a>
+            </form>
+          
+        </div>
+    </div>
 
-                        <input type="number" id="tahunInput" name="tahun" value="{{ $tahun }}" placeholder="Tahun" class="form-input w-20 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm" onchange="this.form.submit()">
-                    </form>
+    <!-- Konten utama -->
+    <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-                    </button>
+            <!-- Chart -->
+            <div class="col-span-12 md:col-span-4 flex flex-col items-center">
+                <p class="text-sm font-semibold mb-4">Keaktifan Pengguna</p>
+                <div class="w-48 md:w-64">
+                    <canvas id="userPieChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <!-- Konten utama -->
-        <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-
-                <!-- Chart -->
-                <div class="col-span-12 md:col-span-4 flex flex-col items-center">
-                    <p class="text-sm font-semibold mb-4">Keaktifan Pengguna</p>
-                    <div class="w-48 md:w-64">
-                        <canvas id="userPieChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="col-span-12 md:col-span-8">
-                    <div class="border bg-white dark:bg-black border-black/10 dark:border-white/10 rounded-md p-3 overflow-x-auto">
-                        <table id="TableKeaktifan" class="whitespace-nowrap table-hover table-bordered w-full"></table>
-                    </div>
+            <!-- Table -->
+            <div class="col-span-12 md:col-span-8">
+                <div class="border bg-white dark:bg-black border-black/10 dark:border-white/10 rounded-md p-3 overflow-x-auto">
+                    <table id="TableKeaktifan" class="whitespace-nowrap table-hover table-bordered w-full"></table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+
+</div>
 
 <!-- Scripts -->
 <script src="{{ asset('assets/js/simple-datatables.js') }}"></script>
@@ -131,7 +138,7 @@
 document.addEventListener("alpine:init", () => {
     Alpine.data('dataKeaktifan', () => ({
         table: null,
-        periodeAktif: '{{ request("periode") ?: "harian" }}', // default
+       periodeAktif: '{{ request("periode") ? request("periode") : "harian" }}',
         pieChartInstance: null,
         listenerAdded: false, // <-- flag agar listener tidak double
         init() {

@@ -83,51 +83,103 @@ class IkmController extends Controller
   }
   public function getAktifData(Request $request)
   {
-        date_default_timezone_set('Asia/Jakarta');
+      date_default_timezone_set('Asia/Jakarta');
 
         $periode = $request->input('periode', 'harian');
-       $bulan = (int) $request->input('bulan', Carbon::now()->month);
+        $bulan = (int) $request->input('bulan', Carbon::now()->month);
         $tahun = (int) $request->input('tahun', Carbon::now()->year);
 
-
-        $days = match ($periode) {
-            'harian'   => 1,
-            'mingguan' => 7,
-            'bulanan'  => 30,
-            default    => 1,
-        };
-
         $users = User::with('ikm')->get();
+        $totalUser = $users->count();
 
-        // Ambil user yang aktif di bulan & tahun yang dipilih
-       $aktifUserIds = Keuangan::whereRaw(
-                "MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?",
-                [$bulan, $tahun]
-            )->distinct('auth')->pluck('auth');
+        // --- TENTUKAN QUERY DAN JUMLAH HARI UNTUK SETIAP PERIODE ---
+        $keuanganQuery = null;
+        $daysInPeriod = 0; // Ini akan menjadi pembagi kita
 
-        $totalUser      = $users->count();
+        switch ($periode) {
+            case 'harian':
+                // Periode harian: fokus pada hari ini
+                $daysInPeriod = 1;
+                $keuanganQuery = Keuangan::whereRaw("DATE(STR_TO_DATE(tanggal, '%d/%m/%Y')) = CURDATE()");
+                break;
+
+            case 'mingguan':
+                // Periode mingguan: fokus pada minggu ini (Senin - Minggu)
+                $startDate = Carbon::now()->startOfWeek(); // Senin minggu ini
+                $endDate   = Carbon::now()->endOfWeek();   // Minggu minggu ini
+                $daysInPeriod = 7;
+                $keuanganQuery = Keuangan::whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') >= ? AND STR_TO_DATE(tanggal, '%d/%m/%Y') <= ?", [
+                    $startDate->format('Y-m-d'),
+                    $endDate->format('Y-m-d')
+                ]);
+                break;
+
+            case 'bulanan':
+                // Periode bulanan: fokus pada bulan & tahun yang dipilih
+                $daysInPeriod = Carbon::createFromDate($tahun, $bulan, 1)->daysInMonth;
+                $keuanganQuery = Keuangan::whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan, $tahun]);
+                break;
+
+            default:
+                // Default ke harian jika ada kesalahan
+                $daysInPeriod = 1;
+                $keuanganQuery = Keuangan::whereRaw("DATE(STR_TO_DATE(tanggal, '%d/%m/%Y')) = CURDATE()");
+                break;
+        }
+
+        // Ambil ID user yang aktif berdasarkan query yang sudah disesuaikan
+        $aktifUserIds = $keuanganQuery->distinct('auth')->pluck('auth');
         $userAktifCount = $aktifUserIds->count();
-        $tidakAktif     = $totalUser - $userAktifCount;
+        $tidakAktif = $totalUser - $userAktifCount;
 
-        $data = $users->map(function ($user) use ($bulan, $tahun, $days) {
-           $activityCount = Keuangan::where('auth', $user->id)
-            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan, $tahun])
-            ->count();
+        // --- Map data untuk setiap user ---
+        $data = $users->map(function ($user) use ($keuanganQuery, $daysInPeriod, $periode) {
+            if ($periode === 'harian') {
+                // Khusus harian, cek apakah ada aktivitas HARI INI
+                $hasActivityToday = $keuanganQuery->where('auth', $user->id)->exists();
+                
+                $status = $hasActivityToday
+                    ? '<span class="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 animate-pulse">
+                            <svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">...</svg>
+                            Aktif Hari Ini
+                        </span>'
+                    : '<span class="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                            <svg class="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">...</svg>
+                            Tidak Aktif
+                        </span>';
 
-            $percentage = $days > 0 ? min(100, ($activityCount / $days) * 100) : 0;
+                return [
+                    $user->ikm->nama ?? '-',
+                    $status,
+                    $user->ikm->id,
+                ];
+            } else {
+                // Untuk mingguan & bulanan, gunakan progress bar
+                $query = clone $keuanganQuery;
+                
+                // Hitung TOTAL INPUT user dalam periode tersebut
+                $totalInputs = $query->where('auth', $user->id)->count();
 
-            $progressBar = '
-                <div class="w-60 bg-gray-200 rounded-full h-3 overflow-hidden">
-                    <div class="bg-green-600 h-3 rounded-full" style="width: ' . $percentage . '%;"></div>
-                </div>
-                <div class="text-xs mt-1">' . number_format($percentage, 0) . '%</div>
-            ';
+                // Hitung rata-rata input per hari
+                $avgInputsPerDay = $daysInPeriod > 0 ? $totalInputs / $daysInPeriod : 0;
 
-            return [
-                $user->ikm->nama ?? '-',
-                $progressBar,
-                $user->ikm->id,
-            ];
+                // Tentukan target untuk progress bar (misal: 2.0 input/hari dianggap 100% aktif)
+                $maxTargetAvg = 2.0;
+                $percentage = min(100, ($avgInputsPerDay / $maxTargetAvg) * 100);
+
+                $progressBar = '
+                    <div class="w-60 bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="bg-green-600 h-3 rounded-full transition-all duration-300" style="width: ' . $percentage . '%;"></div>
+                    </div>
+                    <div class="text-xs mt-1 text-gray-600">' . number_format($percentage, 1) . '%</div>
+                ';
+
+                return [
+                    $user->ikm->nama ?? '-',
+                    $progressBar,
+                    $user->ikm->id,
+                ];
+            }
         })->values();
 
         return response()->json([
@@ -136,7 +188,7 @@ class IkmController extends Controller
             'tidakaktif'  => $tidakAktif,
             'data'        => $data,
             'periode'     => $periode,
-            'bulan'       => $bulan,
+            'bulan'       => $periode === 'bulanan' ? $bulan : '-', // Tidak relevan untuk harian/mingguan
             'tahun'       => $tahun,
         ]);
   }
