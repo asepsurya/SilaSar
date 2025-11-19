@@ -83,50 +83,38 @@ class IkmController extends Controller
   }
   public function getAktifData(Request $request)
   {
-       date_default_timezone_set('Asia/Jakarta');
+        date_default_timezone_set('Asia/Jakarta');
 
         $periode = $request->input('periode', 'harian');
-        $bulan   = (int) $request->input('bulan', Carbon::now()->month);
-        $tahun   = (int) $request->input('tahun', Carbon::now()->year);
-        $hari    = (int) $request->input('hari', Carbon::now()->day);
+       $bulan = (int) $request->input('bulan', Carbon::now()->month);
+        $tahun = (int) $request->input('tahun', Carbon::now()->year);
+
 
         $days = match ($periode) {
             'harian'   => 1,
             'mingguan' => 7,
             'bulanan'  => 30,
-            default    => 7,
+            default    => 1,
         };
 
         $users = User::with('ikm')->get();
 
-        // Filter UserActivity sesuai periode
-        $queryAktif = UserActivity::query();
-
-        if ($periode === 'harian') {
-            $queryAktif->whereDate('created_at', Carbon::createFromDate($tahun, $bulan, $hari));
-        } else {
-            $queryAktif->whereMonth('created_at', $bulan)
-                    ->whereYear('created_at', $tahun);
-        }
-
-        $aktifUserIds = $queryAktif->distinct('user_id')->pluck('user_id');
+        // Ambil user yang aktif di bulan & tahun yang dipilih
+       $aktifUserIds = Keuangan::whereRaw(
+                "MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?",
+                [$bulan, $tahun]
+            )->distinct('auth')->pluck('auth');
 
         $totalUser      = $users->count();
         $userAktifCount = $aktifUserIds->count();
         $tidakAktif     = $totalUser - $userAktifCount;
 
-        $data = $users->map(function ($user) use ($periode, $bulan, $tahun, $hari, $days) {
-            $query = UserActivity::where('user_id', $user->id);
+        $data = $users->map(function ($user) use ($bulan, $tahun, $days) {
+           $activityCount = Keuangan::where('auth', $user->id)
+            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ? AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan, $tahun])
+            ->count();
 
-            if ($periode === 'harian') {
-                $query->whereDate('created_at', Carbon::createFromDate($tahun, $bulan, $hari));
-            } else {
-                $query->whereMonth('created_at', $bulan)
-                    ->whereYear('created_at', $tahun);
-            }
-
-            $activityCount = $query->count();
-            $percentage    = $days > 0 ? min(100, ($activityCount / $days) * 100) : 0;
+            $percentage = $days > 0 ? min(100, ($activityCount / $days) * 100) : 0;
 
             $progressBar = '
                 <div class="w-60 bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -143,14 +131,13 @@ class IkmController extends Controller
         })->values();
 
         return response()->json([
-            'total_user' => $totalUser,
-            'user_aktif' => $userAktifCount,
-            'tidakaktif' => $tidakAktif,
-            'data'       => $data,
-            'periode'    => $periode,
-            'bulan'      => $bulan,
-            'tahun'      => $tahun,
-            'hari'       => $hari,
+            'total_user'  => $totalUser,
+            'user_aktif'  => $userAktifCount,
+            'tidakaktif'  => $tidakAktif,
+            'data'        => $data,
+            'periode'     => $periode,
+            'bulan'       => $bulan,
+            'tahun'       => $tahun,
         ]);
   }
 
@@ -257,7 +244,7 @@ class IkmController extends Controller
 
     // 🔹 Query dasar
     $transaksiQuery = Transaksi::where('auth', $user->id)->with('mitra');
-    $keuanganQuery = Keuangan::where('auth', $user->id)->orderBy('created_at', 'desc');
+    $keuanganQuery = Keuangan::where('auth', $user->id);
 
   if (request('tipe')) {
             $keuanganQuery->where('tipe', request('tipe'));

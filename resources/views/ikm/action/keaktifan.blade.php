@@ -57,201 +57,185 @@
     </div>
 
     <!-- ============== TAB KEAKTIFAN ============== -->
-  <div x-show="tab === 'harian'" class="p-4 rounded-lg" x-data="dataKeaktifan" x-init="init()">
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between  border-gray-200 dark:border-white/10 px-5 mb-2">
-        <!-- Judul kiri -->
-        <h2 class="text-lg font-semibold mb-3 md:mb-0">Keaktifan Pengguna</h2>
+    <div x-show="tab === 'harian'" class="p-4 rounded-lg" x-data="dataKeaktifan" x-init="init()">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between  border-gray-200 dark:border-white/10 px-5 mb-2">
+            <!-- Judul kiri -->
+            <h2 class="text-lg font-semibold mb-3 md:mb-0">Keaktifan Pengguna</h2>
 
-        <!-- Bagian kanan: tombol tab + filter bulan/tahun -->
-        <div class="flex flex-wrap items-center gap-3">
+            <!-- Bagian kanan: tombol tab + filter bulan/tahun -->
+            <div class="flex flex-wrap items-center gap-3">
 
-            <!-- Tombol tab -->
-            <div class="flex space-x-2">
-                <button
-                    @click="loadData('harian')"
-                    :class="periodeAktif === 'harian' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
-                    class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition"
-                >
-                    Harian
-                </button>
-                <button
-                    @click="loadData('mingguan')"
-                    :class="periodeAktif === 'mingguan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
-                    class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition"
-                >
-                    Mingguan
-                </button>
-                <button
-                    @click="loadData('bulanan')"
-                    :class="periodeAktif === 'bulanan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
-                    class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition"
-                >
-                    Bulanan
-                </button>
-            </div>
+                <!-- Tombol tab -->
+                <div class="flex flex-wrap items-center gap-3">
 
-            <!-- Filter Bulan dan Tahun -->
-            <form id="filterForm" method="GET" class="flex gap-0 items-center">
-                <select name="bulan" id="bulanSelect" style="width: 150px;"
-                    class="form-select border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm"
-                    onchange="this.form.submit()">
-                    @foreach(range(1, 12) as $b)
-                    <option value="{{ $b }}" {{ $b == $bulan ? 'selected' : '' }}>
-                        {{ \Carbon\Carbon::createFromDate(null, (int)$b, 1)->translatedFormat('F') }}
-                    </option>
-                    @endforeach
-                </select>
+                    <!-- Tombol tab -->
+                    <div class="flex space-x-2">
+                        <button @click="loadData('harian')" :class="periodeAktif === 'harian' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
+                            Harian
+                        </button>
+                        <button @click="loadData('mingguan')" :class="periodeAktif === 'mingguan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
+                            Mingguan
+                        </button>
+                        <button @click="loadData('bulanan')" :class="periodeAktif === 'bulanan' ? 'active-button border-b-2 border-blue-500 text-blue-600' : 'border-transparent text-gray-500'" class="px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition">
+                            Bulanan
+                        </button>
+                    </div>
 
-                <input type="number" id="tahunInput" name="tahun" value="{{ $tahun }}" placeholder="Tahun"
-                    class="form-input w-20 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm"
-                    onchange="this.form.submit()">
-            </form>
-        </div>
-    </div>
+                    <!-- Filter Bulan dan Tahun -->
+                    <form id="filterForm" method="GET" class="flex gap-0 items-center">
+                        <select name="bulan" id="bulanSelect" style="width: 150px;" class="form-select border dark:border-white/10 border-gray-300 rounded-l-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm" onchange="this.form.submit()">
+                            @foreach(range(1, 12) as $b)
+                            <option value="{{ $b }}" {{ $b == $bulan ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::createFromDate(null, (int)$b, 1)->translatedFormat('F') }}
+                            </option>
+                            @endforeach
+                        </select>
 
-    <!-- Konten utama -->
-    <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <input type="number" id="tahunInput" name="tahun" value="{{ $tahun }}" placeholder="Tahun" class="form-input w-20 border dark:border-white/10 border-gray-300 border-l-0 rounded-r-md px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm" onchange="this.form.submit()">
+                    </form>
 
-            <!-- Chart -->
-            <div class="col-span-12 md:col-span-4 flex flex-col items-center">
-                <p class="text-sm font-semibold mb-4">Keaktifan Pengguna</p>
-                <div class="w-48 md:w-64">
-                    <canvas id="userPieChart"></canvas>
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Table -->
-            <div class="col-span-12 md:col-span-8">
-                <div class="border bg-white dark:bg-black border-black/10 dark:border-white/10 rounded-md p-3 overflow-x-auto">
-                    <table id="TableKeaktifan" class="whitespace-nowrap table-hover table-bordered w-full"></table>
+        <!-- Konten utama -->
+        <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                <!-- Chart -->
+                <div class="col-span-12 md:col-span-4 flex flex-col items-center">
+                    <p class="text-sm font-semibold mb-4">Keaktifan Pengguna</p>
+                    <div class="w-48 md:w-64">
+                        <canvas id="userPieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="col-span-12 md:col-span-8">
+                    <div class="border bg-white dark:bg-black border-black/10 dark:border-white/10 rounded-md p-3 overflow-x-auto">
+                        <table id="TableKeaktifan" class="whitespace-nowrap table-hover table-bordered w-full"></table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
-</div>
 
 <!-- Scripts -->
 <script src="{{ asset('assets/js/simple-datatables.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    document.addEventListener("alpine:init", () => {
-        Alpine.data('dataKeaktifan', () => ({
-            table: null
-            , periodeAktif: 'mingguan'
-            , pieChartInstance: null,
+document.addEventListener("alpine:init", () => {
+    Alpine.data('dataKeaktifan', () => ({
+        table: null,
+        periodeAktif: '{{ request("periode") ?: "harian" }}', // default
+        pieChartInstance: null,
+        listenerAdded: false, // <-- flag agar listener tidak double
+        init() {
+            // Load data saat init
+            this.loadData(this.periodeAktif);
 
-            init() {
-                this.loadData(this.periodeAktif);
-            },
+            // Event filter: saat select periode berubah
+            window.addEventListener('filter', () => {
+                const select = document.getElementById('periodeFilter');
+                this.loadData(select.value);
+            });
+        },
 
-            loadData(periode) {
-                this.periodeAktif = periode;
+        loadData(periode) {
+            this.periodeAktif = periode;
 
-                fetch(`/keaktifan?periode=${periode}`, {
-                        method: 'POST'
-                        , headers: {
-                            'Content-Type': 'application/json'
-                            , 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        }
-                        , body: JSON.stringify({
-                            periode,
-                            bulan: document.getElementById('bulanSelect').value,
-                            tahun: document.getElementById('tahunInput').value
-                        })
-                    })
-                    
-                    .then(response => response.json())
-                    .then(data => {
-                        // ========== TABEL ==========
-                        if (this.table) {
-                            this.table.destroy();
-                            this.table = null;
-                        }
+            // Ambil bulan & tahun dari request Blade
+            const bulan = {{ $bulan ?? now()->month }};
+            const tahun = {{ $tahun ?? now()->year }};
 
-                         const numberedData = data.data.map((row, index) => {
-                            const userId = row[2]; // misal ID user di index ke-2
-                            const userName = row[0]; // nama user di index ke-0
-                            const stat = row[1]; // statistik keaktifan di index ke-1
+            fetch(`/keaktifan?periode=${periode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ periode, bulan, tahun })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // ===========================
+                // Render DataTable
+                // ===========================
+                if (this.table) {
+                    this.table.destroy();
+                    this.table = null;
+                }
 
-                            // Sisipkan link di kolom nama
-                            const link = `<a href="/people/update/${userId}" class="text-blue-600 hover:underline">${userName}</a>`;
+                const numberedData = data.data.map((row, index) => {
+                    const userId = row[2];
+                    const userName = row[0];
+                    const stat = row[1];
+                    const link = `<a href="/people/update/${userId}" class="text-blue-600 hover:underline">${userName}</a>`;
+                    return [index + 1, link, stat];
+                });
 
-                            return [index + 1, link, stat];
-                        });
+                this.table = new simpleDatatables.DataTable("#TableKeaktifan", {
+                    data: {
+                        headings: ["No", "Nama", "Statistik Keaktifan"],
+                        data: numberedData
+                    },
+                    sortable: false,
+                    searchable: true,
+                    perPage: 10,
+                    perPageSelect: [10, 20, 50, 100],
+                    firstLast: false,
+                    labels: { perPage: '{select}' },
+                    layout: { top: '{select}{search}', bottom: '{info}{pager}' }
+                });
 
-                        this.table = new simpleDatatables.DataTable("#TableKeaktifan", {
-                            data: {
-                                headings: ["No", "Nama", "Statistik Keaktifan"]
-                                , data: numberedData
-                            }
-                            , sortable: false
-                            , searchable: true
-                            , perPage: 10
-                            , perPageSelect: [10, 20, 50, 100]
-                            , firstLast: false
-                            , labels: {
-                                perPage: '{select}'
-                            }
-                            , layout: {
-                                top: '{select}{search}'
-                                , bottom: '{info}{pager}'
-                            }
-                        });
+                // ===========================
+                // Render Pie Chart
+                // ===========================
+                const canvas = document.getElementById('userPieChart');
+                const ctx = canvas.getContext('2d');
 
-                        // ========== PIE CHART ==========
-                        const canvas = document.getElementById('userPieChart');
-                        const ctx = canvas.getContext('2d');
+                if (this.pieChartInstance) {
+                    this.pieChartInstance.destroy();
+                }
 
-                        if (this.pieChartInstance) {
-                            this.pieChartInstance.destroy();
-                        }
+                const { total_user, user_aktif, tidakaktif } = data;
 
-                        const {
-                            total_user
-                            , user_aktif
-                            , tidakaktif
-                        } = data;
-
-                        this.pieChartInstance = new Chart(ctx, {
-                            type: 'pie'
-                            , data: {
-                                labels: ['Aktif', 'Tidak Aktif']
-                                , datasets: [{
-                                    label: 'Keaktifan User'
-                                    , data: [user_aktif, tidakaktif]
-                                    , backgroundColor: ['#16A34A', '#E5E7EB']
-                                    , borderWidth: 1
-                                }]
-                            }
-                            , options: {
-                                responsive: true
-                                , plugins: {
-                                    legend: {
-                                        position: 'bottom'
-                                    }
-                                    , tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                const value = context.parsed;
-                                                const percentage = (value / total_user * 100).toFixed(1);
-                                                return `${context.label}: ${value} user (${percentage}%)`;
-                                            }
-                                        }
+                this.pieChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Aktif', 'Tidak Aktif'],
+                        datasets: [{
+                            label: 'Keaktifan User',
+                            data: [user_aktif, tidakaktif],
+                            backgroundColor: ['#16A34A', '#E5E7EB'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const percentage = (value / total_user * 100).toFixed(1);
+                                        return `${context.label}: ${value} user (${percentage}%)`;
                                     }
                                 }
                             }
-                        });
-                    })
-                    .catch(err => console.error('Error loading data:', err));
-            }
-        }));
-    });
-
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error('Error loading data:', err));
+        }
+    }));
+});
 </script>
 
 @endsection

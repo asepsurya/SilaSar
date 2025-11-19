@@ -359,7 +359,7 @@ class KeuanganController extends Controller
             ->performedOn($keuangan)
             ->causedBy(auth()->user())
             ->log('Menambahkan data keuangan baru');
-         UserActivity::create(['user_id'=> auth()->id()]);
+        
          return redirect()->back()->with("success", "Berhasil menyimpan data");
     }
 
