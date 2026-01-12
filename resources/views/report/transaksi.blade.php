@@ -108,8 +108,8 @@
                 <th>No</th>
                 <th>Kode</th>
                 <th>Nama</th>
-                <th>Masuk</th>
                 <th>Keluar</th>
+                <th>Terjual</th>
                 <th>Retur</th>
                 <th>Satuan</th>
                 <th>Harga</th>
@@ -122,8 +122,9 @@
                 <td class="text-center">{{ $i+1 }}</td>
                 <td>{{ $item->kode_produk }}</td>
                 <td>{{ $item->nama_produk }}</td>
-                <td class="text-right">{{ number_format($item->jumlah, 0) }}</td>
+             
                 <td class="text-center">{{ number_format($item->barang_keluar, 0) }}</td>
+                   <td class="text-center">{{ number_format($item->jumlah, 0) }}</td>
                 <td class="text-center">{{ number_format($item->barang_retur, 0) }}</td>
                 <td class="text-center">{{ $item->satuan }}</td>
                 <td class="text-center">{{ number_format($item->harga, 0) }}</td>
