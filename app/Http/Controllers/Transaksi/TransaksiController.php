@@ -508,9 +508,27 @@ class TransaksiController extends Controller
     }
 
     public function hapusTransksi($id){
-        Transaksi::where('kode_transaksi',$id)->delete();
-        TransaksiProduct::where('kode_transaksi',$id)->delete();
-        return redirect()->route('transaksi.index')->with("success", "Data has been deleted successfully!");
+       $transaksiProducts = TransaksiProduct::where('kode_transaksi', $id)->get();
+    
+        foreach ($transaksiProducts as $tp) {
+            // Ambil satu produk, bukan Collection
+            $product = Produk::where('kode_produk', $tp->kode_produk)->first();
+        
+            if ($product) {
+                // Tambahkan kembali stok
+                $product->stok += $tp->barang_keluar; // pastikan kolom ini benar
+                $product->save();
+            }
+        }
+    
+        // Hapus transaksi products
+        TransaksiProduct::where('kode_transaksi', $id)->delete();
+    
+        // Hapus transaksi
+        Transaksi::where('kode_transaksi', $id)->delete();
+    
+        return redirect()->route('transaksi.index')
+                         ->with("success", "Data has been deleted and stock updated successfully!");
     }
 
     public function laporanTransaksi(){
