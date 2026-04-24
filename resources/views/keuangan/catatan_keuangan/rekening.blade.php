@@ -9,14 +9,20 @@
     }
 
     .select2-container--default .select2-selection--single {
-        margin-left: -10px;
-        border: none;
+        background-color: transparent !important;
+        border: none !important;
+        height: auto !important;
+        padding: 0 !important;
     }
 
-    .dark .select2-container--default .select2-selection--single {
-        background-color: rgba(0, 0, 0, 0);
-        margin-left: -10px;
-        border: none;
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        color: inherit !important;
+    }
+
+    .dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #fff !important;
     }
 </style>
 <div class="px-2 py-1 flex items-center justify-between mb-3">
@@ -70,7 +76,7 @@
                             </div>
                         </div>
                         @endif
-                        <form action="{{ route('rekening.add.harian') }}" method="POST">
+                        <form action="{{ route('rekening.add') }}" method="POST">
                             @csrf
                             <div
                                 class="hidden mb-4 relative bg-white dark:bg-white/5 py-4 px-5 rounded-lg border border-black/10">
@@ -198,7 +204,7 @@
                         </td>
                         <td class="py-4 ">
                             <div class="hidden md:block">
-                                @if((app('settings')['default_rekening_harian'] ?? null) == $item->kode_rekening)
+                                @if((app('settings')['default_rekening'] ?? null) == $item->kode_rekening)
                                 <span class="bg-violet-500 text-white text-[10px] px-1.5 py-0.5 rounded">
                                     <span class="p-0.5 rounded-full bg-white inline-block mr-1 align-middle"></span>
                                     Default
@@ -230,7 +236,7 @@
                                     <div class="py-1" role="menu" aria-orientation="vertical"
                                         aria-labelledby="options-menu">
                                         @if((app('settings')['default_rekening'] ?? null) != $item->kode_rekening)
-                                        <form action="{{ route('default.rekening.harian', $item->id) }}" method="GET">
+                                        <form action="{{ route('default.rekening', $item->id) }}" method="GET">
                                             @csrf
                                             <button type="submit"
                                                 class="block w-full text-left px-4 py-2 text-sm text-violet-700 hover:bg-gray-100"
@@ -240,7 +246,7 @@
                                         </form>
                                         @endif
 
-                                        <a href="{{ route('rekening.history.harian', $item->kode_rekening) }}"
+                                        <a href="{{ route('rekening.history', $item->kode_rekening) }}"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             role="menuitem">
                                             History
@@ -263,7 +269,7 @@
                                             Update
                                         </button>
                                     </div>
-                                    <form action="{{ route('rekening.delete.harian', $item->id) }}" method="POST"
+                                    <form action="{{ route('rekening.delete', $item->id) }}" method="POST"
                                         @submit.prevent="Swal.fire({
                                             title: 'Yakin ingin menghapus rekening ini?',
                                             text: 'Aksi ini tidak dapat dibatalkan!',
@@ -339,7 +345,7 @@
             </button>
         </div>
         <div class="p-5">
-            <form action="{{ route('rekening.update.harian') }} " method="POST">
+            <form action="{{ route('rekening.update') }} " method="POST">
                 @csrf
                 <input type="hidden" name="id" x-model="editRekening.id">
                 <div class="mb-4 relative bg-white dark:bg-white/5 py-4 px-5 rounded-lg border border-black/10">
@@ -356,7 +362,7 @@
                     <label class="block text-xs text-black/40 dark:text-white/40 mb-1">Jenis Akun <span
                             style="color: red">*</span></label>
                     <select name="jenis_akun" x-model="editRekening.jenis_akun"
-                        class="select2 form-select py-2.5 px-3 text-sm text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white focus:ring-0 focus:shadow-none w-[150px]">
+                        class="select2 form-select  px-3 text-sm text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white focus:ring-0 focus:shadow-none w-[150px]">
                         <option value="default">Default</option>
                         <option value="uang_tunai">Uang Tunai</option>
                         <option value="kartu_kredit">Kartu Debit</option>
@@ -414,7 +420,6 @@
     </div>
 </div>
 </div>
-
 
 <script>
     $(document).ready(function() {

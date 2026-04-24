@@ -6,9 +6,9 @@ use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\Ikm\IkmController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Nota\NotaController;
-use App\Http\Controllers\Auth\logoutController;
+use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Mitra\MitraController;
-use App\Http\Controllers\Auth\registerController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Region\RegionController;
 use App\Http\Controllers\Laporan\LaporanController;
@@ -28,15 +28,15 @@ Route::get('/reset-password', [AuthController::class, 'passReset'])->name('passR
 Route::post('/reset-password/action', [AuthController::class, 'passResetAction'])->name('passResetAction')->middleware('guest');
 Route::get('/refresh-captcha', [AuthController::class, 'refreshCaptcha'])->name('refreshCaptcha');
 
-Route::get('/register', [registerController::class, 'register'])->name('register')->middleware('guest');
-Route::post('/mail/resend/', [registerController::class, 'resend'])->name('resend')->middleware('guest');
+Route::get('/register', [RegisterController::class, 'register'])->name('register')->middleware('guest');
+Route::post('/mail/resend/', [RegisterController::class, 'resend'])->name('resend')->middleware('guest');
 
-Route::get('/account/activate/{token}', [registerController::class, 'activate'])->name('activate')->middleware('guest');
-Route::get('/register/success/{token}', [registerController::class, 'successRegister'])->name('successRegister');
+Route::get('/account/activate/{token}', [RegisterController::class, 'activate'])->name('activate')->middleware('guest');
+Route::get('/register/success/{token}', [RegisterController::class, 'successRegister'])->name('successRegister');
 
-Route::post('/check-email', [registerController::class, 'checkEmail'])->name('check.email');
-Route::post('/register/auth', [registerController::class, 'registerAction'])->name('register.add')->middleware('guest');
-Route::post('/logout', [logoutController::class, 'logout'])->name('logout');
+Route::post('/check-email', [RegisterController::class, 'checkEmail'])->name('check.email');
+Route::post('/register/auth', [RegisterController::class, 'registerAction'])->name('register.add')->middleware('guest');
+Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 
 // ------------------------------------------------
@@ -75,6 +75,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/produk/create', [ProdukController::class, 'create'])->name('index.create.produk');
         Route::get('/produk/update/{id}', [ProdukController::class, 'update'])->name('index.update.produk');
         Route::post('/produk/update', [ProdukController::class, 'updateaction'])->name('action.update');
+        Route::delete('/produk/image/delete', [ProdukController::class, 'deleteImage'])->name('produk.image.delete');
         Route::get('/produk/delete/{id}', [ProdukController::class, 'deleteaction'])->name('action.delete');
         Route::post('/produk/store', [ProdukController::class, 'store'])->name('produk.store');
         Route::get('/produk/category', [ProdukController::class, 'category'])->name('produk.category');
@@ -99,6 +100,8 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         // Route  Transaksi Induk Mitra
         // ------------------------------------------------
         Route::get('/transaksi', [TransaksiController::class, 'transaksiIndex'])->name('transaksi.index');
+        Route::get('/retur', [TransaksiController::class, 'returIndex'])->name('transaksi.retur');
+        Route::post('/retur/kembalikan', [TransaksiController::class, 'returKembalikan'])->name('transaksi.retur.kembalikan');
         Route::get('/transaksi/{id}', [TransaksiController::class, 'DetailTransaki'])->name('transaksi.detail');
         Route::post('/transaksi/create', [TransaksiController::class, 'transaksiCreate'])->name('transaksi.create');
         Route::post('/transaksi/update', [TransaksiController::class, 'transaksiUpdate'])->name('transaksi.update');
@@ -229,12 +232,20 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     });
 
         // ------------------------------------------------
+        // Route Canvassing Toko
+        // ------------------------------------------------
+        Route::get('/canvassing', [\App\Http\Controllers\TokoController::class, 'index'])->name('canvassing.index');
+        Route::post('/canvassing/store', [\App\Http\Controllers\TokoController::class, 'store'])->name('canvassing.store');
+        Route::get('/api/toko', [\App\Http\Controllers\TokoController::class, 'getTokos']);
+        Route::post('/api/rute', [\App\Http\Controllers\TokoController::class, 'rute']);
+        Route::post('/api/toko/{id}/toggle-status', [\App\Http\Controllers\TokoController::class, 'toggleStatus']);
+        Route::get('/api/toko/{kode_mitra}/items', [\App\Http\Controllers\TokoController::class, 'getProposedItems']);
+
+        // ------------------------------------------------
         // Route Perusahaan
         // ------------------------------------------------
         Route::get('/create/perusahaan/auth', [PerusahaanController::class, 'index'])->middleware('check.auth.perusahaan')->name('perusahaan.index');
         Route::post('/create/perusahaan', [PerusahaanController::class, 'create'])->name('perusahaan.create');
         Route::get('/setelan', [PerusahaanController::class, 'PerusahaanSetting'])->name('perusahaan.setting');
 });
-
-
 

@@ -9,6 +9,9 @@
 */
 
 document.addEventListener("alpine:init", () => {
+    const closeSidebarOnDesktop = () => window.innerWidth >= 1024;
+    const closeRightSidebarOnWide = () => window.innerWidth >= 1536;
+
     Alpine.data("collapse", () => ({
         collapse: false,
 
@@ -37,6 +40,9 @@ document.addEventListener("alpine:init", () => {
     Alpine.store("app", {
         // Light and dark Mode
         mode: Alpine.$persist("light"),
+        menu: "",
+        layout: "",
+        navbar: "",
         toggleMode(val) {
             if (!val) {
                 val = this.mode || "light"; // light And Dark
@@ -56,5 +62,18 @@ document.addEventListener("alpine:init", () => {
         rightSidebar() {
             this.rightsidebar = !this.rightsidebar;
         },
+
+        syncResponsiveState() {
+            if (closeSidebarOnDesktop()) {
+                this.sidebar = false;
+            }
+
+            if (closeRightSidebarOnWide()) {
+                this.rightsidebar = false;
+            }
+        },
     });
+
+    Alpine.store("app").syncResponsiveState();
+    window.addEventListener("resize", () => Alpine.store("app").syncResponsiveState());
 });

@@ -32,6 +32,7 @@
 
     {{-- CSS --}}
     @yield('css')
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom-table.css') }}" />
     <style>
         @media (max-width: 768px) {
             .p-7 {
@@ -59,19 +60,19 @@
             }
         }
     </style>
-    @if(auth()->user()->role =="gold")
-    <style>
-        #sidebar {
-            display: none;
-            visibility: hidden;
-        }
-
-        @media (min-width: 1024px) {
-            .main-container .main-content {
-                margin-left: 0;
+    @if(auth()->user()->role == "gold")
+        <style>
+            #sidebar {
+                display: none;
+                visibility: hidden;
             }
-        }
-    </style>
+
+            @media (min-width: 1024px) {
+                .main-container .main-content {
+                    margin-left: 0;
+                }
+            }
+        </style>
     @endif
 </head>
 
@@ -92,19 +93,19 @@
     <!-- Start Main Content -->
     <div class="main-container navbar-sticky flex" :class="[$store.app.navbar]">
         <!-- Start Sidebar -->
-        @if(auth()->user()->role !="gold")
-        @include('layout.partial.sidebar')
+        @if(auth()->user()->role != "gold")
+            @include('layout.partial.sidebar')
         @endif
         <!-- End sidebar -->
 
         <!-- Start Content Area -->
         <div class="main-content flex-1 flex flex-col min-h-screen">
             <!-- Start Topbar -->
-            @if(auth()->user()->role !="gold")
-            @include('layout.partial.topbar')
+            @if(auth()->user()->role != "gold")
+                @include('layout.partial.topbar')
 
             @else
-            @include('layout.partial.topbarUser')
+                @include('layout.partial.topbarUser')
             @endif
             <!-- End Topbar -->
 
@@ -117,14 +118,19 @@
             <!-- End Content -->
 
             <!-- Start Footer -->
+
             <div class="hidden sm:block">
-                <footer class="p-7 bg-white dark:bg-black flex flex-wrap items-center justify-center sm:justify-between gap-3">
-                    <p class="text-xs text-black/40 dark:text-white/40">&copy; {{ date('Y') }} {{ config('app.name') }}</p>
+                <footer
+                    class="p-7 bg-white dark:bg-black flex flex-wrap items-center justify-center sm:justify-between gap-3">
+                    <p class="text-xs text-black/40 dark:text-white/40">&copy; {{ date('Y') }} {{ config('app.name') }}
+                    </p>
                     <ul class="flex items-center text-black/40 dark:text-white/40 text-xs gap-5">
-                        <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="" width="120"></li>
+                        {{-- <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="" width="120"></li> --}}
                         <li>
-                            <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130" class="block dark:hidden">
-                            <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130" class="hidden dark:block">
+                            <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130"
+                                class="block dark:hidden">
+                            <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130"
+                                class="hidden dark:block">
                         </li>
                     </ul>
                 </footer>
@@ -142,7 +148,7 @@
         <script src="{{ asset('assets/js/alpine-collaspe.min.js') }}"></script>
         <script src="{{ asset('assets/js/alpine-persist.min.js') }}"></script>
         <script src="{{ asset('assets/js/alpine-ui.min.js') }}"></script>
-        <script src="{{ asset('assets/js/alpine.min.js') }}" defer></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
         <!-- Custom js -->

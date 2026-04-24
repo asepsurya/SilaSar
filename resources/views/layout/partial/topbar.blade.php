@@ -147,19 +147,19 @@
                         </a>
                     </li>
                     <li>
-                        <div x-data="{ open: false }">
-                            <!-- Trigger -->
-                            <a href="javascript:;" class="flex items-center" @click="window.dispatchEvent(new CustomEvent('pass'))">
+                        <div x-data="{ open: false }" @pass.window="open = true" @close-modal.window="open = false">
+                            <a href="javascript:;" class="flex items-center"
+                                @click="window.dispatchEvent(new CustomEvent('pass'))">
                                 <x-icon name="gear" class="text-gray-600" />
                                 Ubah Password
                             </a>
-                             <div x-data="{ open: false }" @pass.window="open = true" @close-modal.window="open = false" s>
-                                <!-- Overlay -->
+                            <div>
                                 <div
-                                    class="fixed inset-0 bg-black/60 dark:bg-white/10hidden overflow-y-auto" style="z-index: 2147483647;"
+                                    class="fixed inset-0 bg-black/60 dark:bg-white/10 overflow-y-auto"
+                                    style="z-index: 2147483647;"
                                     :class="{ 'block': open, 'hidden': !open }">
-                                    <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
-                                        <!-- Modal Box -->
+                                    <div class="flex items-center justify-center min-h-screen px-4"
+                                        @click.self="open = false">
                                         <div
                                             x-show="open"
                                             x-transition
@@ -231,8 +231,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        
                         </div>
 
 

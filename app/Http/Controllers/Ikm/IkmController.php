@@ -23,7 +23,7 @@ class IkmController extends Controller
   {
     date_default_timezone_set('Asia/Jakarta');
     $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-    $ikm = ikm::all()->sortByDesc("created_at")->map(function ($item) {
+    $ikm = ikm::with('user')->orderByDesc('created_at')->get()->map(function ($item) {
         $foto = $item->foto ? asset('storage/' . $item->foto) : asset('assets/images/byewind-avatar.png');
         return [
              '<a href="' . route("ikm.update", $item->id) . '" class="flex items-center space-x-2 text-blue-600 hover:underline">
@@ -198,7 +198,7 @@ class IkmController extends Controller
   public function update( request $request,$id)
   {
       // 🔹 Ambil data IKM
-    $ikm = Ikm::find($id);
+    $ikm = ikm::find($id);
     if (!$ikm) {
         abort(404);
     }
@@ -221,23 +221,6 @@ class IkmController extends Controller
         [$tahun, $bulan] = explode('-', $request->periode);
     }
      
-      if ($from && $to) {
-          try {
-              $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
-              $toDate   = Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
-              // filter query di sini
-          } catch (\Exception $e) {
-              // abaikan kalau format salah
-          }
-      } elseif ($from && !$to) {
-          // hanya dari tanggal, set ke hari yang sama
-          try {
-              $fromDate = Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
-              $toDate   = $fromDate->copy()->endOfDay();
-          } catch (\Exception $e) {}
-      } else {
-          // fallback ke bulan/tahun
-      }
     // 🔹 Data umum
     $provinsi = Province::all();
     $mitra = Mitra::where('auth', $user->id)->get();
@@ -250,65 +233,8 @@ class IkmController extends Controller
   if (request('tipe')) {
             $keuanganQuery->where('tipe', request('tipe'));
         }
-    // ==============================================================
-    // 🔹 FILTER DATA BERDASARKAN RANGE ATAU BULAN/TAHUN
-    // ==============================================================
-    // ==============================================================
-// 🔹 FILTER DATA BERDASARKAN RANGE ATAU BULAN/TAHUN
-// ==============================================================
-    if ($from && $to) {
-        try {
-            // 🧩 Deteksi otomatis format tanggal (d/m/Y atau Y-m-d atau d-m-Y)
-            $fromDate = null;
-            $toDate = null;
 
-            foreach (['d/m/Y', 'Y-m-d', 'd-m-Y'] as $fmt) {
-                try {
-                    $fromDate = Carbon::createFromFormat($fmt, $from);
-                    $toDate = Carbon::createFromFormat($fmt, $to);
-                    break; // Berhenti kalau berhasil parse
-                } catch (\Exception $e) {
-                    continue;
-                }
-            }
-
-            if (!$fromDate || !$toDate) {
-                $fromDate = Carbon::parse($from);
-                $toDate = Carbon::parse($to);
-            }
-
-            $fromDate = $fromDate->startOfDay();
-            $toDate = $toDate->endOfDay();
-
-            // ✅ Keuangan → format tanggal: d/m/Y
-            $keuanganQuery->whereRaw("
-                STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
-            ", [
-                $fromDate->format('Y-m-d'),
-                $toDate->format('Y-m-d')
-            ]);
-
-            // ✅ Transaksi → format tanggal_transaksi: d-m-Y
-            $transaksiQuery->whereRaw("
-                STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d') BETWEEN ? AND ?
-            ", [
-                $fromDate->format('Y-m-d'),
-                $toDate->format('Y-m-d')
-            ]);
-
-        } catch (\Exception $e) {
-            // Abaikan error format
-        }
-    } else {
-        // 🔹 Jika tidak ada filter tanggal, gunakan bulan & tahun
-        $keuanganQuery
-            ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
-            ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
-
-        $transaksiQuery
-            ->whereRaw("MONTH(STR_TO_DATE(tanggal_transaksi, '%Yd-%m-%d')) = ?", [$bulan])
-            ->whereRaw("YEAR(STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d')) = ?", [$tahun]);
-    }
+    $this->applyDateFilters($transaksiQuery, $keuanganQuery, $from, $to, $bulan, $tahun);
 
     // ==============================================================
     // 🔹 Eksekusi Query
@@ -327,13 +253,9 @@ class IkmController extends Controller
     // ==============================================================
     // 🔹 Hitung kelengkapan data IKM
     // ==============================================================
-    $data = $ikm->toArray();
-    unset($data['sosmed'], $data['website']);
-
-    $totalFields = count($data);
-    $emptyFields = collect($data)->filter(fn($value) => empty($value))->count();
-    $filledFields = $totalFields - $emptyFields;
-    $percentage = intval(($filledFields / $totalFields) * 100);
+    $completion = $this->calculateProfileCompletion($ikm);
+    $percentage = $completion['percentage'];
+    $emptyFields = $completion['emptyFields'];
 
     // ==============================================================
     // 🔹 Return ke view
@@ -359,6 +281,69 @@ class IkmController extends Controller
         "to" => $to,
     ]);
   }
+
+    private function applyDateFilters($transaksiQuery, $keuanganQuery, $from, $to, $bulan, $tahun)
+    {
+        if ($from) {
+            try {
+                $to = $to ?: $from;
+                $fromDate = null;
+                $toDate = null;
+
+                foreach (['d/m/Y', 'Y-m-d', 'd-m-Y'] as $fmt) {
+                    try {
+                        $fromDate = Carbon::createFromFormat($fmt, $from);
+                        $toDate = Carbon::createFromFormat($fmt, $to);
+                        break;
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+
+                if (!$fromDate || !$toDate) {
+                    $fromDate = Carbon::parse($from);
+                    $toDate = Carbon::parse($to);
+                }
+
+                $fromDate = $fromDate->startOfDay();
+                $toDate = $toDate->endOfDay();
+
+                $keuanganQuery->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [
+                    $fromDate->format('Y-m-d'),
+                    $toDate->format('Y-m-d')
+                ]);
+
+                $transaksiQuery->whereRaw("STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d') BETWEEN ? AND ?", [
+                    $fromDate->format('Y-m-d'),
+                    $toDate->format('Y-m-d')
+                ]);
+            } catch (\Exception $e) {
+                // Abaikan error format
+            }
+        } else {
+            $keuanganQuery
+                ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan])
+                ->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun]);
+
+            $transaksiQuery
+                ->whereRaw("MONTH(STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d')) = ?", [$bulan])
+                ->whereRaw("YEAR(STR_TO_DATE(tanggal_transaksi, '%Y-%m-%d')) = ?", [$tahun]);
+        }
+    }
+
+    private function calculateProfileCompletion($ikm)
+    {
+        $data = $ikm->toArray();
+        unset($data['sosmed'], $data['website']);
+
+        $totalFields = count($data);
+        $emptyFields = collect($data)->filter(fn($value) => empty($value))->count();
+        $filledFields = $totalFields - $emptyFields;
+        return [
+            'percentage' => intval(($filledFields / $totalFields) * 100),
+            'emptyFields' => $emptyFields
+        ];
+    }
 
     public function updateFoto(Request $request)
     {

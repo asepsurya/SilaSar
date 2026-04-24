@@ -4,19 +4,25 @@
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-    
+
 @endsection
 @section('container')
     <style>
         .select2-container--default .select2-selection--single {
-            margin-left: -10px;
-            border: none;
+            background-color: transparent !important;
+            border: none !important;
+            height: auto !important;
+            padding: 0 !important;
         }
 
-        .dark .select2-container--default .select2-selection--single {
-            background-color: rgba(0, 0, 0, 0);
-            margin-left: -10px;
-            border: none;
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+            color: inherit !important;
+        }
+
+        .dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #fff !important;
         }
     </style>
     <style>
@@ -44,9 +50,10 @@
                 margin-right: 0;
                 margin-bottom: 50px;
             }
-           .no-scrollbar{
+
+            .no-scrollbar {
                 max-width: 500px;
-           } 
+            }
 
         }
 
@@ -84,23 +91,28 @@
         .btn-icon:hover {
             background-color: #1e40af;
         }
-       .scrolling-wrapper {
-        overflow-x: scroll;
-        overflow-y: hidden;
-        white-space: nowrap;
 
-            
+        .scrolling-wrapper {
+            overflow-x: scroll;
+            overflow-y: hidden;
+            white-space: nowrap;
+
+
         }
-         .no-scrollbar::-webkit-scrollbar {
-                display: none;
-            }
-         @media (max-width: 768px) {
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
             body {
-                zoom: 0.9; /* Zoom-out untuk layar kecil */
+                zoom: 0.9;
+                /* Zoom-out untuk layar kecil */
             }
 
             table {
-                font-size: 14px; /* Mengurangi ukuran font untuk tampilan kecil */
+                font-size: 14px;
+                /* Mengurangi ukuran font untuk tampilan kecil */
             }
 
             .search-icon {
@@ -109,7 +121,8 @@
             }
 
             /* Menyesuaikan ukuran tabel agar lebih baik di mobile */
-            th, td {
+            th,
+            td {
                 padding: 5px;
             }
         }
@@ -117,17 +130,18 @@
         /* Lebih responsif jika ukuran lebih kecil dari 500px */
         @media (max-width: 500px) {
             body {
-                zoom: 0.7; /* Lebih kecil lagi di perangkat lebih kecil */
+                zoom: 0.7;
+                /* Lebih kecil lagi di perangkat lebih kecil */
             }
 
             table {
-                font-size: 12px; /* Ukuran font semakin kecil */
+                font-size: 12px;
+                /* Ukuran font semakin kecil */
             }
         }
-        
     </style>
     <script>
-        document.getElementById('rightSidebar').addEventListener('click', function() {
+        document.getElementById('rightSidebar').addEventListener('click', function () {
             const sidebar = document.getElementById('rigtcontent');
             const floatingButtons = document.querySelector('.floating-buttons');
 
@@ -146,7 +160,7 @@
         });
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             // Cek apakah URL cocok dengan pola `/people/update/*`
             if (window.location.pathname.startsWith("/people/update/")) {
                 // Pilih semua elemen yang mengandung class `sm:p-7`
@@ -159,82 +173,92 @@
             }
         });
     </script>
-     @if (auth()->user()->role == 'admin' || auth()->user()->role == 'superadmin')
-    <!-- Wrapper scrollable -->
-    <div class="w-full overflow-x-auto no-scrollbar  bg-white dark:text-black dark:bg-black" >
-        <div class="flex space-x-2 px-2  mt-1 min-w-max scrolling-wrapper no-scrollbar mb-2" >
-           
-            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md  border-gray-300 bg-gray-100 text-sm dark:bg-white/5 dark:border-black/10 dark:text-white  hover:bg-gray-200 transition" onclick="changeTab(0)">
-                Detail IKM
-            </button>
-            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(1)">
-                Data Mitra
-            </button>
-            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(2)">
-                Data Produk
-            </button>
-            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(3)">
-                Riwayat Transaksi
-            </button>
-            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(4)">
-                Laporan Keuangan
-            </button>
-            <button class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition" onclick="changeTab(5)">
-                Log Aktivitas
-            </button>
-           
+    @if (auth()->user()->role == 'admin' || auth()->user()->role == 'superadmin')
+        <!-- Wrapper scrollable -->
+        <div class="w-full overflow-x-auto no-scrollbar  bg-white dark:text-black dark:bg-black">
+            <div class="flex space-x-2 px-2  mt-1 min-w-max scrolling-wrapper no-scrollbar mb-2">
+
+                <button
+                    class="tab-button px-4 py-2  whitespace-nowrap rounded-md  border-gray-300 bg-gray-100 text-sm dark:bg-white/5 dark:border-black/10 dark:text-white  hover:bg-gray-200 transition"
+                    onclick="changeTab(0)">
+                    Detail IKM
+                </button>
+                <button
+                    class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition"
+                    onclick="changeTab(1)">
+                    Data Mitra
+                </button>
+                <button
+                    class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition"
+                    onclick="changeTab(2)">
+                    Data Produk
+                </button>
+                <button
+                    class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition"
+                    onclick="changeTab(3)">
+                    Riwayat Transaksi
+                </button>
+                <button
+                    class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition"
+                    onclick="changeTab(4)">
+                    Laporan Keuangan
+                </button>
+                <button
+                    class="tab-button px-4 py-2  whitespace-nowrap rounded-md border-gray-300 bg-gray-100 text-sm  dark:bg-white/5 dark:border-black/10 dark:text-white hover:bg-gray-200 transition"
+                    onclick="changeTab(5)">
+                    Log Aktivitas
+                </button>
+
+            </div>
         </div>
-    </div>
-    <script>
-    function changeTab(index) {
-        // Hapus semua tab aktif
-        document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active-tab');
-        btn.classList.add('bg-gray-100');
-        btn.classList.remove('bg-white');
-        });
+        <script>
+            function changeTab(index) {
+                // Hapus semua tab aktif
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active-tab');
+                    btn.classList.add('bg-gray-100');
+                    btn.classList.remove('bg-white');
+                });
 
-        // Tambahkan ke tab aktif
-        const activeBtn = document.querySelectorAll('.tab-button')[index];
-        activeBtn.classList.add('active-tab', 'bg-white');
-        activeBtn.classList.remove('bg-gray-100');
+                // Tambahkan ke tab aktif
+                const activeBtn = document.querySelectorAll('.tab-button')[index];
+                activeBtn.classList.add('active-tab', 'bg-white');
+                activeBtn.classList.remove('bg-gray-100');
 
-        // Simpan index tab di localStorage agar tetap aktif setelah reload
-        localStorage.setItem('activeTab', index);
-    }
+                // Simpan index tab di localStorage agar tetap aktif setelah reload
+                localStorage.setItem('activeTab', index);
+            }
 
-    // Saat halaman diload, aktifkan tab yang terakhir diklik
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedTab = localStorage.getItem('activeTab');
-        if (savedTab !== null) {
-        changeTab(parseInt(savedTab));
-        }
-    });
-    </script>
-     @endif
+            // Saat halaman diload, aktifkan tab yang terakhir diklik
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedTab = localStorage.getItem('activeTab');
+                if (savedTab !== null) {
+                    changeTab(parseInt(savedTab));
+                }
+            });
+        </script>
+    @endif
     <div class="bg-lightwhite dark:bg-white/5 dark:border-black/10 p-6">
         <div class="flex items-start justify-between gap-2 ">
             <div>
                 <h2 class="text-lg font-semibold mb-3">{{ $ikm->nama }}</h2>
                 <div class="flex flex-wrap gap-4 items-center mb-4">
                     <div class="flex items-center gap-1 text-xs text-black/40 dark:text-white/40">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M11.8465 2.26238C10.4873 1.6875 9 1.6875 9 1.6875C7.51265 1.6875 6.15347 2.26238 6.15347 2.26238C4.84109 2.81747 3.82928 3.82928 3.82928 3.82928C2.81748 4.84109 2.26238 6.15347 2.26238 6.15347C1.6875 7.51265 1.6875 9 1.6875 9C1.6875 10.4873 2.26238 11.8465 2.26238 11.8465C2.81747 13.1589 3.82928 14.1707 3.82928 14.1707C3.90704 14.2485 3.98657 14.3235 4.06715 14.3959C4.09662 14.4287 4.1301 14.4583 4.16709 14.4837C5.11036 15.2964 6.15347 15.7376 6.15347 15.7376C7.51265 16.3125 9 16.3125 9 16.3125C10.4873 16.3125 11.8465 15.7376 11.8465 15.7376C12.6786 15.3857 13.3899 14.8501 13.799 14.5053C13.8585 14.4704 13.9102 14.4253 13.9523 14.373C14.0928 14.2486 14.1707 14.1707 14.1707 14.1707C15.1825 13.1589 15.7376 11.8465 15.7376 11.8465C16.3125 10.4873 16.3125 9 16.3125 9C16.3125 7.51265 15.7376 6.15347 15.7376 6.15347C15.1825 4.84109 14.1707 3.82928 14.1707 3.82928C13.1589 2.81747 11.8465 2.26238 11.8465 2.26238ZM6.59172 14.7015C6.04988 14.4723 5.56846 14.151 5.21752 13.882C5.81067 12.9896 6.64596 12.4769 6.64596 12.4769C7.7291 11.8121 9 11.8125 9 11.8125C10.2709 11.8125 11.354 12.4769 11.354 12.4769C12.036 12.8955 12.5166 13.4997 12.7791 13.8899C12.0784 14.418 11.4083 14.7015 11.4083 14.7015C10.2592 15.1875 9 15.1875 9 15.1875C7.74079 15.1875 6.59172 14.7015 6.59172 14.7015ZM6.05746 11.5181C6.05746 11.5181 6.39649 11.3101 6.93432 11.1023C6.82429 11.0195 6.71668 10.9271 6.61351 10.824C6.61351 10.824 5.625 9.83547 5.625 8.4375C5.625 8.4375 5.625 7.03953 6.61351 6.05101C6.61351 6.05101 7.60203 5.0625 9 5.0625C9 5.0625 10.398 5.0625 11.3865 6.05101C11.3865 6.05101 12.375 7.03953 12.375 8.4375C12.375 8.4375 12.375 9.83547 11.3865 10.824C11.3865 10.824 11.2708 10.9397 11.0625 11.092C11.3547 11.2016 11.654 11.341 11.9425 11.5181C11.9425 11.5181 12.8853 12.0968 13.6153 13.1114C13.9039 12.7751 14.3886 12.148 14.7015 11.4083C14.7015 11.4083 15.1875 10.2592 15.1875 9C15.1875 9 15.1875 7.74079 14.7015 6.59172C14.7015 6.59172 14.2319 5.48143 13.3752 4.62478C13.3752 4.62478 12.5186 3.76813 11.4083 3.29851C11.4083 3.29851 10.2592 2.8125 9 2.8125C9 2.8125 7.74078 2.8125 6.59172 3.29851C6.59172 3.29851 5.48143 3.76813 4.62478 4.62478C4.62478 4.62478 3.76813 5.48143 3.29851 6.59172C3.29851 6.59172 2.8125 7.74078 2.8125 9C2.8125 9 2.8125 10.2592 3.29851 11.4083C3.29851 11.4083 3.68218 12.3154 4.38853 13.1224C4.73326 12.6405 5.2946 11.9864 6.05746 11.5181ZM10.591 10.0285C9.93198 10.6875 9 10.6875 9 10.6875C8.06802 10.6875 7.40901 10.0285 7.40901 10.0285C6.75 9.36948 6.75 8.4375 6.75 8.4375C6.75 7.50552 7.40901 6.84651 7.40901 6.84651C8.06802 6.1875 9 6.1875 9 6.1875C9.93198 6.1875 10.591 6.84651 10.591 6.84651C11.25 7.50552 11.25 8.4375 11.25 8.4375C11.25 9.36948 10.591 10.0285 10.591 10.0285Z"
                                 fill="currentcolor"></path>
                         </svg>
                         <p>{{ $ikm->jenis_kelamin == 'L'
-                            ? 'Laki - Laki'
-                            : ($ikm->jenis_kelamin == 'P'
-                                ? 'Perempuan'
-                                : 'belum
-                                                                                                                                                                                                                        disetel') }}
+        ? 'Laki - Laki'
+        : ($ikm->jenis_kelamin == 'P'
+            ? 'Perempuan'
+            : 'belum
+                                                                                                                                                                                                                                disetel') }}
                         </p>
                     </div>
                     <div class="flex items-center gap-1 text-xs text-black/40 dark:text-white/40 ">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M9 4.5C9 4.5 10.165 4.5 10.9887 5.32376C10.9887 5.32376 11.8125 6.14752 11.8125 7.3125C11.8125 7.3125 11.8125 8.47748 10.9887 9.30124C10.9887 9.30124 10.165 10.125 9 10.125C9 10.125 7.83502 10.125 7.01126 9.30124C7.01126 9.30124 6.1875 8.47748 6.1875 7.3125C6.1875 7.3125 6.1875 6.14752 7.01126 5.32376C7.01126 5.32376 7.83502 4.5 9 4.5ZM9 5.625C9 5.625 8.30101 5.625 7.80676 6.11926C7.80676 6.11926 7.3125 6.61351 7.3125 7.3125C7.3125 7.3125 7.3125 8.01149 7.80676 8.50574C7.80676 8.50574 8.30101 9 9 9C9 9 9.69899 9 10.1932 8.50574C10.1932 8.50574 10.6875 8.01149 10.6875 7.3125C10.6875 7.3125 10.6875 6.61351 10.1932 6.11926C10.1932 6.11926 9.69899 5.625 9 5.625Z"
                                 fill="currentcolor"></path>
@@ -247,8 +271,7 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-1 text-xs text-black/40 dark:text-white/40">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                 d="M1.6875 13.5V3.9375C1.6875 3.62684 1.93934 3.375 2.25 3.375H15.75C16.0607 3.375 16.3125 3.62684 16.3125 3.9375V13.5C16.3125 13.5 16.3125 13.966 15.983 14.2955C15.983 14.2955 15.6535 14.625 15.1875 14.625H2.8125C2.8125 14.625 2.34651 14.625 2.01701 14.2955C2.01701 14.2955 1.6875 13.966 1.6875 13.5ZM2.8125 13.5H15.1875V4.5H2.8125V13.5Z"
                                 fill="currentcolor"></path>
@@ -270,14 +293,15 @@
                             </div>
                         </div>
                         @if ($emptyFields > 0)
-                            <p class="text-sm text-black/40 dark:text-white/40 mt-1">Masih ada {{ $emptyFields }} data yang belum diisi.</p>
+                            <p class="text-sm text-black/40 dark:text-white/40 mt-1">Masih ada {{ $emptyFields }} data yang
+                                belum diisi.</p>
                         @endif
                     </div>
 
                 </div>
             </div>
             <!--image-->
-            <div >
+            <div>
                 <div x-data="modals">
                     <a @click="toggle">
                         <img class="flex-none rounded-full object-cover cursor-pointer"
@@ -332,7 +356,7 @@
                                             class="my-4 py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 dark:bg-white/5">
                                             <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Ubah
                                                 Foto</label>
-                                            <input type="file" id="image-input"  class="form-input">
+                                            <input type="file" id="image-input" class="form-input">
                                         </div>
 
                                         {{-- LOADING INDICATOR (Opsional) --}}
@@ -395,16 +419,16 @@
                 </div>
 
                 {{-- <div class="flex flex-col sm:flex-row gap-3">
-            <button type="submit"
-                class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition duration-150">
-                Simpan
-            </button>
+                    <button type="submit"
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition duration-150">
+                        Simpan
+                    </button>
 
-            <button type="button" onclick="confirmDelete('{{ route('ikm.delete', $id) }}')"
-                class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow transition duration-150">
-                Hapus
-            </button>
-        </div> --}}
+                    <button type="button" onclick="confirmDelete('{{ route('ikm.delete', $id) }}')"
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow transition duration-150">
+                        Hapus
+                    </button>
+                </div> --}}
 
             </div>
             <script>
@@ -474,11 +498,11 @@
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Jenis Kelamin</label>
                         <select name="jenis_kelamin" class="form-input" id="jenis_kelamin">
                             <option value="">-- Pilih Jenis Kelamin --</option>
-                            <option value="L"
-                                {{ old('jenis_kelamin', $ikm->jenis_kelamin ?? '') == 'L' ? 'selected' : '' }}>Laki-laki
+                            <option value="L" {{ old('jenis_kelamin', $ikm->jenis_kelamin ?? '') == 'L' ? 'selected' : '' }}>
+                                Laki-laki
                             </option>
-                            <option value="P"
-                                {{ old('jenis_kelamin', $ikm->jenis_kelamin ?? '') == 'P' ? 'selected' : '' }}>Perempuan
+                            <option value="P" {{ old('jenis_kelamin', $ikm->jenis_kelamin ?? '') == 'P' ? 'selected' : '' }}>
+                                Perempuan
                             </option>
                         </select>
                     </div>
@@ -504,15 +528,14 @@
                     </div>
                     <div class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 mb-3">
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Provinsi</label>
-                      @php
+                        @php
                             $selectedProvinsi = old('id_provinsi', $ikm->id_provinsi);
                         @endphp
 
                         <select id="provinsi" name="id_provinsi" class="form-select w-full">
                             <option value="">Pilih Provinsi</option>
                             @foreach ($provinsi as $ikm2)
-                                <option value="{{ $ikm2->id }}"
-                                    {{ $ikm2->id == $selectedProvinsi ? 'selected' : '' }}>
+                                <option value="{{ $ikm2->id }}" {{ $ikm2->id == $selectedProvinsi ? 'selected' : '' }}>
                                     {{ $ikm2->name }}
                                 </option>
                             @endforeach
@@ -540,7 +563,8 @@
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Kecamatan</label>
                         <select id="kecamatan" name="id_kecamatan" class="form-select w-full">
                             @if ($selectedKecamatanId)
-                                <option value="{{ $selectedKecamatanId }}" selected>{{ $ikm->kecamatan->name ?? 'Terpilih' }}</option>
+                                <option value="{{ $selectedKecamatanId }}" selected>{{ $ikm->kecamatan->name ?? 'Terpilih' }}
+                                </option>
                             @else
                                 <option value="">Pilih Kecamatan</option>
                             @endif
@@ -588,10 +612,13 @@
                         <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Status </label>
                         <select id="status_perkawinan" name="status_perkawinan" class="form-select w-full">
                             <option value="" {{ $selectedStatus == '' ? 'selected' : '' }}>status perkawinan</option>
-                            <option value="belum_menikah" {{ $selectedStatus == 'belum_menikah' ? 'selected' : '' }}>Belum Menikah</option>
+                            <option value="belum_menikah" {{ $selectedStatus == 'belum_menikah' ? 'selected' : '' }}>Belum
+                                Menikah</option>
                             <option value="menikah" {{ $selectedStatus == 'menikah' ? 'selected' : '' }}>Menikah</option>
-                            <option value="cerai_hidup" {{ $selectedStatus == 'cerai_hidup' ? 'selected' : '' }}>Cerai Hidup</option>
-                            <option value="cerai_mati" {{ $selectedStatus == 'cerai_mati' ? 'selected' : '' }}>Cerai Mati</option>
+                            <option value="cerai_hidup" {{ $selectedStatus == 'cerai_hidup' ? 'selected' : '' }}>Cerai Hidup
+                            </option>
+                            <option value="cerai_mati" {{ $selectedStatus == 'cerai_mati' ? 'selected' : '' }}>Cerai Mati
+                            </option>
                         </select>
                     </div>
 
@@ -683,25 +710,22 @@
                                 <td class="px-4 py-2 mobile">{{ $item->no_telp_mitra }}</td>
                             </tr>
                         @endforeach
-                       @if ($mitra->isEmpty())
-                        <tr>
-                            <td colspan="5" class="py-10">
-                                <div class="flex flex-col items-center justify-center text-gray-400">
-                                    <!-- Ikon catatan kosong -->
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="w-14 h-14 mb-2 text-gray-300"
-                                        fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor" stroke-width="1.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2
-                                                2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
-                                    </svg>
+                        @if ($mitra->isEmpty())
+                            <tr>
+                                <td colspan="5" class="py-10">
+                                    <div class="flex flex-col items-center justify-center text-gray-400">
+                                        <!-- Ikon catatan kosong -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 mb-2 text-gray-300" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2
+                                                                2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                                        </svg>
 
-                                    <p class="text-sm text-gray-500">Tidak ada data mitra ditemukan</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endif
+                                        <p class="text-sm text-gray-500">Tidak ada data mitra ditemukan</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
 
 
                     </tbody>
@@ -774,13 +798,10 @@
                                 <td colspan="5" class="py-10">
                                     <div class="flex flex-col items-center justify-center text-gray-400">
                                         <!-- Ikon catatan kosong -->
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            class="w-14 h-14 mb-2 text-gray-300"
-                                            fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2
-                                                    2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 mb-2 text-gray-300" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2
+                                                                    2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
                                         </svg>
 
                                         <p class="text-sm text-gray-500">Data tidak ditemukan</p>
@@ -805,7 +826,7 @@
                     terdaftar di sistem.</p>
             </div>
 
-            
+
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -817,28 +838,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                    
+
                         @foreach ($transaksi2 as $item)
                             <tr>
                                 <td class="whitespace-nowrap"><a
                                         href="/transaksi/{{ $item->id }}">{{ $item->kode_transaksi }}</a></td>
-                                <td class="hidden md:block">{{ \Carbon\Carbon::make($item->tanggal_transaksi)->translatedFormat('d F Y') }}</td>
+                                <td class="hidden md:block">
+                                    {{ \Carbon\Carbon::make($item->tanggal_transaksi)->translatedFormat('d F Y') }}
+                                </td>
                                 <td>{{ $item->mitra->nama_mitra }}</td>
                                 <td class="hidden md:block">Rp{{ number_format($item->total, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                         @if ($transaksi2->isEmpty())
-                             <tr>
+                            <tr>
                                 <td colspan="5" class="py-10">
                                     <div class="flex flex-col items-center justify-center text-gray-400">
                                         <!-- Ikon catatan kosong -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" 
-                                            class="w-16 h-16 mb-3 text-gray-300" 
-                                            fill="none" viewBox="0 0 24 24" 
-                                            stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 
-                                                    2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mb-3 text-gray-300" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 
+                                                                    2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
                                         </svg>
                                         <p class="text-sm">Tidak ada riwayat transaksi ditemukan</p>
                                     </div>
@@ -851,235 +871,225 @@
 
         </div>
     </div>
-<div id="tab-content-4" class="tab-content hidden p-4">
-    <p class="text-sm font-semibold mb-3 text-black/40 dark:text-white/40">Catatan Keuangan</p>
-    @php
-    // Ambil parameter sort dan filter tanggal dari request
-    $sort = request('sort', 'desc');
-    $from = request('from');
-    $to = request('to');
+    <div id="tab-content-4" class="tab-content hidden p-4">
+        <p class="text-sm font-semibold mb-3 text-black/40 dark:text-white/40">Catatan Keuangan</p>
+        @php
+            // Ambil parameter sort dan filter tanggal dari request
+            $sort = request('sort', 'desc');
+            $from = request('from');
+            $to = request('to');
 
-    // Filter transaksi berdasarkan rentang tanggal jika ada
-    $filteredTransaksi = $transaksi;
-    if ($from && $to) {
-    try {
-        $fromDate = \Carbon\Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
-        $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
-        $filteredTransaksi = $filteredTransaksi->filter(function ($item) use ($fromDate, $toDate) {
-        $itemDate = \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal);
-    return $itemDate->between($fromDate, $toDate);
-    });
-    } catch (\Exception $e) {
-    // Jika format salah, tampilkan semua
-    }
-    }
+            // Filter transaksi berdasarkan rentang tanggal jika ada
+            $filteredTransaksi = $transaksi;
+            if ($from && $to) {
+                try {
+                    $fromDate = \Carbon\Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
+                    $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
+                    $filteredTransaksi = $filteredTransaksi->filter(function ($item) use ($fromDate, $toDate) {
+                        $itemDate = \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal);
+                        return $itemDate->between($fromDate, $toDate);
+                    });
+                } catch (\Exception $e) {
+                    // Jika format salah, tampilkan semua
+                }
+            }
 
-    // Urutkan transaksi berdasarkan tanggal sesuai sort
-    $filteredTransaksi =
-    $sort === 'asc' ? $filteredTransaksi->sortBy(function ($item) {
-        return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
-    }) : $filteredTransaksi->sortByDesc(function ($item) {
-        return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
-    });
-    @endphp
+            // Urutkan transaksi berdasarkan tanggal sesuai sort
+            $filteredTransaksi =
+                $sort === 'asc' ? $filteredTransaksi->sortBy(function ($item) {
+                    return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
+                }) : $filteredTransaksi->sortByDesc(function ($item) {
+                    return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
+                });
+        @endphp
 
 
 
-    <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
-         <div class="flex flex-wrap md:flex-row gap-2 items-start w-full md:w-auto">
-   
-            <!-- Filter -->
-            <div x-data="{ openFilter: false }" class="relative shrink-0 mb-3">
-                <button type="button"
-                        @click="openFilter = !openFilter"
+        <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
+            <div class="flex flex-wrap md:flex-row gap-2 items-start w-full md:w-auto">
+
+                <!-- Filter -->
+                <div x-data="{ openFilter: false }" class="relative shrink-0 mb-3">
+                    <button type="button" @click="openFilter = !openFilter"
                         class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-auto">
-                    <i class="fas fa-filter"></i>
-                    <span class="hidden sm:inline">Filter</span>
-                </button>
+                        <i class="fas fa-filter"></i>
+                        <span class="hidden sm:inline">Filter</span>
+                    </button>
 
-                <!-- Dropdown Filter -->
-                <div x-show="openFilter"
-                    @click.away="openFilter = false"
-                    x-transition
-                    class="absolute z-50 mt-2 left-0 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg shadow-lg p-4 min-w-[320px] max-w-[90vw]">
-                    <form method="GET" id="filterForm" class="flex flex-col gap-3">
-                        <h3 class="font-semibold text-sm">Filter Transaksi</h3>
+                    <!-- Dropdown Filter -->
+                    <div x-show="openFilter" @click.away="openFilter = false" x-transition
+                        class="absolute z-50 mt-2 left-0 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg shadow-lg p-4 min-w-[320px] max-w-[90vw]">
+                        <form method="GET" id="filterForm" class="flex flex-col gap-3">
+                            <h3 class="font-semibold text-sm">Filter Transaksi</h3>
 
-                        <div class="flex items-center gap-2">
-                            <label class="text-sm w-16">Dari:</label>
-                            <input type="text" name="from" id="from_date"
-                                value="{{ $from }}"
-                                class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
-                                placeholder="dd/mm/yyyy" autocomplete="off">
-                        </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm w-16">Dari:</label>
+                                <input type="text" name="from" id="from_date" value="{{ $from }}"
+                                    class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
+                                    placeholder="dd/mm/yyyy" autocomplete="off">
+                            </div>
 
-                        <div class="flex items-center gap-2">
-                            <label class="text-sm w-16">Sampai:</label>
-                            <input type="text" name="to" id="to_date"
-                                value="{{ $to }}"
-                                class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
-                                placeholder="dd/mm/yyyy" autocomplete="off">
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm w-16">Sampai:</label>
+                                <input type="text" name="to" id="to_date" value="{{ $to }}"
+                                    class="form-input py-1 px-2 rounded border border-black/10 dark:border-white/10 w-full"
+                                    placeholder="dd/mm/yyyy" autocomplete="off">
 
-                        </div>
-                        <input type="text" name="ip" value="{{ $id }}" hidden>      
-                        <div class="flex gap-2 mt-3">
-                            <button type="submit"
+                            </div>
+                            <input type="text" name="ip" value="{{ $id }}" hidden>
+                            <div class="flex gap-2 mt-3">
+                                <button type="submit"
                                     class="submitBtn flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition w-full">
-                                <span class="btn-text">Terapkan</span>
-                                <span class="btn-spinner hidden animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
-                            </button>
+                                    <span class="btn-text">Terapkan</span>
+                                    <span
+                                        class="btn-spinner hidden animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                                </button>
 
-                            <a href="{{ route('index.keuangan') }}"
-                            class="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition w-full text-center">
-                                Reset
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Pilih Bulan -->
-            <form method="GET" class="shrink-0 w-auto">
-                <input type="month"
-                    name="periode"
-                    value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
-                    onchange="this.form.submit()"
-                    class="bg-white dark:bg-black form-input py-2.5 px-4 w-auto text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5">
-                    <input type="text" name="ip" value="{{ $id }}" hidden>
-                    <select name="tipe"
-                id="tipe"
-                onchange="this.form.submit()"
-                class="bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 w-auto"
-                style="min-width: 140px;">
-                <option value="" {{ request('tipe') == '' ? 'selected' : '' }}>Semua Tipe</option>
-                <option value="pemasukan" {{ request('tipe') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
-                <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
-            </select>
-                </form>
-                <a  href="{{ route('keuangan.pdf.harian', request()->query()) }}" target="_blank" type="button"
-                        @click="openFilter = !openFilter"
-                        class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-auto">
-                    <i class="fas fa-file-pdf"></i>
-                    <span class="hidden sm:inline">Filter</span>
-            </a>
-        </div>
-        
-        <div class="table-responsive">
-            @if($keuangan->isEmpty())
-                <div class="flex flex-col items-center justify-center py-10 text-gray-400">
-                    <!-- Ikon catatan keuangan kosong -->
-                    <svg xmlns="http://www.w3.org/2000/svg" 
-                        class="w-16 h-16 mb-3 text-gray-300" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor" 
-                        stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" 
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 
-                                2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
-                    </svg>
-
-                    <div class="text-center text-sm">
-                        Tidak ada data keuangan yang tersedia.
+                                <a href="{{ route('index.keuangan') }}"
+                                    class="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 transition w-full text-center">
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-            @else
-            <table class="w-full border-collapse text-sm table-auto" id="produkTable">
-                @php
-                    // Group transaksi by tanggal (format: Y-m-d)
-                    $groupedTransaksi = $keuangan->groupBy(function ($item) {
-                        return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
-                    });
-                @endphp
+                <!-- Pilih Bulan -->
+                <form method="GET" class="shrink-0 w-auto">
+                    <input type="month" name="periode" value="{{ $tahun }}-{{ str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
+                        onchange="this.form.submit()"
+                        class="bg-white dark:bg-black form-input py-2.5 px-4 w-auto text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5">
+                    <input type="text" name="ip" value="{{ $id }}" hidden>
+                    <select name="tipe" id="tipe" onchange="this.form.submit()"
+                        class="bg-white dark:bg-black form-input py-2.5 px-4 text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-100 dark:focus:border-white/20 dark:focus:ring-white/5 w-auto"
+                        style="min-width: 140px;">
+                        <option value="" {{ request('tipe') == '' ? 'selected' : '' }}>Semua Tipe</option>
+                        <option value="pemasukan" {{ request('tipe') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
+                        <option value="pengeluaran" {{ request('tipe') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran
+                        </option>
+                    </select>
+                </form>
+                <a href="{{ route('keuangan.pdf.harian', request()->query()) }}" target="_blank" type="button"
+                    @click="openFilter = !openFilter"
+                    class="p-3 rounded-lg bg-gray-100 hover:bg-blue-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center md:justify-start gap-1 w-auto">
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="hidden sm:inline">Filter</span>
+                </a>
+            </div>
 
-                @foreach ($groupedTransaksi as $tanggal => $items)
-                    @php
-                        // Format tanggal untuk header
-                        $carbonTanggal = \Carbon\Carbon::createFromFormat('Y-m-d', $tanggal);
-                        $tanggalFormatted = $carbonTanggal->translatedFormat('d F Y - l');
-                        // Hitung total pemasukan & pengeluaran untuk tanggal ini
-                        $pemasukan = $items->where('tipe', 'pemasukan')->sum('total');
-                        $pengeluaran = $items->where('tipe', 'pengeluaran')->sum('total');
-                    @endphp
-                    <thead class="lg:table-header-group">
-                        <tr class="text-gray-400">
-                            <th width="70%" class="text-left font-normal">{{ $tanggalFormatted }}</th>
-                            <th class="text-left">
-                                <div class="flex flex-col lg:flex-row gap-4 text-gray-600">
-                                    <div>Pemasukan: <span class="text-green-600">Rp {{ number_format($pemasukan, 0, ',', '.') }}</span></div>
-                                    <div>Pengeluaran: <span class="text-red-600">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</span></div>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($items as $item)
-                            <tr class="hover:bg-gray-50" x-data="{ openDetail: false }">
-                                <!-- Produk / Transaksi -->
-                                <td class="py-4 pl-6 flex items-start gap-3">
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold leading-tight">
-                                            <a>{{ $item->deskripsi ?? '-' }}</a>
-                                        </span>
-                                        <span class="text-gray-400 leading-tight truncate max-w-[120px]">
-                                            {{ $item->akun->nama_akun ?? '-' }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="py-4 font-semibold mobile lg:table-cell">
-                                    <span class="{{ $item->tipe == 'pemasukan' ? 'text-green-600' : 'text-red-600' }}">
-                                        Rp. {{ number_format($item->total, 0, ',', '.') }}
-                                    </span>
-                                </td>
-                            </tr>
+            <div class="table-responsive">
+                @if($keuangan->isEmpty())
+                    <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                        <!-- Ikon catatan keuangan kosong -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mb-3 text-gray-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 
+                                                2 0 012-2h7l5 5v14a2 2 0 01-2 2z" />
+                        </svg>
+
+                        <div class="text-center text-sm">
+                            Tidak ada data keuangan yang tersedia.
+                        </div>
+                    </div>
+
+                @else
+                    <table class="w-full border-collapse text-sm table-auto" id="produkTable">
+                        @php
+                            // Group transaksi by tanggal (format: Y-m-d)
+                            $groupedTransaksi = $keuangan->groupBy(function ($item) {
+                                return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
+                            });
+                        @endphp
+
+                        @foreach ($groupedTransaksi as $tanggal => $items)
+                            @php
+                                // Format tanggal untuk header
+                                $carbonTanggal = \Carbon\Carbon::createFromFormat('Y-m-d', $tanggal);
+                                $tanggalFormatted = $carbonTanggal->translatedFormat('d F Y - l');
+                                // Hitung total pemasukan & pengeluaran untuk tanggal ini
+                                $pemasukan = $items->where('tipe', 'pemasukan')->sum('total');
+                                $pengeluaran = $items->where('tipe', 'pengeluaran')->sum('total');
+                            @endphp
+                            <thead class="lg:table-header-group">
+                                <tr class="text-gray-400">
+                                    <th width="70%" class="text-left font-normal">{{ $tanggalFormatted }}</th>
+                                    <th class="text-left">
+                                        <div class="flex flex-col lg:flex-row gap-4 text-gray-600">
+                                            <div>Pemasukan: <span class="text-green-600">Rp
+                                                    {{ number_format($pemasukan, 0, ',', '.') }}</span></div>
+                                            <div>Pengeluaran: <span class="text-red-600">Rp
+                                                    {{ number_format($pengeluaran, 0, ',', '.') }}</span></div>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($items as $item)
+                                    <tr class="hover:bg-gray-50" x-data="{ openDetail: false }">
+                                        <!-- Produk / Transaksi -->
+                                        <td class="py-4 pl-6 flex items-start gap-3">
+                                            <div class="flex flex-col">
+                                                <span class="font-semibold leading-tight">
+                                                    <a>{{ $item->deskripsi ?? '-' }}</a>
+                                                </span>
+                                                <span class="text-gray-400 leading-tight truncate max-w-[120px]">
+                                                    {{ $item->akun->nama_akun ?? '-' }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 font-semibold mobile lg:table-cell">
+                                            <span class="{{ $item->tipe == 'pemasukan' ? 'text-green-600' : 'text-red-600' }}">
+                                                Rp. {{ number_format($item->total, 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
                         @endforeach
-                    </tbody>
-                @endforeach
-            </table>
-            @endif
+                    </table>
+                @endif
+            </div>
         </div>
     </div>
-</div>
 
     <div id="tab-content-5" class="tab-content hidden p-4">
         <p class="text-sm font-semibold mb-3 text-black/40 dark:text-white/40">Log Aktivitas Pengguna</p>
         <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
-            <div class="bg-white dark:bg-black p-5 rounded-md border border-black/10 dark:border-white/10 max-h-[400px] overflow-y-auto">
-            @foreach ($Ikmlogs as $log)
-                <div class="flex gap-3 items-start  text-sm text-gray-700 dark:text-gray-300 mb-3 border-b dark:border-white/10 border-black/10 pb-3">
-                    <div class="h-6 w-6 flex-none p-1 text-black bg-lightblue-100 rounded-lg">
-                        <x-icon name="users" class="text-gray-600" />
+            <div
+                class="bg-white dark:bg-black p-5 rounded-md border border-black/10 dark:border-white/10 max-h-[400px] overflow-y-auto">
+                @foreach ($Ikmlogs as $log)
+                    <div
+                        class="flex gap-3 items-start  text-sm text-gray-700 dark:text-gray-300 mb-3 border-b dark:border-white/10 border-black/10 pb-3">
+                        <div class="h-6 w-6 flex-none p-1 text-black bg-lightblue-100 rounded-lg">
+                            <x-icon name="users" class="text-gray-600" />
+                        </div>
+                        <div class="flex-1">
+                            <p class=" text-sm text-gray-900 dark:text-white">
+                                {{ $log->description }} oleh <strong>{{ $log->causer->name ?? 'Sistem' }}</strong>
+                            </p>
+                            <p class="text-xs dark:text-gray-400 text-gray-500 mb-3">
+                                {{ $log->created_at->diffForHumans() }}
+                            </p>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <p class=" text-sm text-gray-900 dark:text-white">
-                            {{ $log->description }} oleh <strong>{{ $log->causer->name ?? 'Sistem' }}</strong>
-                        </p>
-                        <p class="text-xs dark:text-gray-400 text-gray-500 mb-3">
-                            {{ $log->created_at->diffForHumans() }}
-                        </p>
-                    </div>
+                @endforeach
+                <div class="text-center dark:text-gray-400 text-sm">
+                    @if ($Ikmlogs->count() === 0)
+                        <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                            <!-- Ikon aktivitas kosong -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 mb-2 text-gray-300" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 13a4 4 0 014-4h3l3-3v12l-3-3H7a4 4 0 01-4-4z" />
+                            </svg>
+
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Tidak ada aktivitas terbaru.
+                            </p>
+                        </div>
+                    @endif
+
                 </div>
-            @endforeach
-            <div class="text-center dark:text-gray-400 text-sm">
-               @if ($Ikmlogs->count() === 0)
-                    <div class="flex flex-col items-center justify-center py-10 text-gray-400">
-                        <!-- Ikon aktivitas kosong -->
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="w-14 h-14 mb-2 text-gray-300"
-                            fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 13a4 4 0 014-4h3l3-3v12l-3-3H7a4 4 0 01-4-4z" />
-                        </svg>
-
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Tidak ada aktivitas terbaru.
-                        </p>
-                    </div>
-                @endif
-
-            </div>
             </div>
         </div>
     </div>
@@ -1118,8 +1128,7 @@
                 <div class="p-5">
                     <div class="text-sm text-black dark:text-white">
                         <div class="relative">
-                            <img id="image" src="" alt="Image"
-                                class="h-auto max-h-96 object-contain w-60">
+                            <img id="image" src="" alt="Image" class="h-auto max-h-96 object-contain w-60">
                         </div>
                         <div class="mt-6 flex justify-end space-x-4">
                             <button id="cancelCrop"
@@ -1132,7 +1141,7 @@
             </div>
         </div>
     </div>
-     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
     <script>
         // Inisialisasi Flatpickr dengan lokal Indonesia
@@ -1200,7 +1209,7 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             $('#jenis_kelamin').select2({
                 placeholder: "Pilih Jenis Kelamin",
                 width: '100%'
@@ -1284,12 +1293,12 @@
                     formData.append('foto', croppedImage);
 
                     fetch("{{ route('ikm.store') }}", {
-                            method: "POST",
-                            headers: {
-                                'X-CSRF-TOKEN': "{{ csrf_token() }}", // CSRF Token untuk keamanan
-                            },
-                            body: formData,
-                        })
+                        method: "POST",
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}", // CSRF Token untuk keamanan
+                        },
+                        body: formData,
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -1309,7 +1318,7 @@
     </script>
 
     <script>
-        $(function() {
+        $(function () {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1317,8 +1326,8 @@
             });
 
 
-            $(function() {
-                $('#provinsi').on('change', function() {
+            $(function () {
+                $('#provinsi').on('change', function () {
                     let id_provinsi = $('#provinsi').val();
 
                     $.ajax({
@@ -1329,21 +1338,21 @@
                         },
                         cache: false,
 
-                        success: function(msg) {
+                        success: function (msg) {
                             $('#kabupaten').removeAttr('disabled');
                             $('#kabupaten').html(msg);
                             $('#kecamatan').html('');
                             $('#desa').html('');
 
                         },
-                        error: function(data) {
+                        error: function (data) {
                             console.log('error:', data)
                         },
                     })
                 })
 
 
-                $('#kabupaten').on('change', function() {
+                $('#kabupaten').on('change', function () {
                     let id_kabupaten = $('#kabupaten').val();
 
                     $.ajax({
@@ -1354,20 +1363,20 @@
                         },
                         cache: false,
 
-                        success: function(msg) {
+                        success: function (msg) {
                             $('#kecamatan').removeAttr('disabled');
                             $('#kecamatan').html(msg);
                             $('#desa').html('');
 
 
                         },
-                        error: function(data) {
+                        error: function (data) {
                             console.log('error:', data)
                         },
                     })
                 })
 
-                $('#kecamatan').on('change', function() {
+                $('#kecamatan').on('change', function () {
                     let id_kecamatan = $('#kecamatan').val();
 
                     $.ajax({
@@ -1378,13 +1387,13 @@
                         },
                         cache: false,
 
-                        success: function(msg) {
+                        success: function (msg) {
                             $('#desa').removeAttr('disabled');
                             $('#desa').html(msg);
 
 
                         },
-                        error: function(data) {
+                        error: function (data) {
                             console.log('error:', data)
                         },
                     })
@@ -1421,33 +1430,33 @@
         //     changeTab(savedIndex);
         // });
     </script>
-  <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const activeTabIndex = localStorage.getItem('activeTabIndex') || 0;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const activeTabIndex = localStorage.getItem('activeTabIndex') || 0;
 
-    // Fungsi ubah tab
-    function changeTab(index) {
-        tabButtons.forEach((btn, i) => {
-            btn.classList.toggle('bg-blue-600', i === index);
-            btn.classList.toggle('text-white', i === index);
+            // Fungsi ubah tab
+            function changeTab(index) {
+                tabButtons.forEach((btn, i) => {
+                    btn.classList.toggle('bg-blue-600', i === index);
+                    btn.classList.toggle('text-white', i === index);
+                });
+                tabContents.forEach((content, i) => {
+                    content.classList.toggle('hidden', i !== index);
+                });
+
+                localStorage.setItem('activeTabIndex', index);
+            }
+
+            // Pasang event klik ke semua tombol tab
+            tabButtons.forEach((btn, i) => {
+                btn.addEventListener('click', () => changeTab(i));
+            });
+
+            // Saat halaman pertama kali dimuat → buka tab terakhir yang disimpan
+            changeTab(parseInt(activeTabIndex));
         });
-        tabContents.forEach((content, i) => {
-            content.classList.toggle('hidden', i !== index);
-        });
-
-        localStorage.setItem('activeTabIndex', index);
-    }
-
-    // Pasang event klik ke semua tombol tab
-    tabButtons.forEach((btn, i) => {
-        btn.addEventListener('click', () => changeTab(i));
-    });
-
-    // Saat halaman pertama kali dimuat → buka tab terakhir yang disimpan
-    changeTab(parseInt(activeTabIndex));
-});
-</script>
+    </script>
 
 @endsection

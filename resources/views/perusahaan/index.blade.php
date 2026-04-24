@@ -19,6 +19,13 @@
     touch-action: none;
 }
 
+ .select2-container--default .select2-selection__rendered {
+       color: #333333;
+       margin-top:-18px;
+       margin-left: -19px;
+       margin-right: 10px;
+       font-size: 14px;
+   }
 @media (max-width: 768px) {
     #signature-pad {
         height: 250px; /* default tinggi di HP */

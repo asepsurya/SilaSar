@@ -1,604 +1,547 @@
 @extends('layout.main')
 @section('title', 'Tambah Produk')
+@section('css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+@endsection
 @section('container')
-<style>
-    .select2-container--default .select2-selection--single {
+    <style>
+        .select2-container--default .select2-selection--single {
+            background-color: transparent !important;
+            border: none !important;
+            height: auto !important;
+            padding: 0 !important;
+        }
 
-        margin-left: -10px;
-        border: none;
-    }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+            color: inherit !important;
+        }
 
-    .akun+.select2 .select2-selection--single {
-        padding: 20px;
+        .dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #fff !important;
+        }
 
-        color: #000;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        border-radius: 0.5rem;
+        @media (max-width: 768px) {
+            .tombol-dekstop {
+                display: none;
+            }
 
-    }
+            .tombol-mobile {
+                display: flex;
+            }
+        }
 
-    .akun+.select2 .select2-selection__arrow {
-        display: none !important;
-    }
+        .cropper-container {
+            max-height: 500px !important;
+        }
+    </style>
 
-    .satuan-select+.select2 .select2-selection--single {
-        padding: 20px;
+    <div x-data="productForm()" class="pb-20">
+        <form action="{{ route('produk.store') }}" method="POST" enctype="multipart/form-data" id="produkForm">
+            @csrf
 
-        color: #000;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        border-radius: 0.5rem;
+            <div class="px-2 py-1 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <h2 class="text-2xl font-black text-black dark:text-white tracking-tight">Tambah Produk Baru</h2>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Lengkapi informasi untuk
+                        mendaftarkan produk baru ke sistem</p>
+                </div>
 
-    }
+                <!-- Tab Navigation -->
+                <div
+                    class="flex items-center gap-1 bg-gray-100 dark:bg-white/5 p-1 rounded-xl w-fit border border-black/5 dark:border-white/5 shadow-inner">
+                    <button type="button" @click="activeTab = 'informasi'"
+                        :class="activeTab === 'informasi' ? 'bg-white dark:bg-white/10 text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+                        class="px-5 py-2 text-xs font-bold rounded-lg transition-all duration-200">
+                        Informasi Produk
+                    </button>
+                    <button type="button" @click="activeTab = 'akuntansi'"
+                        :class="activeTab === 'akuntansi' ? 'bg-white dark:bg-white/10 text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+                        class="px-5 py-2 text-xs font-bold rounded-lg transition-all duration-200">
+                        Pemetaan Akun
+                    </button>
+                </div>
 
-    .satuan-select+.select2 .select2-selection__arrow {
-        display: none !important;
-    }
-
-    /* Supaya teks tetap center setelah arrow hilang */
-    .satuan-select+.select2 .select2-selection--single {
-        padding-right: 16px;
-        /* hilangkan ruang untuk arrow */
-    }
-
-
-
-    .dark .satuan-select+.select2 .select2-selection--single {
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.1);
-        background: transparent;
-    }
-
-    .dark .select2-container--default .select2-selection--single {
-        margin-left: -10px;
-        background: transparent;
-        border: none;
-    }
-    .dark .satuan+.select2-container--default .select2-selection--single{
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .p-7 {
-        padding: 0px !important;
-    }
-
-    footer {
-        margin: 30px;
-    }
-
-</style>
-<style>
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
-
-</style>
-
-<div x-data="{ tab: 'tab1' }">
-    <!-- Tab Header -->
-    <div class="flex border-b border-gray-200 dark:border-white/10">
-        <button @click="tab = 'tab1'" :class="tab === 'tab1' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-2 font-medium text-sm">
-            Data Produk
-        </button>
-
-        <button @click="tab = 'tab2'" :class="tab === 'tab2' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-2 font-medium text-sm">
-            Persediaan dan Stok
-        </button>
-        <button @click="tab = 'tab3'" :class="tab === 'tab3' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-2 font-medium text-sm">
-            Akunting
-        </button>
-    </div>
-    <form action="{{ route('produk.store') }}" method="POST" enctype="multipart/form-data" id="addProdukForm">
-        @csrf
-        <div class=" pt-5 px-5 flex items-center justify-between  ">
-            <h2 class="text-lg font-semibold">Produk Saya</h2>
-
-            <div class="flex items-center gap-2">
-                <button type="submit" id="submitForm" class="px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
-                    Simpan Produk
-                </button>
-
-                <button type="button" id="cancelButton" class="px-3 py-2 text-sm bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition">
-                    Batal
-                </button>
-            </div>
-        </div>
-        @if ($errors->any())
-        <div x-data="{ show: true }" x-show="show" class="relative rounded-xl border bg-lightred text-white p-4 " style="margin: 20px">
-            <!-- Tombol Close -->
-            <button @click="show = false" type="button" class="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-transform duration-300 hover:rotate-180">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                    <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-            </button>
-
-            <!-- Judul Error -->
-            <div class="font-semibold mb-2">
-                Terjadi kesalahan saat memproses data:
+                <!-- Desktop Action Button -->
+                <div class="tombol-dekstop">
+                    <button type="submit"
+                        class="p-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition duration-150 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 flex items-center gap-2">
+                        <span>Simpan Produk</span>
+                        <i class="fas fa-check-circle"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- Daftar Error -->
-            <ul class="space-y-1 list-disc pl-5 text-sm">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+            <!-- Mobile Action Button -->
+            <div class="fixed bottom-0 right-4 z-[99] space-y-3 flex flex-col tombol-mobile hidden"
+                style="margin-bottom: 90px; margin-top:10px;">
+                <button type="submit"
+                    class="w-14 h-14 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition transform active:scale-95 shadow-blue-500/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+            </div>
 
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6 shadow-sm"
+                    role="alert">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong class="font-bold">Terjadi kesalahan!</strong>
+                    </div>
+                    <ul class="mt-1 list-disc list-inside text-sm opacity-90">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
+            <!-- Tab Content: Informasi Produk -->
+            <div x-show="activeTab === 'informasi'" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <div class="grid grid-cols-1 gap-7 lg:grid-cols-2">
+                    <!-- Kolom Kiri: Informasi Produk -->
+                    <div class="space-y-6 ">
+                        <div
+                            class="mb-4 border bg-white dark:bg-white/5 border-black/10 dark:border-white/10 p-6 rounded-xl shadow-sm">
+                            <p
+                                class="text-sm font-bold mb-6 text-black dark:text-white uppercase tracking-widest border-l-4 border-blue-600 pl-3">
+                                Informasi Dasar</p>
 
-        <!-- Tab Content -->
-        <div class="p-4  border-t-0 border-gray-200 dark:border-gray-700 rounded-b-lg">
-            <div x-show="tab === 'tab1'">
+                            <!-- Nama Produk -->
+                            <div
+                                class="py-4 px-5 mb-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                <label
+                                    class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Nama
+                                    Produk <span class="text-red-500">*</span></label>
+                                <input type="text" name="nama_produk" placeholder="Masukkan nama produk"
+                                    class="form-input font-bold text-base" required value="{{ old('nama_produk') }}" />
+                            </div>
 
-                <div class="flex flex-col md:flex-row gap-4">
-                    <!-- SECTION FORM KIRI -->
-                    <div class="md:w-4/5 w-full bg-white dark:bg-black border border-black/10 dark:border-white/10 p-4 rounded-lg">
-                        <input type=" hidden" name="user_id" value="{{ auth()->user()->id }}" hidden>
-                        <!-- Nama Produk -->
-                        <div class="space-y-4">
                             <!-- Kode Produk -->
-                            <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                                <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Kode Produk <span style="color: red">*</span></label>
-                                <input type="text" name="kode_produk" id="kode_produk" class="form-input" readonly />
+                            <div
+                                class="py-4 px-5 mb-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                <label
+                                    class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Kode
+                                    Produk</label>
+                                <input type="text" name="kode_produk" placeholder="Otomatis jika kosong"
+                                    class="form-input font-bold text-blue-600 dark:text-blue-400"
+                                    value="{{ old('kode_produk', $generatedCode) }}" />
                             </div>
 
-                            <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                                <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Nama Produk <span style="color: red">*</span></label>
-                                <input type="text" name="nama_produk" placeholder="Nama Produk" class="form-input" value="{{ old('nama_produk') }}" />
-                            </div>
-
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                                <!-- Harga -->
-                                <div x-data="{ openModal: false }" class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 mb-3">
-                                    <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                                        Kategori Produk <span class="text-red-500">*</span>
-                                    </label>
-
-                                    <div class="flex gap-2">
-                                        <select id="select-kategori" name="kategori" class="form-select w-full">
-                                            <option value="" disabled {{ old('kategori') === null ? 'selected' : '' }}>Pilih Kategori</option>
-
-                                            @foreach ($category as $item)
-                                            <option value="{{ $item->id }}" {{ old('kategori') == $item->id ? 'selected' : '' }}>
-                                                {{ $item->name }}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                                <!-- Kategori -->
+                                <div
+                                    class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                    <label
+                                        class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Kategori
+                                        <span class="text-red-500">*</span></label>
+                                    <select name="kategori" class="select2 w-full" required>
+                                        <option value="">Pilih Kategori</option>
+                                        @foreach($category as $cat)
+                                            <option value="{{ $cat->id }}" {{ old('kategori') == $cat->id ? 'selected' : '' }}>
+                                                {{ $cat->name }}
                                             </option>
-                                            @endforeach
-
-                                            <option value="other" {{ old('kategori') == 'other' ? 'selected' : '' }}>Lainnya</option>
-                                        </select>
-
-                                        <!-- Tombol buka modal -->
-                                        <button type="button" @click="$dispatch('produk')" class="btn px-3 py-2 text-sm rounded-md bg-blue-600  text-white hover:bg-blue-600">
-                                            +
-                                        </button>
-                                    </div>
-
+                                        @endforeach
+                                    </select>
                                 </div>
 
-                                <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                                    <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Berat Bersih <span style="color: red">*</span></label>
-                                    <div class="flex items-center">
-                                        <input type="number" name="berat" placeholder="Berat Bersih" class="form-input" value="{{ old('berat') }}" />
-                                        <select name="satuan" style="width:100px;" class="satuan-select form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-
-                                            <!-- Berat -->
-                                            <option value="mg" {{ old('satuan') == 'mg' ? 'selected' : '' }}>mg</option>
-                                            <option value="gram" {{ old('satuan') == 'gram' ? 'selected' : '' }} selected>gram</option>
-                                            <option value="ons" {{ old('satuan') == 'ons' ? 'selected' : '' }}>ons</option>
-                                            <option value="kg" {{ old('satuan') == 'kg' ? 'selected' : '' }}>kg</option>
-                                            <option value="ton" {{ old('satuan') == 'ton' ? 'selected' : '' }}>ton</option>
-
-                                        </select>
-
-                                    </div>
+                                <!-- Satuan -->
+                                <div
+                                    class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                    <label
+                                        class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Satuan
+                                        <span class="text-red-500">*</span></label>
+                                    <select name="satuan" class="select2 w-full" required id="satuan_select">
+                                        <option value="">Pilih Satuan</option>
+                                        @foreach($satuans as $sat)
+                                            <option value="{{ $sat->nama }}" data-id="{{ $sat->id }}" {{ old('satuan') == $sat->nama ? 'selected' : '' }}>{{ $sat->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="hidden" name="satuan_id" id="satuan_id" value="{{ old('satuan_id') }}">
                                 </div>
-
                             </div>
 
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                                 <!-- Stok -->
-                                <div hidden class=" px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                                    <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Status Keterdiaan <span style="color: red">*</span></label>
-                                    <select name="status" class="status form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-                                        <option value="">Pilih status</option>
-                                        <option value="available" selected>Tersedia</option>
-                                        <option value="out_of_stock">Habis Stok</option>
-                                        <option value="pre_order">Pre Order</option>
+                                <div
+                                    class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                    <label
+                                        class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Stok
+                                        Awal <span class="text-red-500">*</span></label>
+                                    <input type="number" name="stok" placeholder="0" class="form-input font-bold" required
+                                        value="{{ old('stok', 0) }}" />
+                                </div>
+
+                                <!-- Berat -->
+                                <div
+                                    class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                    <label
+                                        class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Berat
+                                        (gram)</label>
+                                    <input type="number" name="berat" placeholder="0" class="form-input"
+                                        value="{{ old('berat', 0) }}" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="border bg-white dark:bg-white/5 border-black/10 dark:border-white/10 p-6 rounded-xl shadow-sm">
+                            <p
+                                class="text-sm font-bold mb-6 text-black dark:text-white uppercase tracking-widest border-l-4 border-blue-600 pl-3">
+                                Informasi Tambahan</p>
+                            <!-- Deskripsi -->
+                            <div
+                                class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                <label
+                                    class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Deskripsi
+                                    Produk</label>
+                                <textarea name="deskripsi" placeholder="Keterangan tambahan produk..."
+                                    class="form-input h-32 resize-none leading-relaxed"
+                                    oninput="autoResize(this)">{{ old('deskripsi') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kolom Kanan: Harga & Gambar -->
+                    <div class="space-y-6">
+                        <div
+                            class="mb-4 border bg-white dark:bg-white/5 border-black/10 dark:border-white/10 p-6 rounded-xl shadow-sm">
+                            <p
+                                class="text-sm font-bold mb-6 text-black dark:text-white uppercase tracking-widest border-l-4 border-blue-600 pl-3">
+                                Harga & Gambar</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                                <!-- Harga Pokok (HPP) -->
+                                <div
+                                    class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                    <label
+                                        class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Harga
+                                        Pokok (HPP) <span class="text-red-500">*</span></label>
+                                    <div class="flex items-center">
+                                        <span class="text-sm mr-2 text-black/40 dark:text-white/40 font-bold">Rp</span>
+                                        <input type="number" name="harga" placeholder="0"
+                                            class="form-input bg-transparent font-bold" required value="{{ old('harga') }}"
+                                            @input="updateFormattedPrice($event, 'formattedHPP')" />
+                                    </div>
+                                    <small id="formattedHPP"
+                                        class="text-[10px] text-blue-600 dark:text-blue-400 font-bold"></small>
+                                </div>
+
+                                <!-- Harga Jual -->
+                                <div
+                                    class="py-4 px-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                    <label
+                                        class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Harga
+                                        Jual <span class="text-red-500">*</span></label>
+                                    <div class="flex items-center">
+                                        <span class="text-sm mr-2 text-black/40 dark:text-white/40 font-bold">Rp</span>
+                                        <input type="number" name="harga_jual" placeholder="0"
+                                            class="form-input bg-transparent font-bold" required
+                                            value="{{ old('harga_jual') }}"
+                                            @input="updateFormattedPrice($event, 'formattedJual')" />
+                                    </div>
+                                    <small id="formattedJual"
+                                        class="text-[10px] text-blue-600 dark:text-blue-400 font-bold"></small>
+                                </div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="py-4 px-5 mb-5 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                                <label
+                                    class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Status
+                                    Produk</label>
+                                <select name="status"
+                                    class="form-select dark:bg-black font-bold text-blue-600 dark:text-blue-400">
+                                    <option value="aktif">Aktif</option>
+                                    <option value="non-aktif">Non-Aktif</option>
+                                </select>
+                            </div>
+
+                            <!-- Gambar Produk (Multi) -->
+                            <div
+                                class="py-6 px-5 mb-5 bg-white rounded-2xl border border-black/10 relative dark:bg-white/5">
+                                <label
+                                    class="block mb-4 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black italic">Gambar
+                                    Produk</label>
+
+                                <div class="flex flex-wrap gap-4">
+                                    <!-- Image Thumbnails -->
+                                    <template x-for="(img, index) in images" :key="index">
+                                        <div
+                                            class="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-blue-500/50 group shadow-lg">
+                                            <img :src="img" class="relative z-0 w-full h-full object-cover">
+                                            <button type="button" @click="removeImage(index)"
+                                                class="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition-colors z-10">
+                                                <i class="fas fa-trash text-[10px]"></i>
+                                            </button>
+                                            <input type="hidden" name="cropped_gambar[]" :value="img">
+                                        </div>
+                                    </template>
+
+                                    <!-- Add Button -->
+                                    <button type="button" @click="$refs.imageInput.click()"
+                                        class="w-24 h-24 rounded-2xl border-2 border-dashed border-gray-300 dark:border-white/20 flex flex-col items-center justify-center bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 hover:border-blue-500 transition-all duration-300 group">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-plus"></i>
+                                        </div>
+                                        <span
+                                            class="text-[9px] font-black uppercase text-gray-400 dark:text-white/40 group-hover:text-blue-600">Tambah</span>
+                                    </button>
+                                </div>
+                                <input type="file" x-ref="imageInput" @change="handleImageUpload" class="hidden"
+                                    accept="image/*">
+                            </div>
+                        </div>
+
+                        <!-- Info Section -->
+                        <div class="bg-blue-600/5 border border-blue-600/10 p-5 rounded-2xl flex gap-4">
+                            <div
+                                class="w-10 h-10 bg-blue-600 text-white flex items-center justify-center rounded-xl flex-shrink-0 shadow-lg shadow-blue-600/20">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-blue-800 dark:text-blue-300 font-bold mb-1">Tips Fotografi Produk</p>
+                                <p class="text-[10px] text-blue-700/60 dark:text-blue-400/60 leading-relaxed">Gunakan
+                                    background polos dan pencahayaan yang cukup. Pastikan produk berada di tengah frame
+                                    sebelum melakukan cropping.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Pemetaan Akun -->
+            <div x-show="activeTab === 'akuntansi'" x-cloak x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <div class="max-w-3xl mx-auto space-y-6 pb-10">
+                    <div
+                        class="border bg-white dark:bg-white/5 border-black/10 dark:border-white/10 p-8 rounded-2xl shadow-xl">
+                        <div class="flex items-center gap-4 mb-10 border-b border-black/5 dark:border-white/5 pb-6">
+                            <div
+                                class="w-12 h-12 bg-blue-600 text-white flex items-center justify-center rounded-2xl shadow-lg shadow-blue-600/30">
+                                <i class="fas fa-file-invoice-dollar fa-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-black dark:text-white tracking-tight">Konfigurasi
+                                    Akuntansi</h3>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1">Pemetaan akun
+                                    untuk otomatisasi penjurnalan transaksi</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Akun Persediaan -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] text-black/50 dark:text-white/50 uppercase tracking-widest font-black ml-1">Akun
+                                    Persediaan (Asset)</label>
+                                <div
+                                    class="py-3 px-4 bg-white rounded-xl border border-black/10 dark:bg-white/5 hover:border-blue-500/50 transition duration-200">
+                                    <select name="persediaan_id" class="select2 w-full">
+                                        <option value="">Pilih Akun Persediaan</option>
+                                        @foreach($akun as $ak)
+                                            <option value="{{ $ak->id }}">{{ $ak->kode_akun }} - {{ $ak->nama_akun }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
 
-                            <!-- Deskripsi -->
-                            <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                                <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Deskripsi Produk</label>
-                                <textarea name="deskripsi" placeholder="Deskripsi Singkat Produk Anda" class="form-input resize-none overflow-hidden" rows="8" oninput="autoResize(this)">{{ old('deskripsi') }}</textarea>
-                            </div>
-
-                        </div>
-                    </div>
-                    <!-- SECTION KANAN: GAMBAR DAN KATEGORI -->
-                    <div class="w-1/5 bg-white dark:bg-black border border-black/10 dark:border-white/10 p-4 rounded-lg">
-                        <div class="">
-                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Gambar Produk</label>
-                            <!-- Input file -->
-                            <input id="fileInput" name="gambar" type="file" accept="image/*" class="form-input" onchange="previewImage(event)" />
-                            <!-- Kotak preview -->
-                            <div class="mt-4 border border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden relative" style=" height: 200px;">
-                                <img id="imgPreview" src="" alt="Preview" class="w-full h-full object-cover hidden" />
-                                <span id="imgPlaceholder" class="text-gray-400 text-sm">Belum ada gambar</span>
-
-                                <!-- Tombol hapus -->
-                                <button type="button" id="btnRemove" onclick="removeImage()" class="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-md shadow hidden hover:bg-red-600">
-                                    Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            {{-- Modal --}}
-            <div x-data="categoryModal()" @produk.window="open = true" @close-modal.window="open = false">
-
-                <!-- Overlay -->
-                <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999]" x-show="open" x-transition.opacity @click.self="open = false">
-                    <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
-
-                        <!-- Modal Box -->
-                        <div class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8" x-show="open">
-
-                            <!-- Header -->
-                            <div class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
-                                <h5 class="font-semibold text-lg">Kategori</h5>
-                                <button type="button" class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white" @click="open = false">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
-                                        <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Body -->
-                            <div class="p-0">
-
-                                <!-- Table kategori -->
-                                <div class="flex-1 overflow-y-auto" style="max-height: 300px; overflow-y: auto;">
-                                    <table class="w-full text-sm">
-                                        <thead class="bg-gray-100 dark:bg-white/10 sticky top-0">
-                                            <tr>
-                                                <th class="px-3 py-2 w-20 text-left">ID</th>
-                                                <th class="px-3 py-2 text-left">Nama</th>
-                                                <th class="px-3 py-2 w-28 text-center">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="item in categories" :key="item.id">
-                                                <tr class="border-t border-gray-200 dark:border-white/10">
-                                                    <td class="px-3 py-2" x-text="item.id"></td>
-
-                                                    <!-- Nama -->
-                                                    <td class="px-3 py-2">
-                                                        <template x-if="editRow !== item.id">
-                                                            <span x-text="item.name"></span>
-                                                        </template>
-                                                        <template x-if="editRow === item.id">
-                                                            <div class="flex gap-2">
-                                                                <input type="text" x-model="item.name" class="w-full px-2 py-1 border rounded-md text-sm dark:bg-black dark:border-gray-700">
-                                                                <button @click="updateCategory(item)" class="px-2 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600">✔</button>
-                                                            </div>
-                                                        </template>
-                                                    </td>
-
-                                                    <!-- Tombol -->
-                                                    <td class="px-3 py-2 text-center">
-                                                        <button x-show="editRow !== item.id" @click="editRow = item.id" class="px-2 py-1 text-xs btn rounded-md">Edit</button>
-                                                        <button x-show="editRow === item.id" @click="editRow = null" class="px-2 py-1 text-xs btn rounded-md hover:bg-gray-500">Batal</button>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
+                            <!-- Akun Pendapatan -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] text-black/50 dark:text-white/50 uppercase tracking-widest font-black ml-1">Akun
+                                    Pendapatan (Sales)</label>
+                                <div
+                                    class="py-3 px-4 bg-white rounded-xl border border-black/10 dark:bg-white/5 hover:border-blue-500/50 transition duration-200">
+                                    <select name="pendapatan_id" class="select2 w-full">
+                                        <option value="">Pilih Akun Pendapatan</option>
+                                        @foreach($akun as $ak)
+                                            <option value="{{ $ak->id }}">{{ $ak->kode_akun }} - {{ $ak->nama_akun }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-
-                                <!-- Tambah kategori -->
-                                <div class="mt-4 flex gap-2 p-3">
-                                    <input type="text" placeholder="Nama kategori baru" x-model="newName" class="form-input mt-2 py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-                                    <button @click.prevent="addCategory()" class="px-5 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                        Tambah
-                                    </button>
-                                </div>
-
                             </div>
 
-                        </div>
-                    </div>
-                </div>
+                            <!-- Akun HPP -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] text-black/50 dark:text-white/50 uppercase tracking-widest font-black ml-1">Akun
+                                    HPP (COGS)</label>
+                                <div
+                                    class="py-3 px-4 bg-white rounded-xl border border-black/10 dark:bg-white/5 hover:border-blue-500/50 transition duration-200">
+                                    <select name="hpp_id" class="select2 w-full">
+                                        <option value="">Pilih Akun HPP</option>
+                                        @foreach($akun as $ak)
+                                            <option value="{{ $ak->id }}">{{ $ak->kode_akun }} - {{ $ak->nama_akun }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
-            </div>
-
-            {{-- Alpine.js Script --}}
-            <script>
-                function categoryModal() {
-                    return {
-                        open: false
-                        , categories: []
-                        , editRow: null
-                        , newName: '',
-
-                        async fetchCategories() {
-                            let res = await fetch("{{ route('category.list') }}");
-                            this.categories = await res.json();
-                        },
-
-                        async addCategory() {
-                            if (!this.newName.trim()) return;
-                            let res = await fetch("{{ route('category.add') }}", {
-                                method: "POST"
-                                , headers: {
-                                    "Content-Type": "application/json"
-                                    , "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
-                                , body: JSON.stringify({
-                                    name: this.newName
-                                })
-                            });
-                            if (res.ok) {
-                                this.newName = '';
-                                this.fetchCategories();
-                            }
-                        },
-
-                        async updateCategory(item) {
-                            if (!item.name.trim()) return;
-                            let res = await fetch("{{ route('category.update') }}", {
-                                method: "POST"
-                                , headers: {
-                                    "Content-Type": "application/json"
-                                    , "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                }
-                                , body: JSON.stringify({
-                                    id: item.id
-                                    , name: item.name
-                                })
-                            });
-                            if (res.ok) {
-                                this.editRow = null;
-                                this.fetchCategories();
-                            }
-                        },
-
-                        init() {
-                            this.fetchCategories();
-                        }
-                    }
-                }
-
-            </script>
-            <div x-show="tab === 'tab2'">
-                <div class="">
-
-                    <!-- Stok -->
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">Stok Produk <span style="color: red">*</span></label>
-                        <div class="flex items-center">
-                            <input type="number" name="stok" placeholder="Stok Produk" class="form-input" value="1" />
-                            <select name="satuan_id" style="width:100px;" class="satuan-select satuan form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-black rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-                                @foreach($satuans as $satuan)
-                                <option value="{{ $satuan->id }}">{{ $satuan->nama }}</option>
-                                @endforeach
-                            </select>
+                            <!-- Akun Beban Non-Inventory -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] text-black/50 dark:text-white/50 uppercase tracking-widest font-black ml-1">Akun
+                                    Beban (Non-Inventory)</label>
+                                <div
+                                    class="py-3 px-4 bg-white rounded-xl border border-black/10 dark:bg-white/5 hover:border-blue-500/50 transition duration-200">
+                                    <select name="beban_non_inventory_id" class="select2 w-full">
+                                        <option value="">Pilih Akun Beban</option>
+                                        @foreach($akun as $ak)
+                                            <option value="{{ $ak->id }}">{{ $ak->kode_akun }} - {{ $ak->nama_akun }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Harga Poko <span style="color: red">*</span>
-                        </label>
-
-                        <!-- Input tampilan (punya class .format-rupiah) -->
-                        <input type="text" class="form-input format-rupiah" placeholder="Harga Produk">
-
-                        <!-- Input hidden pasangan -->
-                        <input type="hidden" name="harga" class="harga-real">
-                    </div>
-
-                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                            Harga Jual <span style="color: red">*</span>
-                        </label>
-
-                        <input type="text" class="form-input format-rupiah" placeholder="Harga Jual">
-                        <input type="hidden" name="harga_jual" class="harga-real">
+                    <div
+                        class="mt-6 bg-gray-100 dark:bg-white/5 border border-black/5 dark:border-white/5 p-5 rounded-2xl flex items-start gap-4">
+                        <div
+                            class="w-8 h-8 bg-blue-600/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 flex items-center justify-center rounded-lg flex-shrink-0">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                            Pemetaan akun ini digunakan untuk otomatisasi laporan Neraca dan Laba Rugi setiap terjadi
+                            transaksi produk ini. Pastikan Anda memilih akun yang sesuai dengan klasifikasi akuntansi
+                            perusahaan Anda.
+                        </p>
                     </div>
                 </div>
             </div>
+        </form>
 
-
-            <div x-show="tab === 'tab3'">
-                <div class="rounded-lg px-5 space-y-4 border border-black/10 dark:border-white/10  p-5 ">
-
-                    <!-- Harga Pokok Penjualan -->
-                    <div class="grid grid-cols-2 gap-4 items-center mb-3">
-                        <label class="text-sm dark:text-gray-300">Harga Pokok Penjualan</label>
-                        <select name="hpp_id" class="form-select akun py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none">
-                            @foreach ($akun->where('kategori.nama_kategori', 'Harga Pokok Penjualan') as $item)
-                            <option value="{{ $item->id }}" {{ old('hpp_id') == $item->id || $loop->first ? 'selected' : '' }}>
-                                {{ $item->kode_akun }} | {{ $item->nama_akun }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Pendapatan -->
-                    <div class="grid grid-cols-2 gap-4 items-center mb-3">
-                        <label class="text-sm dark:text-gray-300">Pendapatan</label>
-                        <select name="pendapatan_id" class="form-select akun py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none">
-                            @foreach ($akun->where('kategori.nama_kategori', 'Pendapatan') as $item)
-                            <option value="{{ $item->id }}" {{ old('pendapatan_id') == $item->id || $loop->first ? 'selected' : '' }}>
-                                {{ $item->kode_akun }} | {{ $item->nama_akun }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Pendapatan Lainnya -->
-                    <div class="grid grid-cols-2 gap-4 items-center mb-3">
-                        <label class="text-sm dark:text-gray-300">Pendapatan Lainnya</label>
-                        <select name="pendapatan_lainnya_id" class="form-select akun py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none">
-                            @foreach ($akun->where('kategori.nama_kategori', 'Pendapatan Lainnya') as $item)
-                            <option value="{{ $item->id }}" {{ old('pendapatan_lainnya_id') == $item->id || $loop->first ? 'selected' : '' }}>
-                                {{ $item->kode_akun }} | {{ $item->nama_akun }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Persediaan -->
-                    <div class="grid grid-cols-2 gap-4 items-center mb-3">
-                        <label class="text-sm dark:text-gray-300">Persediaan</label>
-                        <select name="persediaan_id" class="form-select akun py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none">
-                            @foreach ($akun->where('kategori.nama_kategori', 'Persediaan') as $item)
-                            <option value="{{ $item->id }}" {{ old('persediaan_id') == $item->id || $loop->first ? 'selected' : '' }}>
-                                {{ $item->kode_akun }} | {{ $item->nama_akun }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Beban Non Inventory -->
-                    <div class="grid grid-cols-2 gap-4 items-center mb-3">
-                        <label class="text-sm dark:text-gray-300">Beban Non Inventory</label>
-                        <select name="beban_non_inventory_id" class="form-select akun py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none">
-                            @foreach ($akun->whereIn('kategori.nama_kategori', ['Beban','Beban Lainnya']) as $item)
-                            <option value="{{ $item->id }}" {{ old('beban_non_inventory_id') == $item->id || $loop->first ? 'selected' : '' }}>
-                                {{ $item->kode_akun }} | {{ $item->nama_akun }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
+        <!-- Cropping Modal -->
+        <div id="cropperModal"
+            class="fixed inset-0 bg-black/80 z-[9999] hidden flex flex-col items-center justify-center p-4">
+            <div
+                class="bg-white dark:bg-zinc-900 w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[90vh]">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-black dark:text-white">Crop Gambar Produk (1080x1080)</h3>
+                    <button type="button" @click="closeCropper()"
+                        class="text-gray-400 hover:text-black dark:hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-
-
+                <div class="flex-1 overflow-hidden bg-gray-100 dark:bg-black p-4 relative">
+                    <img id="cropperImage" class="max-w-full">
+                </div>
+                <div
+                    class="px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/5 flex items-center justify-between gap-4">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium italic">Gunakan kursor untuk menyesuaikan
+                        bagian gambar yang ingin ditampilkan.</p>
+                    <div class="flex gap-3">
+                        <button type="button" @click="closeCropper()"
+                            class="px-5 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl transition">Batal</button>
+                        <button type="button" @click="applyCrop()"
+                            class="px-8 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition border-b-4 border-blue-800 active:border-b-0 active:translate-y-1">Simpan
+                            Crop</button>
+                    </div>
+                </div>
             </div>
         </div>
-</div>
+    </div>
 
+    <script>
+        function productForm() {
+            return {
+                activeTab: 'informasi',
+                images: [],
+                cropper: null,
 
-</form>
-<script>
-    $(document).ready(function() {
-        // Select kategori
-        $('#select-kategori').select2({
-            placeholder: "Pilih Kategori"
-            , width: '100%'
-        });
+                init() {
+                    $(document).ready(() => {
+                        $('.select2').select2({
+                            width: '100%',
+                            dropdownAutoWidth: true
+                        });
 
-        // Select status
-        $('.status').select2({
-            placeholder: "Status Ketersediaan"
-            , width: '100%'
-        });
+                        $('#satuan_select').on('change', (e) => {
+                            var selectedOption = $(e.target).find('option:selected');
+                            $('#satuan_id').val(selectedOption.data('id'));
+                        });
+                    });
+                },
 
-        // Select satuan (kecil 100px)
-        $('.satuan-select').select2({
-            placeholder: "Pilih satuan"
-            , width: '100px'
-            , minimumResultsForSearch: Infinity // hilangkan kolom search karena kecil
-        });
-        $('.akun').select2({
-            placeholder: "Pilih satuan"
-            , width: '100%'
-            , minimumResultsForSearch: Infinity // hilangkan kolom search karena kecil
-        });
+                handleImageUpload(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const cropperImage = document.getElementById('cropperImage');
+                            cropperImage.src = event.target.result;
+                            document.getElementById('cropperModal').classList.remove('hidden');
+                            document.getElementById('cropperModal').classList.add('flex');
 
+                            if (this.cropper) this.cropper.destroy();
+                            this.cropper = new Cropper(cropperImage, {
+                                aspectRatio: 1,
+                                viewMode: 1,
+                                dragMode: 'move',
+                                autoCropArea: 1,
+                                restore: false,
+                                guides: true,
+                                center: true,
+                                highlight: false,
+                                cropBoxMovable: true,
+                                cropBoxResizable: true,
+                                toggleDragModeOnDblclick: false,
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
 
-    });
+                applyCrop() {
+                    const canvas = this.cropper.getCroppedCanvas({
+                        width: 1080,
+                        height: 1080,
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high',
+                    });
 
-    document.querySelectorAll('.format-rupiah').forEach((el, index) => {
-        el.addEventListener('input', function() {
-            const onlyNumber = this.value.replace(/\D/g, '');
-            this.value = new Intl.NumberFormat('id-ID').format(onlyNumber || 0);
-            // cari hidden input pasangan di parent yang sama
-            const hidden = this.closest('div').querySelector('.harga-real');
-            if (hidden) hidden.value = onlyNumber;
-        });
-    });
+                    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    this.images.push(croppedDataUrl);
+                    this.closeCropper();
+                },
 
-</script>
+                closeCropper() {
+                    document.getElementById('cropperModal').classList.add('hidden');
+                    document.getElementById('cropperModal').classList.remove('flex');
+                    this.$refs.imageInput.value = '';
+                    if (this.cropper) this.cropper.destroy();
+                },
 
-<script>
-    // Preview gambar
-    function previewImage(event) {
-        const file = event.target.files[0];
-        const img = document.getElementById('imgPreview');
-        const placeholder = document.getElementById('imgPlaceholder');
-        const btnRemove = document.getElementById('btnRemove');
+                removeImage(index) {
+                    this.images.splice(index, 1);
+                },
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                btnRemove.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+                updateFormattedPrice(e, targetId) {
+                    const value = e.target.value;
+                    const target = document.getElementById(targetId);
+                    if (value) {
+                        target.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                    } else {
+                        target.innerText = '';
+                    }
+                }
+            }
         }
-    }
 
-    function removeImage() {
-        const img = document.getElementById('imgPreview');
-        const placeholder = document.getElementById('imgPlaceholder');
-        const fileInput = document.getElementById('fileInput');
-        const btnRemove = document.getElementById('btnRemove');
-
-        img.src = '';
-        img.classList.add('hidden');
-        placeholder.classList.remove('hidden');
-        btnRemove.classList.add('hidden');
-        fileInput.value = ''; // reset input file
-    }
-
-    // Generate kode produk otomatis
-    document.addEventListener('DOMContentLoaded', function() {
-        const kodeInput = document.getElementById('kode_produk');
-        if (kodeInput) {
-            const now = new Date();
-            const month = String(now.getMonth() + 1).padStart(2, '0'); // Bulan (01-12)
-            const year = String(now.getFullYear()).slice(-2); // 2 digit terakhir tahun
-            const random = Math.floor(1000 + Math.random() * 9000); // 4 digit acak
-
-            kodeInput.value = `PRD-${month}${year}/${random}`;
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
         }
-    });
-    // Toggle function for sidebar    
-    // Auto resize textarea
-    function autoResize(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-</script>
-{{-- <script>
-    document.getElementById('submitAddCategory').addEventListener('click', function() {
-        document.getElementById('addCategoryForm').submit();
-    });
-
-    document.getElementById('submitEditCategory').addEventListener('click', function() {
-        document.getElementById('editCategoryForm').submit();
-    });
-    document.getElementById('submitForm').addEventListener('click', function() {
-        document.getElementById('addProdukForm').submit();
-    });
-
-</script> --}}
+    </script>
 @endsection

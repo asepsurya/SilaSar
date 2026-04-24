@@ -1,9 +1,6 @@
 @extends('layout.main')
-@section('css')
 
-@section('title', 'Form Tambah Mitra')
-@section('container')
-    <style>
+@section('css')@section('title', 'Form Tambah Mitra')@section('container')<style>
         /* Membatasi tinggi dropdown dan menambah overflow auto untuk scroll jika terlalu panjang */
         #kota-recommendations {
             max-height: 200px;
@@ -15,6 +12,14 @@
             /* Menampilkan di bawah input */
             left: 0;
             z-index: 10;
+        }
+
+        .select2-container--default .select2-selection__rendered {
+            color: #333333;
+            margin-top: -12px;
+            margin-left: -19px;
+            margin-right: 10px;
+            font-size: 14px;
         }
 
         /* Agar dropdown terlihat lebih rapi saat tampil */
@@ -44,20 +49,25 @@
             border-color: #4b5563;
             /* dark border */
         }
-        .select2-container--default .select2-selection--single{
-            border:none;
+
+        .select2-container--default .select2-selection--single {
+            border: none;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             display: none !important;
         }
+
         /* Teks di dalam input select2 (yang terpilih) */
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             font-weight: bold;
         }
+
         /* Default desktop: full width */
         .select2-container--default .select2-selection--single {
             width: 100% !important;
         }
+
         .select2-container--default .select2-dropdown {
             width: 200px !important;
         }
@@ -65,10 +75,13 @@
         /* Mobile: kecil */
         @media (max-width: 768px) {
             .select2-container--default .select2-selection--single {
-                width: 160px !important; /* ukuran mobile */
+                width: 160px !important;
+                /* ukuran mobile */
             }
+
             .select2-container--default .select2-dropdown {
-                width: 160px !important; /* samakan dropdown */
+                width: 160px !important;
+                /* samakan dropdown */
             }
         }
 
@@ -79,11 +92,15 @@
             }
         }
 
-        @media (max-width: 640px) { /* misal max-width 640px untuk mobile */
+        @media (max-width: 640px) {
+
+            /* misal max-width 640px untuk mobile */
             .select2 {
-                width: 90% !important; /* paksa lebar 50% di mobile */
+                width: 90% !important;
+                /* paksa lebar 50% di mobile */
             }
         }
+
         .select2-container .select2-selection--single .select2-selection__rendered {
             display: block;
             padding-left: 0px;
@@ -97,58 +114,53 @@
         @csrf
         <div class="px-2 py-1 mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold">Detail Mitra / Toko</h2>
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                 <!-- Tombol Simpan -->
                 <button type="submit"
                     class="hidden sm:block w-full sm:w-auto inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition duration-150">
                     Simpan
                 </button>
-                <button
-                    type="submit"
-                    class="fixed right-4 bottom-0 z-50
-                           w-12 h-12 sm:w-auto sm:h-auto
-                           flex items-center justify-center
-                           bg-blue-600 hover:bg-blue-700 text-white font-medium
-                           rounded-full sm:rounded-lg shadow-lg transition duration-150
-                           px-0 sm:px-4 py-0 sm:py-2 text-sm sm:text-base"
-                style="margin-bottom:100px;" >
+                <button type="submit" class="fixed right-4 bottom-0 z-50 
+                                       w-12 h-12 sm:w-auto sm:h-auto 
+                                       flex items-center justify-center 
+                                       bg-blue-600 hover:bg-blue-700 text-white font-medium 
+                                       rounded-full sm:rounded-lg shadow-lg transition duration-150
+                                       px-0 sm:px-4 py-0 sm:py-2 text-sm sm:text-base" style="margin-bottom:100px;">
                     <span class="sm:inline hidden">Simpan</span>
-                    <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-6 h-6 sm:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </button>
 
-                 <div class="relative inline-block text-left w-full sm:w-auto">
-                <!-- Button Utama -->
-                <button type="button" onclick="toggleDropdown()"
-                    class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-1.5 text-sm font-medium  btn rounded-lg shadow transition duration-150">
-                    Tindakan
-                    <svg class="ml-2 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
+                <div class="relative inline-block text-left w-full sm:w-auto">
+                    <!-- Button Utama -->
+                    <button type="button" onclick="toggleDropdown()"
+                        class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-1.5 text-sm font-medium  btn rounded-lg shadow transition duration-150">
+                        Tindakan
+                        <svg class="ml-2 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
 
-                <!-- Dropdown Menu -->
-                <div id="dropdownMenu"
-                    class="hidden absolute z-50 mt-2 w-full sm:w-40 rounded-md shadow-lg bg-white ring-1 ring-black/10 focus:outline-none">
-                    <div class="py-1">
-                        <!-- Tombol Hapus -->
-                        <button type="button"
-                            onclick="confirmDelete('{{ route('mitra.delete', $mitra->id) }}')"
-                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                            Hapus
-                        </button>
+                    <!-- Dropdown Menu -->
+                    <div id="dropdownMenu"
+                        class="hidden absolute z-50 mt-2 w-full sm:w-40 rounded-md shadow-lg bg-white ring-1 ring-black/10 focus:outline-none">
+                        <div class="py-1">
+                            <!-- Tombol Hapus -->
+                            <button type="button" onclick="confirmDelete('{{ route('mitra.delete', $mitra->id) }}')"
+                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                Hapus
+                            </button>
 
-                        {{-- <!-- Tombol Transaksi -->
-                        <button type="button"
-                            onclick="checkTransaction('{{ route('transaksi.detail', $mitra->id) }}')"
-                            class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100">
-                            Transaksi
-                        </button> --}}
+                            <!-- Tombol Transaksi -->
+                            <button type="button" onclick="checkTransaction('{{ route('transaksi.detail', $mitra->id) }}')"
+                                class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100">
+                                Transaksi
+                            </button>
+                        </div>
                     </div>
-                </div>
                 </div>
                 <script>
                     function toggleDropdown() {
@@ -167,7 +179,7 @@
                 </script>
 
             </div>
-             <script>
+            <script>
                 function checkTransaction(url) {
                     @if ($mitra->transaksi == null)
                         window.location.href = "{{ route('transaksi.index') }}";
@@ -190,198 +202,246 @@
                             }
                         });
                     @endif
-                }
+                            }
             </script>
 
             <script>
 
-            function confirmDelete(url) {
-                Swal.fire({
-                title: 'Yakin ingin menghapus?',
-                text: 'Tindakan ini tidak dapat dibatalkan!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal',
-                customClass: {
-                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg mx-2 focus:outline-none',
-                    cancelButton: 'bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-1.5 rounded-lg mx-2 focus:outline-none'
-                },
-                buttonsStyling: false
-                }).then((result) => {
-                if (result.isConfirmed) {
+                function confirmDelete(url) {
+                    Swal.fire({
+                        title: 'Yakin ingin menghapus?',
+                        text: 'Tindakan ini tidak dapat dibatalkan!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg mx-2 focus:outline-none',
+                            cancelButton: 'bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-1.5 rounded-lg mx-2 focus:outline-none'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                }
+
+                function redirectToTransaction(url) {
                     window.location.href = url;
                 }
-                });
-            }
-
-            function redirectToTransaction(url) {
-                window.location.href = url;
-            }
             </script>
         </div>
 
-
         <div class="grid grid-cols-1 gap-7 lg:grid-cols-2">
-              <div class="border border-black/10 dark:border-white/10 rounded-lg mb-2">
-            <button type="button" class="w-full flex justify-between items-center px-4 py-3 bg-gray-100 dark:bg-white/10 rounded-t-lg focus:outline-none" data-accordion-target="#accordion-mitra" aria-expanded="true" aria-controls="accordion-mitra" onclick="toggleAccordion('accordion-mitra')">
-                <span class="font-semibold text-sm">Data Mitra / Toko</span>
-                <svg class="w-4 h-4 transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            <div id="accordion-mitra" class="px-4 py-3 bg-white dark:bg-black rounded-b-lg">
-                <div>
-                    <input type="text" name="id" value="{{ $mitra->id }}" hidden>
-                    <div class="space-y-4">
-                        <!-- Mita -->
-                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                                Kode Mitra
-                            </label>
-                            <input type="text" placeholder="Kode Mitra" class="form-input" name="kode_mitra" id="kode_mitra" value="{{ $mitra->kode_mitra }}" readonly />
+            <div>
+                <input type="text" name="id" value="{{ $mitra->id }}" hidden>
+                <div class="space-y-4">
+                    <!-- Mita -->
+                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                            Kode Mitra
+                        </label>
+                        <input type="text" placeholder="Kode Mitra" class="form-input" name="kode_mitra" id="kode_mitra"
+                            value="{{ $mitra->kode_mitra }}" readonly />
+                    </div>
+
+                    <!-- Nama Mitra -->
+                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                            Nama Mitra / Toko
+                        </label>
+                        <input type="text" placeholder="Nama Mitra atau Toko" class="form-input" name="nama_mitra"
+                            id="nama_mitra" value="{{ $mitra->nama_mitra }}" />
+                    </div>
+                    <!-- Telp Mitra -->
+                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                            Nomor Telepon Mitra
+                        </label>
+                        <input type="text" placeholder="Nomor Telepon" class="form-input" name="no_telp_mitra"
+                            id="no_telp_mitra" value="{{ $mitra->no_telp_mitra }}" />
+                    </div>
+                    <!-- Alamat -->
+                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                            Alamat Mitra/Toko
+                        </label>
+                        <textarea type="text" class="form-input" placeholder="Alamat Mitra"
+                            name="alamat_mitra">{{ $mitra->alamat_mitra }}</textarea>
+                    </div>
+
+                    <!-- Provinsi -->
+
+                    <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
+                        <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
+                            Kota
+                        </label>
+                        <input type="text" id="kota-input" name="id_kota" placeholder="Masukan Nama Kota Mitra "
+                            class="form-input" oninput="showRecommendations()" value="{{ $mitra->id_kota }}" />
+                        <!-- Dropdown for Recommendations -->
+                        <ul id="kota-recommendations"
+                            class="absolute w-full mt-1 bg-white dark:bg-dark  dark:border-white/10 p-5  border border-gray-200  shadow-lg hidden max-h-40 overflow-y-auto z-10">
+                            <!-- Data recommendations will be injected here -->
+                        </ul>
+
+                    </div>
+                    <div class="border border-black/10 dark:border-white/10 p-5 rounded-md hidden sm:block">
+                        <p class="text-sm font-semibold mb-3">Titik Lokasi</p>
+                        <div class="mb-4">
+                            <label class="block mb-1">Tempel Link Google Maps</label>
+                            <input type="text" id="gmaps-link" placeholder="Paste link Google Maps di sini"
+                                class="form-input mt-2 py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
                         </div>
 
-                        <!-- Nama Mitra -->
-                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                                Nama Mitra / Toko
-                            </label>
-                            <input type="text" placeholder="Nama Mitra atau Toko" class="form-input" name="nama_mitra" id="nama_mitra" value="{{ $mitra->nama_mitra }}" />
-                        </div>
-                        <!-- Telp Mitra -->
-                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                                Nomor Telepon Mitra
-                            </label>
-                            <input type="text" placeholder="Nomor Telepon" class="form-input" name="no_telp_mitra" id="no_telp_mitra" value="{{ $mitra->no_telp_mitra }}" />
-                        </div>
-                        <!-- Alamat -->
-                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                                Alamat Mitra/Toko
-                            </label>
-                            <textarea type="text" class="form-input" placeholder="Alamat Mitra" name="alamat_mitra">{{ $mitra->alamat_mitra }}</textarea>
-                        </div>
-
-                        <!-- Provinsi -->
-
-                        <div class="py-4 px-5 mb-3 bg-white rounded-lg border border-black/10 relative dark:bg-white/5">
-                            <label class="block mb-1 text-xs text-black/40 dark:text-white/40">
-                                Kota
-                            </label>
-                            <input type="text" id="kota-input" name="id_kota" placeholder="Masukan Nama Kota Mitra " class="form-input" oninput="showRecommendations()" value="{{ $mitra->id_kota }}" />
-                            <!-- Dropdown for Recommendations -->
-                            <ul id="kota-recommendations" class="absolute w-full mt-1 bg-white dark:bg-dark  dark:border-white/10 p-5  border border-gray-200  shadow-lg hidden max-h-40 overflow-y-auto z-10">
-                                <!-- Data recommendations will be injected here -->
-                            </ul>
-
-                        </div>
-                        <div class="border border-black/10 dark:border-white/10 p-5 rounded-md hidden sm:block">
-                            <p class="text-sm font-semibold mb-3">Titik Lokasi</p>
-                            <div class="mb-4">
-                                <label class="block mb-1">Tempel Link Google Maps</label>
-                                <input type="text" id="gmaps-link" placeholder="Paste link Google Maps di sini" class="form-input mt-2 py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Longitude Field -->
+                            <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
+                                <label for="longitude"
+                                    class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
+                                    Longitude
+                                </label>
+                                <input type="text" id="longitude" name="longitude" placeholder="Longitude"
+                                    value="{{ $mitra->longitude }}"
+                                    class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <!-- Longitude Field -->
-                                <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
-                                    <label for="longitude" class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
-                                        Longitude
-                                    </label>
-                                    <input type="text" id="longitude" name="longitude" placeholder="Longitude" value="{{ $mitra->longitude }}" class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                                </div>
-
-                                <!-- Latitude Field -->
-                                <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
-                                    <label for="latitude" class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
-                                        Latitude
-                                    </label>
-                                    <input type="text" id="latitude" name="latitude" placeholder="Latitude" value="{{ $mitra->latitude }}" class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
-                                </div>
+                            <!-- Latitude Field -->
+                            <div class="bg-white dark:bg-white/5 border border-black/10 rounded-lg px-5 py-4">
+                                <label for="latitude"
+                                    class="block mb-1 text-xs font-medium text-black/40 dark:text-white/40">
+                                    Latitude
+                                </label>
+                                <input type="text" id="latitude" name="latitude" placeholder="Latitude"
+                                    value="{{ $mitra->latitude }}"
+                                    class="form-input w-full text-sm rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
                             </div>
+                        </div>
 
+                        <!-- Live Map Preview -->
+                        <div id="map-container"
+                            class="mt-4 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 {{ ($mitra->latitude && $mitra->longitude) ? '' : 'hidden' }}">
+                            <iframe id="map-preview" width="100%" height="200" frameborder="0" style="border:0"
+                                src="{{ ($mitra->latitude && $mitra->longitude) ? 'https://maps.google.com/maps?q=' . $mitra->latitude . ',' . $mitra->longitude . '&hl=es;z=14&output=embed' : '' }}"
+                                allowfullscreen>
+                            </iframe>
                         </div>
-                        <!-- Submit Button -->
-                        <div>
-                        </div>
+
+                    </div>
+                    <!-- Submit Button -->
+                    <div>
                     </div>
                 </div>
             </div>
-        </div>
-        <style>
-            .scroll-box {
-    border: 1px solid rgba(0,0,0,0.1); /* border mirip border-black/10 */
-    background-color: #f9f9f9; /* ganti sesuai bg-lightwhite */
-    padding: 1rem; /* setara p-3 */
-    border-radius: 0.5rem; /* rounded-md */
-    max-height: 500px; /* tinggi maksimum */
-    overflow-y: auto; /* scroll jika konten melebihi max-height */
-     height: 500px;
-}
-        </style>
-            <div class="">
-                <div class="scroll-box border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-3 rounded-md mb-5">
+            <div>
+                <div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-3 rounded-md mb-5">
                     <div class="">
                         <div class="px-2 py-1 mb-4 flex items-center justify-between">
                             <p class="text-sm font-semibold">Daftar Barang yang Dijual</p>
-                            <button type="button"  id="btnTambahProduk" class="btn py-2 px-5 text-[15px]"  >
+                            <button type="button" id="btnTambahProduk" class="btn py-2 px-5 text-[15px]">
                                 + Tambah Produk
                             </button>
                         </div>
-                      <div id="productList" class="space-y-2">
-                        @forelse ($penawaran as $index => $row)
-                            <div class="flex items-center justify-between border rounded-lg p-3 bg-white dark:bg-white/5 dark:border-white/10 shadow-sm" data-index="{{ $index }}">
-                                <!-- Kiri: Hapus + Nama Produk -->
-                                <div class="flex items-center gap-3">
-                                   <button type="button" class="text-red-600 hover:text-red-800" onclick="removeRow(this)" data-id="{{ $row->id }}">
-                                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                           <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
-                            m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z"></path>
-                                       </svg>
-                                   </button>
+                        <div id="productList" class="space-y-2">
+                            @forelse ($penawaran as $index => $row)
+                                <div class="flex items-center justify-between border rounded-lg p-3 bg-white dark:bg-white/5 dark:border-white/10 shadow-sm"
+                                    data-index="{{ $index }}">
+                                    <!-- Kiri: Hapus + Nama Produk -->
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeRow(this)"
+                                            data-id="{{ $row->id }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
+                                                    m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z"></path>
+                                            </svg>
+                                        </button>
 
 
-                                    <select class="select2 text-sm w-full " onchange="updateHarga(this)" name="kode_produk[]" required>
-                                        <option value="">Pilih Produk</option>
-                                        @foreach ($produk as $item)
-                                            <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga }}"
-                                                @selected($item->kode_produk == $row->kode_produk)>
-                                                {{ $item->nama_produk }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                        <select class="select2 text-sm w-full " onchange="updateHarga(this)"
+                                            name="kode_produk[]">
+                                            <option value="">Pilih Produk</option>
+                                            @foreach ($produk as $item)
+                                                <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga }}"
+                                                    @selected($item->kode_produk == $row->kode_produk)>
+                                                    {{ $item->nama_produk }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-sm ">Rp.</div>
+                                        <input type="number" name="harga[]"
+                                            value="{{ $row->harga ? number_format($row->harga, 0, ',', '.') : '' }}"
+                                            oninput="formatCurrency(this)"
+                                            class="harga-input text-sm rounded border border-black/10 px-2 py-1 dark:bg-white/5 "
+                                            style="width: 90px;" placeholder="0">
+                                    </div>
+
                                 </div>
-                              <div class="flex items-center gap-2">
-                                    <div class="text-sm ">Rp.</div>
-                                    <input type="text" name="harga[]"
-                                        value="{{ $row->harga ? number_format($row->harga, 0, '.', '.') : '' }}"
-                                        oninput="formatCurrency(this)" inputmode="numeric"
-                                        class="harga-input text-sm rounded border border-black/10 px-2 py-1 dark:bg-white/5 " style="width: 90px;"
-                                        placeholder="0">
-                                </div>
+                            @empty
+                                <div class="text-center text-gray-500 py-4">Belum ada produk yang ditawarkan.</div>
+                            @endforelse
+                        </div>
 
-                            </div>
-                        @empty
-                            <div class="text-center text-gray-500 py-4">Belum ada produk yang ditawarkan.</div>
-                        @endforelse
-                    </div>
-
-
+                        {{-- <div class="table-responsive">
+                            <table id="productTable" class="table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th width="80%">Nama Produk</th>
+                                        <th>Harga Penawaran</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($penawaran as $index => $row)
+                                    <tr class="group text-xs border-b border-black/20">
+                                        <td class="row-number">{{ $index + 1 }}</td>
+                                        <td>
+                                            <select class="select2 w-full" name="kode_produk[]"
+                                                onchange="updateHarga(this)">
+                                                <option value="">Pilih Produk</option>
+                                                @foreach ($produk as $item)
+                                                <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga }}"
+                                                    @selected($item->kode_produk == $row->kode_produk)>
+                                                    {{ $item->nama_produk }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            Rp.
+                                            <input type="text" name="harga[]"
+                                                value="{{ number_format($row->harga, 0, ',', '.') }}"
+                                                oninput="formatCurrency(this)" class="form-input harga-input"
+                                                style="border:none;">
+                                        </td>
+                                        <td><button type="button" class="text-red-600 hover:text-red-800"
+                                                onclick="removeRow(this)" data-id="{{ $row->id }}">Hapus</button>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr id="noDataRow">
+                                        <td colspan="4" class="text-center text-gray-500">Belum ada produk yang
+                                            ditawarkan.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div> --}}
                     </div>
                 </div>
             </div>
         </div>
     </form>
 
-
     @if(session('reload'))
-    <script>
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
-    </script>
+        <script>
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        </script>
     @endif
     <script>
         $(document).on('select2:open', () => {
@@ -391,7 +451,7 @@
 
     <script>
         // Inisialisasi select2 pada semua select2 yang sudah ada
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('.select2').select2({
                 placeholder: "Pilih Produk",
                 width: 'resolve'
@@ -442,7 +502,7 @@
         }
 
         // Fungsi tambah row produk baru
-        document.getElementById('btnTambahProduk').addEventListener('click', function() {
+        document.getElementById('btnTambahProduk').addEventListener('click', function () {
             const productList = document.getElementById('productList');
 
             // Buat elemen div baru dengan class dan isi sama seperti row produk
@@ -458,31 +518,31 @@
             // Di contoh ini, saya copy langsung dari blade, kamu bisa sesuaikan kalau produk dinamis
 
             const options = `@foreach ($produk as $item)
-                <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga_jual }}">{{ $item->nama_produk }}</option>
+                <option value="{{ $item->kode_produk }}" data-harga="{{ $item->harga }}">{{ $item->nama_produk }}</option>
             @endforeach`;
 
             div.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <button type="button" onclick="hapusItem(this)" class="text-red-600 hover:text-red-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
-                            m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z"></path>
-                        </svg>
-                    </button>
-                    <select class="select2 w-60" onchange="updateHarga(this)" name="kode_produk[]" required>
-                        <option value="">Pilih Produk</option>
-                        ${options}
-                    </select>
-                </div>
-                  <div class="flex items-center gap-2">
-                                    <div class="text-sm ">Rp.</div>
-                                    <input type="text" name="harga[]"
-                                        value="" oninput="formatCurrency(this)"
-                                        class="harga-input text-sm rounded border border-black/10 px-2 py-1 dark:bg-white/5" style="width: 90px;"
-                                        placeholder="0">
-                                </div>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="hapusItem(this)" class="text-red-600 hover:text-red-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
+                                        m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z"></path>
+                                    </svg>
+                                </button>
+                                <select class="select2 w-60" onchange="updateHarga(this)" name="kode_produk[]">
+                                    <option value="">Pilih Produk</option>
+                                    ${options}
+                                </select>
+                            </div>
+                              <div class="flex items-center gap-2">
+                                                <div class="text-sm ">Rp.</div>
+                                                <input type="text" name="harga[]"
+                                                    value="" oninput="formatCurrency(this)"
+                                                    class="harga-input text-sm rounded border border-black/10 px-2 py-1 dark:bg-white/5" style="width: 90px;"
+                                                    placeholder="0">
+                                            </div>
 
-            `;
+                        `;
 
             productList.appendChild(div);
 
@@ -527,7 +587,7 @@
                     li.classList.add('px-4', 'py-2', 'cursor-pointer', 'hover:bg-gray-100');
                     li.textContent = kota.name;
 
-                    li.onclick = function() {
+                    li.onclick = function () {
                         input.value = kota.name;
                         dropdown.classList.add('hidden');
                     };
@@ -541,7 +601,7 @@
 
         document.getElementById('kota-input').addEventListener('input', showRecommendations);
 
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const input = document.getElementById('kota-input');
             const dropdown = document.getElementById('kota-recommendations');
             if (!input.contains(event.target) && !dropdown.contains(event.target)) {
@@ -550,92 +610,47 @@
         });
     </script>
 
-   <script>
-function removeRow(button) {
-    const row = button.closest('div[data-index]');
-    const penawaranId = button.getAttribute('data-id');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const isDark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark');
+    <script>
+        function removeRow(button) {
+            const row = button.closest('div[data-index]');
+            const penawaranId = button.getAttribute('data-id');
 
-    Swal.fire({
-        title: 'Yakin mau hapus?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, hapus',
-        cancelButtonText: 'Batal',
-        buttonsStyling: false,
-        background: isDark ? '#1f2937' : '#ffffff',
-        color: isDark ? '#e5e7eb' : '#111827',
-        customClass: {
-            popup: 'rounded-lg shadow-lg border ' + (isDark ? 'border-gray-700' : 'border-gray-200'),
-            title: 'text-lg font-semibold ' + (isDark ? 'text-gray-100' : 'text-gray-800'),
-            htmlContainer: isDark ? 'text-gray-300' : 'text-gray-600',
-            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md focus:ring-2 focus:ring-red-400 transition',
-            cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md ml-2 focus:ring-2 focus:ring-gray-300 transition dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
             if (penawaranId) {
+                // Hapus dari database via API
                 fetch(`/mitra/produk/delete/${penawaranId}`, {
                     method: 'DELETE',
                     headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({})
-                })
-                .then(response => response.json()) // parse JSON
-                .then(data => {
-                    if (data.success) {
-                        row.remove();
-                        renumberRows();
-                        showSwalMessage('success', 'Berhasil!', 'Data penawaran telah dihapus.', isDark);
-                    } else {
-                        // tampilkan pesan dari JSON
-                        showSwalMessage('error', 'Gagal!', data.message || 'Tidak dapat menghapus data.', isDark);
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showSwalMessage('error', 'Error!', 'Terjadi kesalahan saat menghapus data.', isDark);
-                });
+                    .then(response => {
+                        if (response.ok) {
+                            row.remove();
+                            renumberRows();
+                            console.log('Data penawaran telah dihapus.');
+                        } else {
+                            alert('Gagal menghapus data.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menghapus.');
+                    });
             } else {
+                // Jika belum tersimpan ke DB, cukup hapus dari UI
                 row.remove();
                 renumberRows();
-                showSwalMessage('success', 'Dihapus!', 'Baris berhasil dihapus.', isDark);
             }
         }
-    });
-}
 
 
-function showSwalMessage(icon, title, text, isDark) {
-    Swal.fire({
-        icon,
-        title,
-        text,
-        buttonsStyling: false,
-        background: isDark ? '#1f2937' : '#ffffff',
-        color: isDark ? '#e5e7eb' : '#111827',
-        customClass: {
-            popup: 'rounded-lg shadow-lg border ' + (isDark ? 'border-gray-700' : 'border-gray-200'),
-            title: 'text-lg font-semibold ' + (isDark ? 'text-gray-100' : 'text-gray-800'),
-            confirmButton: (icon === 'success'
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-red-600 hover:bg-red-700')
-                + ' text-white font-medium py-2 px-4 rounded-md focus:ring-2 transition'
+        function renumberRows() {
+            document.querySelectorAll('#productTable tbody tr .row-number').forEach((td, index) => {
+                td.textContent = index + 1;
+            });
         }
-    });
-}
-
-function renumberRows() {
-    document.querySelectorAll('#productTable tbody tr .row-number').forEach((td, index) => {
-        td.textContent = index + 1;
-    });
-}
-</script>
-
+    </script>
 
     <script>
         document.getElementById('gmaps-link').addEventListener('input', function () {
@@ -652,17 +667,38 @@ function renumberRows() {
                 },
                 body: JSON.stringify({ url: url })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.latitude && data.longitude) {
-                    document.getElementById('latitude').value = data.latitude;
-                    document.getElementById('longitude').value = data.longitude;
-                } else {
-                    console.warn(data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Gagal resolve:', error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latitude && data.longitude) {
+                        document.getElementById('latitude').value = data.latitude;
+                        document.getElementById('longitude').value = data.longitude;
+                        updateMap(data.latitude, data.longitude);
+                    } else {
+                        console.warn(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Gagal resolve:', error);
+                });
+        });
+
+        // Live update map when lat/lng are manually changed
+        const updateMap = (lat, lng) => {
+            const container = document.getElementById('map-container');
+            const iframe = document.getElementById('map-preview');
+            if (lat && lng) {
+                iframe.src = `https://maps.google.com/maps?q=${lat},${lng}&hl=es;z=14&output=embed`;
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        };
+
+        ['latitude', 'longitude'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                updateMap(lat, lng);
             });
         });
     </script>

@@ -12,10 +12,25 @@ class Produk extends Model
     {
         return $this->belongsTo(Satuan::class, 'satuan_id', 'id');
     }
-    // di StokItem.php
+
     public function satuanObj()
     {
-        return $this->belongsTo(Satuan::class, 'satuan_id', 'id'); // 'satuan' = field di stok_items
+        return $this->belongsTo(Satuan::class, 'satuan_id', 'id');
+    }
+    public function getFirstImageAttribute()
+    {
+        if (!$this->gambar) return null;
+        $decoded = json_decode($this->gambar, true);
+        if (is_array($decoded) && count($decoded) > 0) {
+            return $decoded[0];
+        }
+        return $this->gambar; // Fallback to single string
     }
 
+    public function getAllImagesAttribute()
+    {
+        if (!$this->gambar) return [];
+        $decoded = json_decode($this->gambar, true);
+        return is_array($decoded) ? $decoded : [$this->gambar];
+    }
 }

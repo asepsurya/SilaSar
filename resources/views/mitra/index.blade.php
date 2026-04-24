@@ -184,13 +184,13 @@
 
 <div class="grid grid-cols-1 gap-7">
     {{-- Simple DataTable --}}
-    <div x-data="main" x-init="init()" class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-5 rounded-md hidden md:block">
-        <div class="mb-4">
+    <div x-data="main" x-init="init()" class="clean-table-container hidden md:block">
+        <div class="p-5 border-b border-black/10 dark:border-white/5">
             <p class="text-sm font-semibold">Daftar Mitra dan Toko</p>
             <p class="text-xs text-black/60 dark:text-white/60">Berikut adalah daftar mitra dan toko yang telah terdaftar di sistem.</p>
         </div>
         <div class="overflow-auto" >
-            <table id="myTable" class="whitespace-nowrap table-hover table-bordered w-full"></table>
+            <table id="myTable" class="whitespace-nowrap w-full"></table>
         </div>
     </div>
 
@@ -208,17 +208,33 @@
     </div>
 
     @foreach($mitraData as $a)
-        <div class="bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+        <div class="bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-xl p-5 mb-4 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
             <!-- Header -->
             <div class="flex justify-between items-center mb-3">
                 <div>
                     <p class="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Kode Mitra</p>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ $a->kode_mitra }}</p>
+                    <p class="text-sm font-semibold transaction-code">{{ $a->kode_mitra }}</p>
                 </div>
-                <a href="{{ route('detail.mitra', $a->id) }}"
-                   class="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200">
-                    Detail
-                </a>
+                <div class="flex gap-2">
+                    @php
+                        $phone = $a->no_telp_mitra;
+                        $waUrl = $phone;
+                        if (str_starts_with($waUrl, '0')) {
+                            $waUrl = '62' . substr($waUrl, 1);
+                        }
+                        $waUrl = preg_replace('/[^0-9]/', '', $waUrl);
+                    @endphp
+                    @if($phone)
+                        <a href="https://wa.me/{{ $waUrl }}" target="_blank"
+                           class="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200">
+                           WA
+                        </a>
+                    @endif
+                    <a href="{{ route('detail.mitra', $a->id) }}"
+                       class="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200">
+                        Detail
+                    </a>
+                </div>
             </div>
 
             <!-- Body -->
@@ -226,6 +242,11 @@
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500 dark:text-gray-400">Nama Mitra:</span>
                     <span class="font-medium text-gray-800 dark:text-gray-100 text-right">{{ $a->nama_mitra }}</span>
+                </div>
+
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500 dark:text-gray-400">Telepon:</span>
+                    <span class="font-medium text-gray-800 dark:text-gray-100">{{ $a->no_telp_mitra ?? '-' }}</span>
                 </div>
 
                 <div class="flex justify-between text-sm">
@@ -245,6 +266,10 @@
         </svg>
         <p class="text-gray-500 dark:text-gray-400">Tidak ada data mitra tersedia.</p>
     </div>
+    @else
+    <div class="mt-4">
+        {{ $mitraData->links('vendor.pagination.clean') }}
+    </div>
     @endif
 </div>
 
@@ -252,7 +277,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('assets/js/simple-datatables.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
    <script>
       // Generate kode produk otomatis
         document.addEventListener('DOMContentLoaded', function() {
@@ -321,44 +346,28 @@
                     , }
                     , sortable: false
                     , searchable: true
-                    , perPage: 5
+                    , perPage: 20
                     , perPageSelect: [5, 10, 20, 50, 100]
                     , firstLast: false
-                    , firstText: `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-              <path opacity="0.5" d="M17 19L11 12L17 5" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`
-                    , lastText: `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-              <path opacity="0.5" d="M7 19L13 12L7 5" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`
-                    , prevText: `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`
-                    , nextText: `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`
+                    , prevText: '<i class="fas fa-chevron-left text-[10px]"></i>'
+                    , nextText: '<i class="fas fa-chevron-right text-[10px]"></i>'
                     , labels: {
-                        perPage: '{select}'
+                        placeholder: 'Cari transaksi, mitra, atau status'
+                    , searchTitle: 'Cari data mitra'
+                    , perPage: ''
+                    , noRows: 'Tidak ada data mitra tersedia'
+                    , info: 'Menampilkan {start} sampai {end} dari {rows} data'
                     , }
                     , layout: {
                         top: '{select}{search}'
-                        , bottom: '{info}{pager}'
-                    , }
+                        , bottom: '<div class="datatable-info-container">{info}</div>{pager}'
+                    , },
+                    init() {
+                        const wrapper = document.querySelector('#myTable')?.closest('.datatable-wrapper') || document.querySelector('#myTable')?.closest('.dataTable-wrapper');
+                        if (wrapper) {
+                            wrapper.classList.add('clean-datatable-wrapper');
+                        }
+                    }
                 , });
             }
         }));

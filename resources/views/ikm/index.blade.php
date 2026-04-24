@@ -137,7 +137,7 @@
                 <div class="bg-lightpurple-100 rounded-2xl p-6">
                     <p class="text-sm font-semibold text-black mb-2">Jumlah Laki-Laki</p>
                     <div class="flex items-center justify-between">
-                        <h2 class="text-2xl leading-9 font-semibold text-black">{{ $jumlah['L'] ?? 0; }}</h2>
+                        <h2 class="text-2xl leading-9 font-semibold text-black">{{ $jumlah['L'] ?? 0 }}</h2>
                         <div class="flex items-center gap-1">
                             <p class="text-xs leading-[18px] text-black">Pengguna</p>
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -149,7 +149,7 @@
                 <div class="bg-lightblue-100 rounded-2xl p-6">
                     <p class="text-sm font-semibold text-black mb-2">Jumlah Perempuan</p>
                     <div class="flex items-center justify-between">
-                        <h2 class="text-2xl leading-9 font-semibold text-black">{{ $jumlah['P'] ?? 0; }}</h2>
+                        <h2 class="text-2xl leading-9 font-semibold text-black">{{ $jumlah['P'] ?? 0 }}</h2>
                         <div class="flex items-center gap-1">
                             <p class="text-xs leading-[18px] text-black">Pengguna</p>
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -176,7 +176,7 @@
 
 @endsection
 @section('js')
-<script src="{{ asset('assets/js/simple-datatables.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -217,12 +217,12 @@
                     , perPage: 10
                     , perPageSelect: [10, 20, 50, 100]
                     , firstLast: false
-                    , firstText: svgFirst
-                    , lastText: svgLast
-                    , prevText: svgPrev
-                    , nextText: svgNext
+                    , prevText: '<'
+                    , nextText: '>'
                     , labels: {
-                        perPage: '{select}'
+                        placeholder: 'Cari nama, telepon, email, atau role'
+                        , searchTitle: 'Cari data pengguna'
+                        , perPage: ''
                     }
                     , layout: {
                         top: '{select}{search}'
@@ -232,35 +232,7 @@
             }
         }));
 
-
-    // Icon SVG Text (biar gak ulang nulis)
-    const svgFirst = ` <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-              <path opacity="0.5" d="M17 19L11 12L17 5" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`;
-    const svgLast = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-              <path opacity="0.5" d="M7 19L13 12L7 5" stroke="currentColor"
-                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`;
-    const svgPrev = ` <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`;
-    const svgNext = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-              <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>`;
-
     });
 </script>
 
 @endsection
-

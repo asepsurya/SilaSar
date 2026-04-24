@@ -22,19 +22,31 @@ class MitraController extends Controller
     {
         $mitra = Mitra::where('auth', auth()->user()->id)->orderBy('created_at', 'desc')->get()->map(function ($item) {
             return [
-                '<a href="' . route("detail.mitra", $item->id) . '" class="flex items
-                -center space-x-2 text-blue-600 hover:underline">
+                '<a href="' . route("detail.mitra", $item->id) . '" class="transaction-code">
                     <span>' . e($item->kode_mitra) . '</span>
                 </a>',
                 '<div class="mobile">' . ($item->nama_mitra ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
                 '<div class="mobile truncate">' . (Str::limit($item->alamat_mitra, 20) ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
                 '<div class="mobile">' . ($item->id_kota ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
-                '<div class="mobile">' . ($item->no_telp_mitra ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
+                '<div class="mobile">' . (function() use ($item) {
+                    $phone = $item->no_telp_mitra;
+                    if (!$phone) return '<span class="text-gray-500">Tidak Diketahui</span>';
+                    
+                    $waUrl = $phone;
+                    if (str_starts_with($waUrl, '0')) {
+                        $waUrl = '62' . substr($waUrl, 1);
+                    }
+                    $waUrl = preg_replace('/[^0-9]/', '', $waUrl);
+                    
+                    return '<a href="https://wa.me/' . $waUrl . '" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                        ' . e($phone) . '
+                    </a>';
+                })() . '</div>',
             ];
         })->values();
         // Hitung jumlah berdasarkan Kota
         $totalKota = Mitra::whereNotNull('id_kota')->where('auth',auth()->user()->id)->count();
-        $mitraData = Mitra::where('auth', auth()->user()->id)->get();
+        $mitraData = Mitra::where('auth', auth()->user()->id)->paginate(10);
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         return view('mitra.index', [
             'activeMenu' => 'mitra',

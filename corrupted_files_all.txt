@@ -1,0 +1,7 @@
+﻿
+Fatal error: Uncaught UnexpectedValueException: RecursiveDirectoryIterator::__construct(d:/02.Project/SilaSar\vendor\phpunit\phpunit\src\TextUI\Command\Commands): The file or directory is corrupted and unreadab (code: 1392) in D:\02.Project\SilaSar\find_corrupted.php:1
+Stack trace:
+#0 [internal function]: RecursiveDirectoryIterator->__construct('d:/02.Project/S...', 0)
+#1 D:\02.Project\SilaSar\find_corrupted.php(1): RecursiveDirectoryIterator->getChildren()
+#2 {main}
+  thrown in D:\02.Project\SilaSar\find_corrupted.php on line 1

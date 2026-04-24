@@ -21,7 +21,8 @@ use Illuminate\Support\Facades\Validator;
 
 class TransaksiController extends Controller
 {
-    public function transaksiIndex(){
+    public function transaksiIndex()
+    {
         $mitra = Mitra::where('auth', auth()->user()->id)
             ->orderBy('created_at', 'desc')
             ->select('id', 'kode_mitra', 'nama_mitra')
@@ -65,81 +66,221 @@ class TransaksiController extends Controller
             ->get()
             ->unique('kode_transaksi')
             ->map(function ($item) {
+                $statusBadge = $item->status_bayar === 'Sudah Bayar'
+                    ? '<span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-green-600">Sudah Bayar</span>'
+                    : '<span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-red-600">Belum Bayar</span>';
+
                 return [
-                    '<a href="' . route("transaksi.detail", $item->id) . '" class="flex items-center space-x-2 text-blue-600 hover:underline">
+                    '<a href="' . route("transaksi.detail", $item->id) . '" class="transaction-code">
                     <span>' . e($item->kode_transaksi) . '</span>
                     </a>',
                     '<div class="mobile">' . ($item->tanggal_transaksi ? \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d M Y') : '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
                     '<div class="mobile">' . ($item->mitra->nama_mitra ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
                     '<div class="mobile">' . (isset($item->total) ? 'Rp ' . number_format($item->total, 0, ',', '.') : '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
-                    '<div class="mobile">' . ($item->status_bayar ?? '<span class="text-gray-500">Tidak Diketahui</span>') . '</div>',
+                    '<div class="mobile">' . $statusBadge . '</div>',
                 ];
             })->values();
 
         $transaksimobile = Transaksi::where('auth', auth()->user()->id)
-            ->when($statusPembayaran === 'belum_bayar', function($q) {
+            ->when($statusPembayaran === 'belum_bayar', function ($q) {
                 $q->where('status_bayar', 'Belum Bayar');
             })
-            ->when($statusPembayaran === 'sudah_bayar', function($q) {
+            ->when($statusPembayaran === 'sudah_bayar', function ($q) {
                 $q->where('status_bayar', 'Sudah Bayar');
             })
-            ->when($kodeMitra, function($q) use ($kodeMitra) {
+            ->when($kodeMitra, function ($q) use ($kodeMitra) {
                 $q->where('kode_mitra', $kodeMitra);
             })
-            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function($q) use ($bulan, $tahunBulan) {
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
                 $q->whereMonth('tanggal_transaksi', $bulan)
-                  ->whereYear('tanggal_transaksi', $tahunBulan);
+                    ->whereYear('tanggal_transaksi', $tahunBulan);
             })
-            ->when($periode === 'tahunan' && $tahunTahun, function($q) use ($tahunTahun) {
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('tanggal_transaksi', $tahunTahun);
             })
-            ->when($awal && $akhir, function($q) use ($awal, $akhir) {
+            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
             })
             ->get()
             ->unique('kode_transaksi');
 
-        $totalTransaksiluar = Transaksi::where(['auth'=> auth()->user()->id,'status_bayar'=>'Belum Bayar'])
-            ->when($kodeMitra, function($q) use ($kodeMitra) {
+        $totalTransaksiluar = Transaksi::where(['auth' => auth()->user()->id, 'status_bayar' => 'Belum Bayar'])
+            ->when($kodeMitra, function ($q) use ($kodeMitra) {
                 $q->where('kode_mitra', $kodeMitra);
             })
-            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function($q) use ($bulan, $tahunBulan) {
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
                 $q->whereMonth('tanggal_transaksi', $bulan)
-                  ->whereYear('tanggal_transaksi', $tahunBulan);
+                    ->whereYear('tanggal_transaksi', $tahunBulan);
             })
-            ->when($periode === 'tahunan' && $tahunTahun, function($q) use ($tahunTahun) {
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('tanggal_transaksi', $tahunTahun);
             })
-            ->when($awal && $akhir, function($q) use ($awal, $akhir) {
+            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
             })
             ->sum('total');
 
-        $totalTransaksi = Transaksi::where(['auth'=> auth()->user()->id,'status_bayar'=>'Sudah Bayar'])
-            ->when($kodeMitra, function($q) use ($kodeMitra) {
+        $totalTransaksi = Transaksi::where(['auth' => auth()->user()->id, 'status_bayar' => 'Sudah Bayar'])
+            ->when($kodeMitra, function ($q) use ($kodeMitra) {
                 $q->where('kode_mitra', $kodeMitra);
             })
-            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function($q) use ($bulan, $tahunBulan) {
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
                 $q->whereMonth('tanggal_transaksi', $bulan)
-                  ->whereYear('tanggal_transaksi', $tahunBulan);
+                    ->whereYear('tanggal_transaksi', $tahunBulan);
             })
-            ->when($periode === 'tahunan' && $tahunTahun, function($q) use ($tahunTahun) {
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('tanggal_transaksi', $tahunTahun);
             })
-            ->when($awal && $akhir, function($q) use ($awal, $akhir) {
+            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
             })
             ->sum('total');
 
-        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
 
         return view('transaksi.index', [
             'activeMenu' => 'transaksi',
             'active' => 'transaksi',
-        ], compact('mitra','logs','transaksi','totalTransaksi','totalTransaksiluar','transaksimobile','awal','akhir','periode','bulan','tahunBulan','tahunTahun'));
+        ], compact('mitra', 'logs', 'transaksi', 'totalTransaksi', 'totalTransaksiluar', 'transaksimobile', 'awal', 'akhir', 'periode', 'bulan', 'tahunBulan', 'tahunTahun'));
     }
 
-    public function DetailTransaki($id){
+    public function returIndex(Request $request)
+    {
+        $mitra = Mitra::where('auth', auth()->id())
+            ->orderBy('nama_mitra')
+            ->select('kode_mitra', 'nama_mitra')
+            ->get();
+        $logs = Activity::where([
+            'causer_id' => auth()->id(),
+            'log_name' => 'ikm',
+        ])->latest()->take(10)->get();
+
+        $transaksiList = Transaksi::where('auth', auth()->id())
+            ->orderBy('tanggal_transaksi', 'desc')
+            ->get(['id', 'kode_transaksi']);
+
+        $returQuery = TransaksiProduct::with(['produk', 'transaksi.mitra'])
+            ->where('barang_retur', '>', 0)
+            ->whereNotNull('no_retur')
+            ->whereHas('transaksi', function ($query) {
+                $query->where('auth', auth()->id());
+            });
+
+        if ($request->filled('kode_mitra')) {
+            $returQuery->where('kode_mitra', $request->kode_mitra);
+        }
+
+        if ($request->filled('kode_transaksi')) {
+            $returQuery->where('kode_transaksi', $request->kode_transaksi);
+        }
+
+        if ($request->filled('tanggal_awal') && $request->filled('tanggal_akhir')) {
+            $returQuery->whereBetween(DB::raw('DATE(tanggal)'), [
+                $request->tanggal_awal,
+                $request->tanggal_akhir,
+            ]);
+        }
+
+        // Ambil data unik no_retur untuk pagination
+        $returBatches = $returQuery->select('no_retur', 'tanggal', 'kode_mitra')
+            ->groupBy('no_retur', 'tanggal', 'kode_mitra')
+            ->orderBy('tanggal', 'desc')
+            ->paginate(15);
+
+        // Ambil produk untuk setiap batch
+        $returBatches->getCollection()->transform(function ($batch) {
+            $batch->items = TransaksiProduct::with(['produk', 'transaksi'])
+                ->where('no_retur', $batch->no_retur)
+                ->where('barang_retur', '>', 0)
+                ->get();
+            $batch->total_barang_retur = $batch->items->sum('barang_retur');
+            return $batch;
+        });
+
+        $returs = $returBatches;
+
+        $alurReturQuery = StokLog::with('produk')
+            ->where('auth', auth()->id())
+            ->where('sumber', 'retur')
+            ->where('tipe', 'masuk');
+
+        if ($request->filled('kode_transaksi')) {
+            $alurReturQuery->where('referensi', $request->kode_transaksi);
+        }
+
+        $alurRetur = $alurReturQuery
+            ->orderBy('created_at', 'desc')
+            ->paginate(20, ['*'], 'alur_page');
+
+        $totalRetur = TransaksiProduct::where('barang_retur', '>', 0)
+            ->whereNotNull('no_retur')
+            ->whereHas('transaksi', function ($query) {
+                $query->where('auth', auth()->id());
+            })->sum('barang_retur');
+            
+        $totalBaris = $returs->total();
+        $totalDikembalikan = $alurRetur->sum('jumlah');
+
+        return view('transaksi.retur', [
+            'activeMenu' => 'transaksi',
+            'active' => 'retur',
+        ], compact('mitra', 'logs', 'transaksiList', 'returs', 'totalRetur', 'totalBaris', 'alurRetur', 'totalDikembalikan'));
+    }
+
+    public function returKembalikan(Request $request)
+    {
+        $request->validate([
+            'transaksi_product_id' => 'required|integer|exists:transaksi_products,id',
+            'jumlah_kembali' => 'required|integer|min:1',
+            'keterangan_lain' => 'nullable|string|max:1000',
+        ]);
+
+        $item = TransaksiProduct::with(['produk', 'transaksi.mitra'])
+            ->where('id', $request->transaksi_product_id)
+            ->whereHas('transaksi', function ($query) {
+                $query->where('auth', auth()->id());
+            })
+            ->firstOrFail();
+
+        $jumlahKembali = (int) $request->jumlah_kembali;
+        $returTersedia = (int) ($item->barang_retur ?? 0);
+
+        if ($jumlahKembali > $returTersedia) {
+            return back()->with('error', 'Jumlah retur yang dikembalikan melebihi retur yang tersedia.');
+        }
+
+        $keteranganLain = trim((string) $request->keterangan_lain);
+
+        DB::transaction(function () use ($item, $jumlahKembali, $keteranganLain) {
+            Produk::where('kode_produk', $item->kode_produk)->increment('stok', $jumlahKembali);
+            $item->decrement('barang_retur', $jumlahKembali);
+
+            $keterangan = 'Pengembalian retur ke stok untuk produk ' . ($item->produk->nama_produk ?? $item->kode_produk) . ' dari mitra ' . ($item->transaksi->mitra->nama_mitra ?? $item->kode_mitra);
+            if ($keteranganLain !== '') {
+                $keterangan .= '. Keterangan lain: ' . $keteranganLain;
+            }
+
+            StokLog::create([
+                'kode_produk' => $item->kode_produk,
+                'tipe' => 'masuk',
+                'jumlah' => $jumlahKembali,
+                'sumber' => 'retur',
+                'referensi' => $item->kode_transaksi,
+                'auth' => auth()->id(),
+                'keterangan' => $keterangan,
+            ]);
+        });
+
+        activity('ikm')
+            ->causedBy(auth()->user())
+            ->performedOn($item)
+            ->log('Mengembalikan retur ke stok');
+
+        return back()->with('success', 'Retur berhasil dikembalikan ke stok.');
+    }
+
+    public function DetailTransaki($id)
+    {
         $transaksi = Transaksi::findOrFail($id);
         $id_mitra = $transaksi->kode_mitra;
 
@@ -149,26 +290,30 @@ class TransaksiController extends Controller
             'log_name' => 'ikm'
         ])->latest()->take(10)->get();
         $penawaran = Penawaran::with('produk')->where('kode_mitra', $id_mitra)->with('produk')->get();
-        $product = TransaksiProduct::where('kode_mitra', $id_mitra)->with(['penawaran','produk'])->get();
+        $product = TransaksiProduct::where('kode_transaksi', $transaksi->kode_transaksi)
+            ->where('kode_mitra', $id_mitra)
+            ->with(['penawaran', 'produk'])
+            ->get();
 
         return view('transaksi.detail', [
             'activeMenu' => 'transaksi',
             'active' => 'transaksi',
-        ], compact('mitra', 'logs', 'penawaran','transaksi','product'));
+        ], compact('mitra', 'logs', 'penawaran', 'transaksi', 'product'));
     }
 
-    public function transaksiCreate(request $request){
-       $request->validate([
+    public function transaksiCreate(request $request)
+    {
+        $request->validate([
             'kode_mitra' => 'required|exists:mitras,kode_mitra',
         ]);
 
         // Buat transaksi baru
         $transaksi = new Transaksi();
-        $transaksi->kode_transaksi     = $request->kode_transaksi;
-        $transaksi->kode_mitra         = $request->kode_mitra;
-        $transaksi->tanggal_transaksi  = now();
-        $transaksi->auth               = auth()->user()->id;
-        $transaksi->status_bayar       = 'Belum Bayar';
+        $transaksi->kode_transaksi = $request->kode_transaksi;
+        $transaksi->kode_mitra = $request->kode_mitra;
+        $transaksi->tanggal_transaksi = now();
+        $transaksi->auth = auth()->user()->id;
+        $transaksi->status_bayar = 'Belum Bayar';
         $transaksi->save();
 
         // Ambil semua penawaran untuk mitra terkait
@@ -177,15 +322,15 @@ class TransaksiController extends Controller
         if ($penawarans->count() > 0) {
             foreach ($penawarans as $item) {
                 TransaksiProduct::create([
-                    'tanggal'           =>now(),
-                    'kode_produk'     => $item->kode_produk,
-                    'kode_transaksi'  => $transaksi->kode_transaksi,
-                    'kode_mitra'      => $request->kode_mitra,
-                    'harga'            => $item->harga,
-                    'barang_keluar'   => 0,
-                    'barang_terjual'  => 0,
-                    'barang_retur'    => 0,
-                    'total'           => 0,
+                    'tanggal' => now(),
+                    'kode_produk' => $item->kode_produk,
+                    'kode_transaksi' => $transaksi->kode_transaksi,
+                    'kode_mitra' => $request->kode_mitra,
+                    'harga' => $item->harga,
+                    'barang_keluar' => 0,
+                    'barang_terjual' => 0,
+                    'barang_retur' => 0,
+                    'total' => 0,
                 ]);
 
             }
@@ -216,104 +361,107 @@ class TransaksiController extends Controller
             'total' => 'required',
         ]);
 
-       $kode_mitra = $request->kode_mitra;
+        $kode_mitra = $request->kode_mitra;
         $transaksi = Transaksi::where('kode_transaksi', $request->nomor_transaksi)->firstOrFail();
         $transaksi->tanggal_transaksi = $request->tanggal_transaksi ?? $transaksi->tanggal_transaksi;
-        $transaksi->diskon = str_replace(['.', ','], '',  $request->discount ?? '0');
+        $transaksi->diskon = str_replace(['.', ','], '', $request->discount ?? '0');
         $transaksi->ongkir = str_replace(['.', ','], '', $request->ongkir ?? '0');
         $transaksi->tanggal_pembayaran = $request->tanggal_bayar ?? $transaksi->tanggal_pembayaran;
         $transaksi->total = str_replace(['.', ','], '', $request->grand_total);
         $transaksi->status_bayar = $request->status_bayar;
         $transaksi->auth = auth()->user()->id;
 
-       foreach ($request->kode_produk as $index => $kode_produk) {
+        foreach ($request->kode_produk as $index => $kode_produk) {
 
-                $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
-                $barangReturBaru  = $request->barang_retur[$index] ?? 0;
+            $barangKeluarBaru = $request->barang_keluar[$index] ?? 0;
+            $barangReturBaru = $request->barang_retur[$index] ?? 0;
 
-                // Cek stok produk
-                $produk = Produk::where('kode_produk', $kode_produk)->first();
-                if (!$produk) {
-                    return redirect()->back()->with("error", "Produk $kode_produk tidak ditemukan.");
-                }
+            // Cek stok produk
+            $produk = Produk::where('kode_produk', $kode_produk)->first();
+            if (!$produk) {
+                return redirect()->back()->with("error", "Produk $kode_produk tidak ditemukan.");
+            }
 
-                // ambil data lama (jika ada)
-                $existing = TransaksiProduct::where([
-                    'kode_produk'    => $kode_produk,
-                    'kode_transaksi' => $transaksi->kode_transaksi,
-                    'kode_mitra'     => $kode_mitra,
-                ])->first();
+            // ambil data lama (jika ada)
+            $existing = TransaksiProduct::where([
+                'kode_produk' => $kode_produk,
+                'kode_transaksi' => $transaksi->kode_transaksi,
+                'kode_mitra' => $kode_mitra,
+            ])->first();
 
-                $barangKeluarLama = $existing->barang_keluar ?? 0;
-                $barangReturLama  = $existing->barang_retur ?? 0;
+            $barangKeluarLama = $existing->barang_keluar ?? 0;
+            $selisihKeluar = $barangKeluarBaru - $barangKeluarLama;
 
-                $selisihKeluar = $barangKeluarBaru - $barangKeluarLama;
-                $selisihRetur  = $barangReturBaru - $barangReturLama;
+            // ❗️Cek stok cukup atau tidak
+            if ($selisihKeluar > 0 && $produk->stok < $selisihKeluar) {
+                return redirect()->back()->with("error", "Stok produk {$produk->nama_produk} tidak mencukupi! Silahkan Cek kembali Stok yang tersedia");
+            }
 
-                // ❗️Cek stok cukup atau tidak
-                if ($selisihKeluar > 0 && $produk->stok < $selisihKeluar) {
-                    return redirect()->back()->with("error", "Stok produk {$produk->nama_produk} tidak mencukupi! Silahkan Cek kembali Stok yang tersedia");
-                }
+            if ($barangReturBaru > $barangKeluarBaru) {
+                return redirect()->back()->with("error", "Barang retur untuk produk {$produk->nama_produk} tidak boleh melebihi barang keluar.");
+            }
 
-                // Update transaksi_product
-                $harga = $request->harga_dekstop[$index] ?? $request->harga_mobile[$index] ?? '0';
-                $barangTerjual = $request->barang_terjual[$index] ?? 0;
-                $transaksiProduct = TransaksiProduct::updateOrCreate(
-                    [
-                        'kode_produk'    => $kode_produk,
-                        'kode_transaksi' => $transaksi->kode_transaksi,
-                        'kode_mitra'     => $kode_mitra,
-                    ],
-                    [   
-                        'tanggal'        =>$request->tanggal_transaksi ?? $transaksi->tanggal_transaksi,
-                        'harga'          => $harga,
-                        'barang_keluar'  => $barangKeluarBaru,
-                        'barang_terjual' => $barangTerjual,
-                        'barang_retur'   => $barangReturBaru,
-                        'total'          => $harga * $barangTerjual,
-                    ]
-                );
-                Penawaran::updateOrCreate(
-                    [
-                        'kode_mitra'  => $kode_mitra,
-                        'kode_produk' => $kode_produk,
-                    ],
-                    [
-                        'harga'       => $harga,
-                        'updated_at'  => now(),
-                    ]
-                );
-                // Update stok
-                if ($selisihKeluar != 0) {
-                    Produk::where('kode_produk', $kode_produk)
-                        ->decrement('stok', $selisihKeluar);
+            // Update transaksi_product
+            $harga = $request->harga_dekstop[$index] ?? $request->harga_mobile[$index] ?? '0';
+            $barangTerjual = $request->barang_terjual[$index] ?? 0;
 
-                    StokLog::create([
-                        'kode_produk' => $kode_produk,
-                        'tipe'        => 'keluar',
-                        'jumlah'      => $selisihKeluar,
-                        'sumber'      => 'transaksi',
-                        'referensi'   => $transaksi->kode_transaksi,
-                        'auth'        => auth()->id(),
-                        'keterangan'  => 'Barang keluar untuk mitra ' . $kode_mitra
-                    ]);
-                }
+            // Generate no_retur jika ada barang retur
+            $noRetur = null;
+            if ($barangReturBaru > 0) {
+                $tanggalRetur = $request->tanggal_transaksi ?? $transaksi->tanggal_transaksi;
+                $noRetur = TransaksiProduct::where('kode_mitra', $kode_mitra)
+                    ->where('tanggal', $tanggalRetur)
+                    ->whereNotNull('no_retur')
+                    ->value('no_retur');
 
-                if ($selisihRetur != 0) {
-                    Produk::where('kode_produk', $kode_produk)
-                        ->increment('stok', $selisihRetur);
-
-                    StokLog::create([
-                        'kode_produk' => $kode_produk,
-                        'tipe'        => 'masuk',
-                        'jumlah'      => $selisihRetur,
-                        'sumber'      => 'retur',
-                        'referensi'   => $transaksi->kode_transaksi,
-                        'auth'        => auth()->id(),
-                        'keterangan'  => 'Barang retur dari mitra ' . $kode_mitra
-                    ]);
+                if (!$noRetur) {
+                    $noRetur = 'RET-' . date('Ymd', strtotime($tanggalRetur)) . '-' . strtoupper(substr(md5($kode_mitra . $tanggalRetur), 0, 4));
                 }
             }
+
+            $transaksiProduct = TransaksiProduct::setEagerLoads([])->updateOrCreate(
+                [
+                    'kode_produk' => $kode_produk,
+                    'kode_transaksi' => $transaksi->kode_transaksi,
+                    'kode_mitra' => $kode_mitra,
+                ],
+                [
+                    'tanggal' => $request->tanggal_transaksi ?? $transaksi->tanggal_transaksi,
+                    'harga' => $harga,
+                    'barang_keluar' => $barangKeluarBaru,
+                    'barang_terjual' => $barangTerjual,
+                    'barang_retur' => $barangReturBaru,
+                    'no_retur' => $noRetur,
+                    'total' => $harga * $barangTerjual,
+                ]
+            );
+            Penawaran::updateOrCreate(
+                [
+                    'kode_mitra' => $kode_mitra,
+                    'kode_produk' => $kode_produk,
+                ],
+                [
+                    'harga' => $harga,
+                    'updated_at' => now(),
+                ]
+            );
+            // Update stok
+            if ($selisihKeluar != 0) {
+                Produk::where('kode_produk', $kode_produk)
+                    ->decrement('stok', $selisihKeluar);
+
+                StokLog::create([
+                    'kode_produk' => $kode_produk,
+                    'tipe' => 'keluar',
+                    'jumlah' => $selisihKeluar,
+                    'sumber' => 'transaksi',
+                    'referensi' => $transaksi->kode_transaksi,
+                    'auth' => auth()->id(),
+                    'keterangan' => 'Barang keluar untuk mitra ' . $kode_mitra
+                ]);
+            }
+
+        }
 
 
         $transaksi->update();
@@ -323,41 +471,44 @@ class TransaksiController extends Controller
             ->causedBy(auth()->user())
             ->performedOn($transaksi)
             ->log('Memperbarui transaksi');
-            $success = true;
-            $message = 'Data transaksi berhasil diperbarui!';
-            $info = 'Harga penawaran juga telah disesuaikan berdasarkan kode mitra dan produk.';
+        $success = true;
+        $message = 'Data transaksi berhasil diperbarui!';
+        $info = 'Harga penawaran juga telah disesuaikan berdasarkan kode mitra dan produk.';
 
-            // Jika request datang dari AJAX, kembalikan JSON
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => $success,
-                    'message' => $message,
-                    'info'    => $info,
-                ]);
-            }
-
-            // Jika request biasa (non-AJAX), redirect dengan flash message
-            return back()->with([
-                'success' => $message,
-                'info'    => $info,
+        // Jika request datang dari AJAX, kembalikan JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => $success,
+                'message' => $message,
+                'info' => $info,
             ]);
+        }
+
+        // Jika request biasa (non-AJAX), redirect dengan flash message
+        return back()->with([
+            'success' => $message,
+            'info' => $info,
+        ]);
 
 
 
     }
 
-    public function konsinyasi($id){
+    public function konsinyasi($id)
+    {
         $transaksi = Transaksi::where('kode_transaksi', $id)->first();
-        return view('transaksi.dokumen.index',compact('id','transaksi'));
+        return view('transaksi.dokumen.index', compact('id', 'transaksi'));
     }
-    public function konsinyasidok($id){
+    public function konsinyasidok($id)
+    {
         $transaksi = Transaksi::where('kode_transaksi', $id)->first();
-        return view('transaksi.dokumen.laporan.konsinyasi',compact('transaksi'));
+        return view('transaksi.dokumen.laporan.konsinyasi', compact('transaksi'));
     }
 
-    public function manualNota($id){
-        $nota = Dokumen::where('kode_transaksi',$id)->first();
-        return view('transaksi.dokumen.manual',compact('nota','id'));
+    public function manualNota($id)
+    {
+        $nota = Dokumen::where('kode_transaksi', $id)->first();
+        return view('transaksi.dokumen.manual', compact('nota', 'id'));
     }
     public function manualadd(Request $request)
     {
@@ -382,8 +533,8 @@ class TransaksiController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                             ->withErrors($validator)
-                             ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $validated = $validator->validated();
@@ -418,8 +569,8 @@ class TransaksiController extends Controller
 
             if ($itemId === null) {
                 $item = Itemdokumen::where('nama_barang', $namaBarang)
-                                   ->where('kode_transaksi', $validated['kode_transaksi'])
-                                   ->first();
+                    ->where('kode_transaksi', $validated['kode_transaksi'])
+                    ->first();
                 $itemId = $item?->id;
             }
 
@@ -436,20 +587,23 @@ class TransaksiController extends Controller
             );
         }
 
-       return back()->with("success", "Data has been updated successfully!");
+        return back()->with("success", "Data has been updated successfully!");
     }
 
-    public function itemDelete($id){
-        Itemdokumen::where('id',$id)->delete();
+    public function itemDelete($id)
+    {
+        Itemdokumen::where('id', $id)->delete();
         return redirect()->back();
     }
 
-    public function kwitansi($id){
+    public function kwitansi($id)
+    {
         $transaksi = Transaksi::where('kode_transaksi', $id)->first();
-        return view('transaksi.dokumen.index',compact('id','transaksi'));
+        return view('transaksi.dokumen.index', compact('id', 'transaksi'));
     }
 
-    public function notes(request $request){
+    public function notes(request $request)
+    {
         Transaksi::where('kode_transaksi', $request->id)->update(['notes' => $request->notes]);
         return back()->with("success", "Data has been updated successfully!");
 
@@ -458,8 +612,8 @@ class TransaksiController extends Controller
     public function updateKodeTransaksi(request $request)
     {
         $kodeTransaksi = $request->kode_transaksi;
-        $kodeProduks   = $request->kode_produk;
-        $kodeMitra     = $request->kode_mitra;
+        $kodeProduks = $request->kode_produk;
+        $kodeMitra = $request->kode_mitra;
 
         if (!$kodeProduks || empty($kodeProduks)) {
             return response()->json(['success' => false, 'message' => 'Tidak ada produk terpilih.']);
@@ -475,16 +629,27 @@ class TransaksiController extends Controller
             if ($exists) {
                 $produkSudahAda[] = $kodeProduk;
             } else {
+                $hargaPenawaran = (int) (Penawaran::where('kode_mitra', $kodeMitra)
+                    ->where('kode_produk', $kodeProduk)
+                    ->latest('updated_at')
+                    ->value('harga') ?? 0);
+
                 TransaksiProduct::create([
-                    'kode_produk'    => $kodeProduk,
+                    'tanggal' => now()->toDateString(),
+                    'kode_produk' => $kodeProduk,
                     'kode_transaksi' => $kodeTransaksi,
-                    'kode_mitra'     => $kodeMitra,
+                    'kode_mitra' => $kodeMitra,
+                    'harga' => $hargaPenawaran,
+                    'barang_keluar' => 0,
+                    'barang_terjual' => 0,
+                    'barang_retur' => 0,
+                    'total' => 0,
                 ]);
             }
         }
 
         return response()->json([
-            'success'        => true,
+            'success' => true,
             'produk_sudah_ada' => $produkSudahAda
         ]);
     }
@@ -497,8 +662,8 @@ class TransaksiController extends Controller
         ]);
 
         $deleted = TransaksiProduct::where('kode_transaksi', $request->kode_transaksi)
-                    ->where('kode_produk', $request->kode_produk)
-                    ->delete();
+            ->where('kode_produk', $request->kode_produk)
+            ->delete();
 
         if ($deleted) {
             return response()->json(['success' => true]);
@@ -507,32 +672,34 @@ class TransaksiController extends Controller
         }
     }
 
-    public function hapusTransksi($id){
-        
-       $transaksiProducts = TransaksiProduct::where('kode_transaksi', $id)->get();
-    
+    public function hapusTransksi($id)
+    {
+
+        $transaksiProducts = TransaksiProduct::where('kode_transaksi', $id)->get();
+
         foreach ($transaksiProducts as $tp) {
             // Ambil satu produk, bukan Collection
             $product = Produk::where('kode_produk', $tp->kode_produk)->first();
-        
+
             if ($product) {
                 // Tambahkan kembali stok
                 $product->stok += $tp->barang_keluar; // pastikan kolom ini benar
                 $product->save();
             }
         }
-    
+
         // Hapus transaksi products
         TransaksiProduct::where('kode_transaksi', $id)->delete();
-    
+
         // Hapus transaksi
         Transaksi::where('kode_transaksi', $id)->delete();
-    
+
         return redirect()->route('transaksi.index')
-                         ->with("success", "Data has been deleted and stock updated successfully!");
+            ->with("success", "Data has been deleted and stock updated successfully!");
     }
 
-    public function laporanTransaksi(){
+    public function laporanTransaksi()
+    {
         $awal = request('tanggal_awal');   // contoh: 2025-11-01
         $akhir = request('tanggal_akhir'); // contoh: 2025-11-30
 
@@ -541,7 +708,7 @@ class TransaksiController extends Controller
         $tahun_bulan = request('tahun_bulan'); // contoh: 2025
         $tahun_tahun = request('tahun_tahun'); // contoh: 2025
 
-      $user = auth()->user();
+        $user = auth()->user();
 
         $laporan = DB::table('transaksis as t')
             ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
@@ -569,7 +736,7 @@ class TransaksiController extends Controller
                 $query->whereMonth('t.tanggal_transaksi', $bulan)
                     ->whereYear('t.tanggal_transaksi', $tahun_bulan);
             })
-            
+
 
             // 🔹 Filter tahunan
             ->when($periode === 'tahunan' && $tahun_tahun, function ($query) use ($tahun_tahun) {
@@ -608,18 +775,18 @@ class TransaksiController extends Controller
 
     }
 
-       public function exportPDF()
+    public function exportPDF()
     {
         // =========================================
         // Ambil request input
         // =========================================
-        $periode      = request('periode');        // bulanan / tahunan / null
-        $bulan        = request('bulan');          // 1–12
-        $tahunBulan   = request('tahun_bulan');    // contoh: 2025
-        $tahunTahun   = request('tahun_tahun');    // contoh: 2025
-        $awal         = request('tanggal_awal');           // contoh: 2025-11-01
-        $akhir        = request('tanggal_akhir');          // contoh: 2025-11-30
-        $tanggalAwal  = request('tanggal_awal');
+        $periode = request('periode');        // bulanan / tahunan / null
+        $bulan = request('bulan');          // 1–12
+        $tahunBulan = request('tahun_bulan');    // contoh: 2025
+        $tahunTahun = request('tahun_tahun');    // contoh: 2025
+        $awal = request('tanggal_awal');           // contoh: 2025-11-01
+        $akhir = request('tanggal_akhir');          // contoh: 2025-11-30
+        $tanggalAwal = request('tanggal_awal');
         $tanggalAkhir = request('tanggal_akhir');
 
         $user = auth()->user(); // user login
@@ -652,7 +819,7 @@ class TransaksiController extends Controller
             // 🔹 Filter bulanan
             ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
                 $q->whereMonth('t.tanggal_transaksi', $bulan)
-                ->whereYear('t.tanggal_transaksi', $tahunBulan);
+                    ->whereYear('t.tanggal_transaksi', $tahunBulan);
             })
 
             // 🔹 Filter tahunan
@@ -674,7 +841,7 @@ class TransaksiController extends Controller
         // =========================================
         // Perhitungan Laba (opsional)
         // =========================================
-        $labaKotor  = ($pendapatan ?? 0) - ($hpp ?? 0);
+        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
         $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
 
 
@@ -682,33 +849,34 @@ class TransaksiController extends Controller
         // Generate PDF
         // =========================================
         $pdf = Pdf::loadView('report.transaksi', [
-            'laporan'      => $laporan,
-            'awal'         => $awal,
-            'akhir'        => $akhir,
-            'periode'      => $periode,
-            'bulan'        => $bulan,
-            'tahunBulan'   => $tahunBulan,
-            'tahunTahun'   => $tahunTahun,
-            'tanggalAwal'  => $tanggalAwal,
+            'laporan' => $laporan,
+            'awal' => $awal,
+            'akhir' => $akhir,
+            'periode' => $periode,
+            'bulan' => $bulan,
+            'tahunBulan' => $tahunBulan,
+            'tahunTahun' => $tahunTahun,
+            'tanggalAwal' => $tanggalAwal,
             'tanggalAkhir' => $tanggalAkhir,
         ])->setPaper('a4', 'portrait');
 
 
-        $namaFile = 'laporan-penjualan-detail-' 
-                    . now()->format('Ymd_His') 
-                    . '-' . rand(1000, 9999) 
-                    . '.pdf';
+        $namaFile = 'laporan-penjualan-detail-'
+            . now()->format('Ymd_His')
+            . '-' . rand(1000, 9999)
+            . '.pdf';
 
         return $pdf->download($namaFile);
 
     }
 
-    public function savePdf(Request $request) {
+    public function savePdf(Request $request)
+    {
         if ($request->hasFile('pdf')) {
             $file = $request->file('pdf');
             $fileName = $file->getClientOriginalName();
             $path = $file->storeAs('public/pdfs', $fileName);
-            return response()->json(['url' => asset('storage/pdfs/'.$fileName)]);
+            return response()->json(['url' => asset('storage/pdfs/' . $fileName)]);
         }
         return response()->json(['error' => 'No file'], 400);
     }

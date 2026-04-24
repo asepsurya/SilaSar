@@ -2,33 +2,35 @@
 
 namespace App\Http\Controllers\Keuangan;
 
-use Storage;
-use App\Models\App;
-use App\Models\AkunTable;
-use App\Models\KategoriAkun;
-use App\Models\UserActivity;
-use Illuminate\Http\Request;
-use App\Models\RekeningTable;
-use Illuminate\Support\Carbon;
-use App\Models\KeuanganTableku;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Flasher\Laravel\Facade\Flasher;
 use App\Http\Controllers\Controller;
+use App\Models\AkunTable;
+use App\Models\App;
 use App\Models\HistoryRekeningTable;
+use App\Models\KategoriAkun;
+use App\Models\KeuanganTableku;
+use App\Models\Rekening;
+use App\Models\RekeningTable;
+use App\Models\UserActivity;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Flasher\Laravel\Facade\Flasher;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
+use Storage;
 
 class KeuanganController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $rekening = RekeningTable::where('auth', auth()->user()->id)->latest()->get();
 
         // Ambil parameter request
-        $sort  = request('sort', 'desc');
-        $from  = request('from');
-        $to    = request('to');
+        $sort = request('sort', 'desc');
+        $from = request('from');
+        $to = request('to');
         $bulan = request('bulan', date('m'));
         $tahun = request('tahun', date('Y'));
 
@@ -45,7 +47,7 @@ class KeuanganController extends Controller
         if ($from && $to) {
             try {
                 $fromDate = Carbon::createFromFormat('d/m/Y', $from)->format('Y-m-d');
-                $toDate   = Carbon::createFromFormat('d/m/Y', $to)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('d/m/Y', $to)->format('Y-m-d');
 
                 $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$fromDate, $toDate]);
             } catch (\Exception $e) {
@@ -88,30 +90,32 @@ class KeuanganController extends Controller
         });
 
 
-        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        return view('keuangan.index',[
+        $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        return view('keuangan.index', [
             'activeMenu' => 'keuangan',
             'active' => 'keuangan',
-        ],compact('logs','rekening','akun','transaksi','tahun','bulan','akunJs'));
+        ], compact('logs', 'rekening', 'akun', 'transaksi', 'tahun', 'bulan', 'akunJs'));
     }
 
-    public function IndexAkun(){
+    public function IndexAkun()
+    {
 
         $akun = AkunTable::all();
         $kategori = KategoriAkun::all();
-        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        return view('keuangan.akun',[
+        $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        return view('keuangan.akun', [
             'activeMenu' => 'akun',
             'active' => 'akun',
-        ],compact('logs','akun','kategori'));
+        ], compact('logs', 'akun', 'kategori'));
     }
 
-    public function akunCreate(request $request){
+    public function akunCreate(request $request)
+    {
 
-       $request->validate([
-            'nama_akun'   => 'required|string|max:255',
-            'jenis_akun'  => 'required',
-            'kode_akun'   => 'required',
+        $request->validate([
+            'nama_akun' => 'required|string|max:255',
+            'jenis_akun' => 'required',
+            'kode_akun' => 'required',
             'kategori_id' => 'required',
         ]);
 
@@ -134,13 +138,14 @@ class KeuanganController extends Controller
 
     }
 
-    public function akunUpdate(request $request){
+    public function akunUpdate(request $request)
+    {
         $request->validate([
-            'nama_akun'   => 'required|string|max:255',
-            'jenis_akun'  => 'required',
-            'kode_akun'   => 'required',
+            'nama_akun' => 'required|string|max:255',
+            'jenis_akun' => 'required',
+            'kode_akun' => 'required',
             'kategori_id' => 'required',
-            'id'          => 'required|numeric'
+            'id' => 'required|numeric'
         ]);
 
         // Gabungkan id dan kode_akun menjadi satu
@@ -151,9 +156,9 @@ class KeuanganController extends Controller
 
         // Update data
         $akun->update([
-            'nama_akun'   => $request->nama_akun,
-            'jenis_akun'  => $request->jenis_akun,
-            'kode_akun'   => $gabunganKode,
+            'nama_akun' => $request->nama_akun,
+            'jenis_akun' => $request->jenis_akun,
+            'kode_akun' => $gabunganKode,
             'kategori_id' => $request->kategori_id,
         ]);
 
@@ -166,7 +171,8 @@ class KeuanganController extends Controller
         return redirect()->back()->with('success', 'Data has been updated successfully!');
     }
 
-    public function akunDelete($id){
+    public function akunDelete($id)
+    {
 
         $akun = AkunTable::findOrFail($id);
         $akun->delete();
@@ -178,18 +184,20 @@ class KeuanganController extends Controller
 
         return redirect()->back()->with("success", "Data akun berhasil dihapus!");
     }
-    public function rekeningIndex(){
-        $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+    public function rekeningIndex()
+    {
+        $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $rekening = RekeningTable::where('auth', auth()->user()->id)->latest()->get();
-        return view('keuangan.rekening',[
+        return view('keuangan.rekening', [
             'activeMenu' => 'rekening',
             'active' => 'rekening',
-        ],compact('logs','rekening'));
+        ], compact('logs', 'rekening'));
     }
 
-    public function rekeningAdd(request $request){
+    public function rekeningAdd(request $request)
+    {
         $validated = $request->validate([
-            'kode_rekening' => 'required|string|unique:rekenings',
+            'kode_rekening' => 'required|string|unique:rekening_tables',
             'nama_rekening' => 'required|string',
             'jenis_akun' => 'required|in:default,uang_tunai,kartu_kredit,rekening_virtual,investasi,piutang,hutang',
             'jumlah' => 'required|numeric',
@@ -213,7 +221,7 @@ class KeuanganController extends Controller
             'id_akun' => 5,
             'tipe' => 'pemasukan',
             'total' => $validated['jumlah'],
-            'id_rekening' => Rekening::where('kode_rekening', $validated['kode_rekening'])->value('id'),
+            'id_rekening' => RekeningTable::where('kode_rekening', $validated['kode_rekening'])->value('id'),
             'auth' => auth()->user()->id,
             'foto' => null,
         ]);
@@ -221,7 +229,8 @@ class KeuanganController extends Controller
         return redirect()->back()->with("success", "Data akun berhasil ditambahkan!");
     }
 
-    public function keuanganAdd(Request $request){
+    public function keuanganAdd(Request $request)
+    {
         $request->validate([
             'tanggal' => 'required',
             'deskripsi' => 'required|string',
@@ -235,13 +244,13 @@ class KeuanganController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
-        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second', 'tipe','jenis_transaksi','total']);
+        $data = $request->only(['tanggal', 'waktu', 'deskripsi', 'id_akun', 'id_akun_second', 'tipe', 'jenis_transaksi', 'total']);
         $data['auth'] = auth()->user()->id;
 
         // Handle rekening
         if (empty($request->id_rekening)) {
             // Cek apakah sudah ada default rekening di App
-            $defaultRekening = App::where(['key' => 'default_rekening','auth'=> auth()->user()->id])->first();
+            $defaultRekening = App::where(['key' => 'default_rekening', 'auth' => auth()->user()->id])->first();
             if ($defaultRekening) {
 
                 // Gunakan rekening default yang sudah ada
@@ -321,7 +330,7 @@ class KeuanganController extends Controller
                     ['key' => 'default_rekening', 'auth' => auth()->user()->id],
                     ['value' => $rekeningBaru->kode_rekening]
                 );
-                  Artisan::call('optimize:clear');
+                Artisan::call('optimize:clear');
             }
         } else {
             $data['id_rekening'] = $request->id_rekening;
@@ -359,11 +368,12 @@ class KeuanganController extends Controller
             ->performedOn($keuangan)
             ->causedBy(auth()->user())
             ->log('Menambahkan data keuangan baru');
-         UserActivity::create(['user_id'=> auth()->id()]);
-         return redirect()->back()->with("success", "Berhasil menyimpan data");
+        UserActivity::create(['user_id' => auth()->id()]);
+        return redirect()->back()->with("success", "Berhasil menyimpan data");
     }
 
-    public function keuanganUpdate(Request $request){
+    public function keuanganUpdate(Request $request)
+    {
 
         $request->validate([
             'tanggal' => 'required',
@@ -432,7 +442,7 @@ class KeuanganController extends Controller
             }
         }
 
-        $data = $request->only(['tanggal','waktu', 'deskripsi', 'id_akun','id_akun_second','jenis_transaksi', 'tipe', 'total']);
+        $data = $request->only(['tanggal', 'waktu', 'deskripsi', 'id_akun', 'id_akun_second', 'jenis_transaksi', 'tipe', 'total']);
         $data['auth'] = auth()->user()->id;
 
         if ($request->hasFile('foto')) {
@@ -454,7 +464,8 @@ class KeuanganController extends Controller
         return redirect()->back()->with("success", "Berhasil menyimpan data");
     }
 
-    public function keuanganDelete($id){
+    public function keuanganDelete($id)
+    {
         $keuangan = KeuanganTableku::findOrFail($id);
         $oldTotal = $keuangan->total;
         $oldTipe = $keuangan->tipe;
@@ -464,22 +475,22 @@ class KeuanganController extends Controller
         if ($oldRekeningId && $oldRekeningId !== '00') {
             $rekening = RekeningTable::find($oldRekeningId);
             if ($rekening) {
-            if ($oldTipe === 'pengeluaran') {
-                $rekening->jumlah += $oldTotal;
-            } elseif ($oldTipe === 'pemasukan') {
-                $rekening->jumlah -= $oldTotal;
-            }
-            $rekening->save();
+                if ($oldTipe === 'pengeluaran') {
+                    $rekening->jumlah += $oldTotal;
+                } elseif ($oldTipe === 'pemasukan') {
+                    $rekening->jumlah -= $oldTotal;
+                }
+                $rekening->save();
 
-            // Tambahkan ke HistoryRekening
-            HistoryRekeningTable::create([
-                'id_rekening' => $rekening->kode_rekening,
-                'tanggal' => now()->format('d/m/Y'),
-                'keterangan' => 'Hapus transaksi: saldo dikembalikan',
-                'debit' => $oldTipe === 'pengeluaran' ? $oldTotal : 0,
-                'kredit' => $oldTipe === 'pemasukan' ? $oldTotal : 0,
-                'saldo' => $rekening->jumlah,
-            ]);
+                // Tambahkan ke HistoryRekening
+                HistoryRekeningTable::create([
+                    'id_rekening' => $rekening->kode_rekening,
+                    'tanggal' => now()->format('d/m/Y'),
+                    'keterangan' => 'Hapus transaksi: saldo dikembalikan',
+                    'debit' => $oldTipe === 'pengeluaran' ? $oldTotal : 0,
+                    'kredit' => $oldTipe === 'pemasukan' ? $oldTotal : 0,
+                    'saldo' => $rekening->jumlah,
+                ]);
             }
         }
 
@@ -495,7 +506,8 @@ class KeuanganController extends Controller
         return redirect()->back()->with("success", "Berhasil menghapus data");
     }
 
-    public function rekeningUpdate(request $request){
+    public function rekeningUpdate(request $request)
+    {
         $validated = $request->validate([
             'id' => 'required|exists:rekenings,id',
             'kode_rekening' => 'required|string',
@@ -520,23 +532,23 @@ class KeuanganController extends Controller
         // Catat perubahan saldo ke history jika jumlah berubah
         if ($oldJumlah != $validated['jumlah']) {
             HistoryRekeningTable::create([
-            'id_rekening' => $validated['kode_rekening'],
-            'tanggal' => now()->format('d/m/Y'),
-            'keterangan' => 'Update Saldo Rekening',
-            'debit' => $validated['jumlah'] > $oldJumlah ? $validated['jumlah'] - $oldJumlah : 0,
-            'kredit' => $validated['jumlah'] < $oldJumlah ? $oldJumlah - $validated['jumlah'] : 0,
-            'saldo' => $validated['jumlah'],
+                'id_rekening' => $validated['kode_rekening'],
+                'tanggal' => now()->format('d/m/Y'),
+                'keterangan' => 'Update Saldo Rekening',
+                'debit' => $validated['jumlah'] > $oldJumlah ? $validated['jumlah'] - $oldJumlah : 0,
+                'kredit' => $validated['jumlah'] < $oldJumlah ? $oldJumlah - $validated['jumlah'] : 0,
+                'saldo' => $validated['jumlah'],
             ]);
 
             KeuanganTableku::create([
-            'tanggal' => now()->format('d/m/Y'),
-            'deskripsi' => 'Update Saldo Rekening',
-            'id_akun' => 5, // sesuaikan id akun jika perlu
-            'tipe' => $validated['jumlah'] > $oldJumlah ? 'pemasukan' : 'pengeluaran',
-            'total' => abs($validated['jumlah'] - $oldJumlah),
-            'id_rekening' => $rekening->id,
-            'auth' => auth()->user()->id,
-            'foto' => null,
+                'tanggal' => now()->format('d/m/Y'),
+                'deskripsi' => 'Update Saldo Rekening',
+                'id_akun' => 5, // sesuaikan id akun jika perlu
+                'tipe' => $validated['jumlah'] > $oldJumlah ? 'pemasukan' : 'pengeluaran',
+                'total' => abs($validated['jumlah'] - $oldJumlah),
+                'id_rekening' => $rekening->id,
+                'auth' => auth()->user()->id,
+                'foto' => null,
             ]);
         }
 
@@ -548,7 +560,8 @@ class KeuanganController extends Controller
         return redirect()->back()->with("success", "Berhasil mengupdate data");
     }
 
-    public function rekeningDelete($id){
+    public function rekeningDelete($id)
+    {
         $rekening = RekeningTable::findOrFail($id);
 
         // Hapus semua transaksi keuangan terkait rekening ini
@@ -572,10 +585,11 @@ class KeuanganController extends Controller
             ->causedBy(auth()->user())
             ->log('Menghapus rekening beserta seluruh transaksi terkait');
 
-       return redirect()->back()->with("success", "Rekening dan seluruh transaksi terkait berhasil dihapus!");
+        return redirect()->back()->with("success", "Rekening dan seluruh transaksi terkait berhasil dihapus!");
     }
 
-    public function rekeningDefault($id){
+    public function rekeningDefault($id)
+    {
         $rekening = RekeningTable::findOrFail($id);
 
         // Update atau buat entry default rekening di tabel App
@@ -589,7 +603,7 @@ class KeuanganController extends Controller
             ->causedBy(auth()->user())
             ->log('Mengatur rekening default: ' . $rekening->kode_rekening);
 
-            \Artisan::call('optimize:clear');
+        \Artisan::call('optimize:clear');
         return redirect()->back()->with("success", "Rekening default berhasil diatur!");
 
     }
@@ -598,169 +612,170 @@ class KeuanganController extends Controller
     public function keuanganPDF(Request $request)
     {
 
-           // 🔹 Tentukan user (bisa dari ip parameter atau auth)
-    $id_user = $request->filled('ip') ? $request->ip : auth()->id();
+        // 🔹 Tentukan user (bisa dari ip parameter atau auth)
+        $id_user = $request->filled('ip') ? $request->ip : auth()->id();
 
-    // 🔹 Mulai query
-    $query = KeuanganTableku::with(['akun', 'rekening'])
-        ->where('auth', $id_user);
+        // 🔹 Mulai query
+        $query = KeuanganTableku::with(['akun', 'rekening'])
+            ->where('auth', $id_user);
 
-    // 🔹 Filter tipe (pemasukan/pengeluaran)
-    $tipe = $request->filled('tipe') ? $request->tipe : null;
-    if ($tipe) {
-        $query->where('tipe', $tipe);
-    }
-
-    $periodeText = 'Semua Periode';
-    $periodeSlug = 'semua-periode';
-
-    // === Filter by from-to ===
-    if ($request->filled('from') && $request->filled('to')) {
-        try {
-            $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
-            $to   = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
-
-            // Filter tanggal string dd/mm/YYYY
-            $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$from, $to]);
-
-            $periodeText = "{$request->from} s.d. {$request->to}";
-            $periodeSlug = str_replace(['/', '\\'], '-', $request->from) . '_sd_' . str_replace(['/', '\\'], '-', $request->to);
-        } catch (\Exception $e) {
-            $periodeSlug = 'semua-periode';
+        // 🔹 Filter tipe (pemasukan/pengeluaran)
+        $tipe = $request->filled('tipe') ? $request->tipe : null;
+        if ($tipe) {
+            $query->where('tipe', $tipe);
         }
-    }
 
-    // === Filter by ?periode=YYYY-MM ===
-    elseif ($request->filled('periode')) {
-        try {
-            [$tahun, $bulan] = explode('-', $request->periode);
-            $tahun = (int) $tahun;
-            $bulan = (int) $bulan;
+        $periodeText = 'Semua Periode';
+        $periodeSlug = 'semua-periode';
 
-            $query->whereRaw("
+        // === Filter by from-to ===
+        if ($request->filled('from') && $request->filled('to')) {
+            try {
+                $from = Carbon::createFromFormat('d/m/Y', $request->from)->format('Y-m-d');
+                $to = Carbon::createFromFormat('d/m/Y', $request->to)->format('Y-m-d');
+
+                // Filter tanggal string dd/mm/YYYY
+                $query->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?", [$from, $to]);
+
+                $periodeText = "{$request->from} s.d. {$request->to}";
+                $periodeSlug = str_replace(['/', '\\'], '-', $request->from) . '_sd_' . str_replace(['/', '\\'], '-', $request->to);
+            } catch (\Exception $e) {
+                $periodeSlug = 'semua-periode';
+            }
+        }
+
+        // === Filter by ?periode=YYYY-MM ===
+        elseif ($request->filled('periode')) {
+            try {
+                [$tahun, $bulan] = explode('-', $request->periode);
+                $tahun = (int) $tahun;
+                $bulan = (int) $bulan;
+
+                $query->whereRaw("
                 YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
                 AND MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
             ", [$tahun, $bulan]);
 
-            $periodeText = Carbon::create($tahun, $bulan, 1)->translatedFormat('F Y');
-            $periodeSlug = "{$bulan}-{$tahun}";
-        } catch (\Exception $e) {
-            $periodeSlug = 'semua-periode';
+                $periodeText = Carbon::create($tahun, $bulan, 1)->translatedFormat('F Y');
+                $periodeSlug = "{$bulan}-{$tahun}";
+            } catch (\Exception $e) {
+                $periodeSlug = 'semua-periode';
+            }
         }
+
+        // === Filter by bulan & tahun ===
+        elseif ($request->filled('bulan') && $request->filled('tahun')) {
+            $bulan = (int) $request->bulan;
+            $tahun = (int) $request->tahun;
+
+            $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
+                ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
+
+            $periodeText = Carbon::createFromDate($tahun, $bulan)->translatedFormat('F Y');
+            $periodeSlug = "{$bulan}-{$tahun}";
+        }
+
+        // 🔹 Ambil data
+        $keuangan = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get();
+
+        // 🔹 Jika tidak ada filter, tampilkan semua periode
+        if (
+            !$request->filled('from') &&
+            !$request->filled('to') &&
+            !$request->filled('periode') &&
+            !$request->filled('bulan') &&
+            !$request->filled('tahun')
+        ) {
+            $periodeText = 'Semua Periode';
+        }
+
+        $data = [
+            'keuangan' => $keuangan,
+            'periode' => $periodeText,
+        ];
+
+        // 🔹 Generate PDF
+        $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
+
+        // 🔹 Nama file aman
+        $safeFile = preg_replace('/[\/\\\\]/', '-', $periodeSlug);
+        $tipeSlug = $tipe ? $tipe : 'semua-tipe';
+        $filename = "laporan-keuangan-{$tipeSlug}-{$safeFile}.pdf";
+
+        return $pdf->download($filename);
     }
-
-    // === Filter by bulan & tahun ===
-    elseif ($request->filled('bulan') && $request->filled('tahun')) {
-        $bulan = (int) $request->bulan;
-        $tahun = (int) $request->tahun;
-
-        $query->whereRaw("YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$tahun])
-              ->whereRaw("MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?", [$bulan]);
-
-        $periodeText = Carbon::createFromDate($tahun, $bulan)->translatedFormat('F Y');
-        $periodeSlug = "{$bulan}-{$tahun}";
-    }
-
-    // 🔹 Ambil data
-    $keuangan = $query->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")->get();
-
-    // 🔹 Jika tidak ada filter, tampilkan semua periode
-    if (
-        !$request->filled('from') &&
-        !$request->filled('to') &&
-        !$request->filled('periode') &&
-        !$request->filled('bulan') &&
-        !$request->filled('tahun')
-    ) {
-        $periodeText = 'Semua Periode';
-    }
-
-    $data = [
-        'keuangan' => $keuangan,
-        'periode'  => $periodeText,
-    ];
-
-    // 🔹 Generate PDF
-    $pdf = Pdf::loadView('keuangan.pdf', $data)->setPaper('a4', 'portrait');
-
-    // 🔹 Nama file aman
-    $safeFile = preg_replace('/[\/\\\\]/', '-', $periodeSlug);
-    $tipeSlug = $tipe ? $tipe : 'semua-tipe';
-    $filename = "laporan-keuangan-{$tipeSlug}-{$safeFile}.pdf";
-
-    return $pdf->download($filename);
-    }
- public function kelenderIndex(){
-        $data = KeuanganTableku::where('auth',auth()->user()->id)->get();
-         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
-        return view('keuangan.bulan',[
+    public function kelenderIndex()
+    {
+        $data = KeuanganTableku::where('auth', auth()->user()->id)->get();
+        $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
+        return view('keuangan.bulan', [
             'activeMenu' => 'keuangan',
             'active' => 'keuangan',
-        ],compact('logs','data'));
+        ], compact('logs', 'data'));
     }
 
- public function cetakHistoryPDF($id_rekening)
-{
-    $histories = HistoryRekeningTable::where('id_rekening', $id_rekening);
+    public function cetakHistoryPDF($id_rekening)
+    {
+        $histories = HistoryRekeningTable::where('id_rekening', $id_rekening);
 
-    // Ambil parameter dari request
-    $periode = request('periode');
-    $bulan = request('bulan');
-    $tahun_bulan = request('tahun_bulan');
-    $tahun_tahun = request('tahun_tahun');
-    $tanggal_awal = request('tanggal_awal');
-    $tanggal_akhir = request('tanggal_akhir');
+        // Ambil parameter dari request
+        $periode = request('periode');
+        $bulan = request('bulan');
+        $tahun_bulan = request('tahun_bulan');
+        $tahun_tahun = request('tahun_tahun');
+        $tanggal_awal = request('tanggal_awal');
+        $tanggal_akhir = request('tanggal_akhir');
 
-    // Pastikan bulan dalam format 2 digit
-    if ($bulan) {
-        $bulan = str_pad($bulan, 2, '0', STR_PAD_LEFT);
-    }
+        // Pastikan bulan dalam format 2 digit
+        if ($bulan) {
+            $bulan = str_pad($bulan, 2, '0', STR_PAD_LEFT);
+        }
 
-    // Filter tanggal (format dd/mm/YYYY)
-    if ($tanggal_awal && $tanggal_akhir) {
-        try {
-            $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
-            $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
+        // Filter tanggal (format dd/mm/YYYY)
+        if ($tanggal_awal && $tanggal_akhir) {
+            try {
+                $fromDate = Carbon::createFromFormat('d/m/Y', $tanggal_awal)->format('Y-m-d');
+                $toDate = Carbon::createFromFormat('d/m/Y', $tanggal_akhir)->format('Y-m-d');
 
-            $histories->whereRaw("
+                $histories->whereRaw("
                 STR_TO_DATE(tanggal, '%d/%m/%Y') BETWEEN ? AND ?
             ", [$fromDate, $toDate]);
-        } catch (\Exception $e) {
-            // Jika format tanggal salah, lewati filter
-        }
-    } elseif ($periode == 'bulanan' && $bulan && $tahun_bulan) {
-        // Filter berdasarkan bulan & tahun
-        $histories->whereRaw("
+            } catch (\Exception $e) {
+                // Jika format tanggal salah, lewati filter
+            }
+        } elseif ($periode == 'bulanan' && $bulan && $tahun_bulan) {
+            // Filter berdasarkan bulan & tahun
+            $histories->whereRaw("
             MONTH(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
             AND YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
         ", [$bulan, $tahun_bulan]);
-    } elseif ($tahun_tahun) {
-        // Filter berdasarkan tahun
-        $histories->whereRaw("
+        } elseif ($tahun_tahun) {
+            // Filter berdasarkan tahun
+            $histories->whereRaw("
             YEAR(STR_TO_DATE(tanggal, '%d/%m/%Y')) = ?
         ", [$tahun_tahun]);
+        }
+
+        // Urutkan berdasarkan tanggal terbaru
+        $histories = $histories->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') DESC")->get();
+
+        // Ambil data rekening
+        $rekening = RekeningTable::where('kode_rekening', $id_rekening)->firstOrFail();
+
+        // Generate PDF
+        $pdf = Pdf::loadView('keuangan.pdfHistory', [
+            'histories' => $histories,
+            'name' => $rekening
+        ])->setPaper('a4', 'portrait');
+
+        // Sanitasi nama file agar aman
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rekening->nama_rekening);
+        $filename = "CetakHistory-keuangan-dari-{$safeName}.pdf";
+
+        return $pdf->download($filename);
     }
 
-    // Urutkan berdasarkan tanggal terbaru
-    $histories = $histories->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') DESC")->get();
-
-    // Ambil data rekening
-    $rekening = RekeningTable::where('kode_rekening', $id_rekening)->firstOrFail();
-
-    // Generate PDF
-    $pdf = Pdf::loadView('keuangan.pdfHistory', [
-        'histories' => $histories,
-        'name' => $rekening
-    ])->setPaper('a4', 'portrait');
-
-    // Sanitasi nama file agar aman
-    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $rekening->nama_rekening);
-    $filename = "CetakHistory-keuangan-dari-{$safeName}.pdf";
-
-    return $pdf->download($filename);
-}
-
-public function neraca()
+    public function neraca()
     {
 
 
@@ -776,14 +791,24 @@ public function neraca()
 
         // Normalisasi tanggal ke Y-m-d (toleran terhadap beberapa format)
         $toYmd = function ($value) {
-            if (!$value) return null;
+            if (!$value)
+                return null;
 
             // coba d/m/Y
-            try { return Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d'); } catch (\Exception $e) {}
+            try {
+                return Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
             // coba Y-m-d
-            try { return Carbon::createFromFormat('Y-m-d', $value)->format('Y-m-d'); } catch (\Exception $e) {}
+            try {
+                return Carbon::createFromFormat('Y-m-d', $value)->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
             // fallback parse
-            try { return Carbon::parse($value)->format('Y-m-d'); } catch (\Exception $e) {}
+            try {
+                return Carbon::parse($value)->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
             return null;
         };
 
@@ -803,20 +828,20 @@ public function neraca()
 
         // Query utama
         $saldoakun_tables = AkunTable::select(
-                'akun_tables.id',
-                'akun_tables.kode_akun',
-                'akun_tables.nama_akun',
-                'kategori_akuns.nama_kategori',
-                'kategori_akuns.tipe',
-                DB::raw('SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_debit'),
-                DB::raw('SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_kredit')
-            )
-            ->join('kategori_akuns','kategori_akuns.id','=','akun_tables.kategori_id')
-            ->leftJoin('keuangan_tables', function($join) use ($periode, $bulan, $tahun, $tanggalAwal, $tanggalAkhir) {
+            'akun_tables.id',
+            'akun_tables.kode_akun',
+            'akun_tables.nama_akun',
+            'kategori_akuns.nama_kategori',
+            'kategori_akuns.tipe',
+            DB::raw('SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_debit'),
+            DB::raw('SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_kredit')
+        )
+            ->join('kategori_akuns', 'kategori_akuns.id', '=', 'akun_tables.kategori_id')
+            ->leftJoin('keuangan_tables', function ($join) use ($periode, $bulan, $tahun, $tanggalAwal, $tanggalAkhir) {
 
-                $join->on(function($q) {
-                    $q->on('keuangan_tables.id_akun','=','akun_tables.id')
-                    ->orOn('keuangan_tables.id_akun_second','=','akun_tables.id');
+                $join->on(function ($q) {
+                    $q->on('keuangan_tables.id_akun', '=', 'akun_tables.id')
+                        ->orOn('keuangan_tables.id_akun_second', '=', 'akun_tables.id');
                 });
 
                 // Jika periode = rentang dan tanggal valid -> gunakan BETWEEN (prioritas)
@@ -844,10 +869,10 @@ public function neraca()
                 // Auth filter
                 $join->where('keuangan_tables.auth', auth()->id());
             })
-            ->groupBy('akun_tables.id','akun_tables.kode_akun','akun_tables.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
+            ->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun', 'kategori_akuns.nama_kategori', 'kategori_akuns.tipe')
             ->get()
-            ->map(function($row){
-                if (in_array($row->tipe, ['aset','beban'])) {
+            ->map(function ($row) {
+                if (in_array($row->tipe, ['aset', 'beban'])) {
                     $row->saldo = $row->total_debit - $row->total_kredit;
                 } else {
                     $row->saldo = $row->total_kredit - $row->total_debit;
@@ -857,15 +882,15 @@ public function neraca()
 
         // Sisanya (logs, view) seperti sebelumnya...
         $logs = Activity::where([
-                'causer_id' => auth()->id(),
-                'log_name'  => 'ikm'
-            ])->latest()->take(10)->get();
+            'causer_id' => auth()->id(),
+            'log_name' => 'ikm'
+        ])->latest()->take(10)->get();
 
         return view('keuangan.neraca', [
             'activeMenu' => 'laporan',
             'active' => 'neraca',
-            'neraca' => $saldoakun_tables->whereIn('tipe', ['aset','liabilitas','ekuitas'])->groupBy('tipe'),
-            'labaRugi' => $saldoakun_tables->whereIn('tipe', ['pendapatan','beban'])->groupBy('tipe'),
+            'neraca' => $saldoakun_tables->whereIn('tipe', ['aset', 'liabilitas', 'ekuitas'])->groupBy('tipe'),
+            'labaRugi' => $saldoakun_tables->whereIn('tipe', ['pendapatan', 'beban'])->groupBy('tipe'),
             'logs' => $logs,
             'bulan' => $bulan,
             'tahun' => $tahun,
@@ -873,7 +898,8 @@ public function neraca()
         ]);
 
     }
-    public function neracapdf(){
+    public function neracapdf()
+    {
         // Ambil parameter filter
         // Ambil input dasar
         $periode = request('periode');
@@ -887,14 +913,24 @@ public function neraca()
 
         // Normalisasi tanggal ke Y-m-d (toleran terhadap beberapa format)
         $toYmd = function ($value) {
-            if (!$value) return null;
+            if (!$value)
+                return null;
 
             // coba d/m/Y
-            try { return Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d'); } catch (\Exception $e) {}
+            try {
+                return Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
             // coba Y-m-d
-            try { return Carbon::createFromFormat('Y-m-d', $value)->format('Y-m-d'); } catch (\Exception $e) {}
+            try {
+                return Carbon::createFromFormat('Y-m-d', $value)->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
             // fallback parse
-            try { return Carbon::parse($value)->format('Y-m-d'); } catch (\Exception $e) {}
+            try {
+                return Carbon::parse($value)->format('Y-m-d');
+            } catch (\Exception $e) {
+            }
             return null;
         };
 
@@ -914,20 +950,20 @@ public function neraca()
 
         // Query utama
         $saldoakun_tables = AkunTable::select(
-                'akun_tables.id',
-                'akun_tables.kode_akun',
-                'akun_tables.nama_akun',
-                'kategori_akuns.nama_kategori',
-                'kategori_akuns.tipe',
-                DB::raw('SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_debit'),
-                DB::raw('SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_kredit')
-            )
-            ->join('kategori_akuns','kategori_akuns.id','=','akun_tables.kategori_id')
-            ->leftJoin('keuangan_tables', function($join) use ($periode, $bulan, $tahun, $tanggalAwal, $tanggalAkhir) {
+            'akun_tables.id',
+            'akun_tables.kode_akun',
+            'akun_tables.nama_akun',
+            'kategori_akuns.nama_kategori',
+            'kategori_akuns.tipe',
+            DB::raw('SUM(CASE WHEN keuangan_tables.id_akun = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_debit'),
+            DB::raw('SUM(CASE WHEN keuangan_tables.id_akun_second = akun_tables.id THEN keuangan_tables.total ELSE 0 END) AS total_kredit')
+        )
+            ->join('kategori_akuns', 'kategori_akuns.id', '=', 'akun_tables.kategori_id')
+            ->leftJoin('keuangan_tables', function ($join) use ($periode, $bulan, $tahun, $tanggalAwal, $tanggalAkhir) {
 
-                $join->on(function($q) {
-                    $q->on('keuangan_tables.id_akun','=','akun_tables.id')
-                    ->orOn('keuangan_tables.id_akun_second','=','akun_tables.id');
+                $join->on(function ($q) {
+                    $q->on('keuangan_tables.id_akun', '=', 'akun_tables.id')
+                        ->orOn('keuangan_tables.id_akun_second', '=', 'akun_tables.id');
                 });
 
                 // Jika periode = rentang dan tanggal valid -> gunakan BETWEEN (prioritas)
@@ -955,47 +991,47 @@ public function neraca()
                 // Auth filter
                 $join->where('keuangan_tables.auth', auth()->id());
             })
-            ->groupBy('akun_tables.id','akun_tables.kode_akun','akun_tables.nama_akun','kategori_akuns.nama_kategori','kategori_akuns.tipe')
+            ->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun', 'kategori_akuns.nama_kategori', 'kategori_akuns.tipe')
             ->get()
-            ->map(function($row){
-                if (in_array($row->tipe, ['aset','beban'])) {
+            ->map(function ($row) {
+                if (in_array($row->tipe, ['aset', 'beban'])) {
                     $row->saldo = $row->total_debit - $row->total_kredit;
                 } else {
                     $row->saldo = $row->total_kredit - $row->total_debit;
                 }
                 return $row;
             });
-        $neraca = $saldoakun_tables->whereIn('tipe', ['aset','liabilitas','ekuitas'])->groupBy('tipe');
-        $labaRugi = $saldoakun_tables->whereIn('tipe', ['pendapatan','beban'])->groupBy('tipe');
+        $neraca = $saldoakun_tables->whereIn('tipe', ['aset', 'liabilitas', 'ekuitas'])->groupBy('tipe');
+        $labaRugi = $saldoakun_tables->whereIn('tipe', ['pendapatan', 'beban'])->groupBy('tipe');
 
 
-            // Ambil log aktivitas terbaru (opsional untuk catatan bawah PDF)
-            $logs = Activity::where([
-                        'causer_id' => auth()->id(),
-                        'log_name'  => 'ikm'
-                    ])
-                    ->latest()
-                    ->take(10)
-                    ->get();
+        // Ambil log aktivitas terbaru (opsional untuk catatan bawah PDF)
+        $logs = Activity::where([
+            'causer_id' => auth()->id(),
+            'log_name' => 'ikm'
+        ])
+            ->latest()
+            ->take(10)
+            ->get();
 
-            // Buat PDF
-            $pdf = Pdf::loadView('keuangan.pdf.neracaNew', [
-                'neraca' => $neraca,
-                'labaRugi' => $labaRugi,
-                'logs' => $logs,
-                'bulan' => $bulan,
-                'tahun' => $tahun,
-            ])->setPaper('a4', 'portrait');
+        // Buat PDF
+        $pdf = Pdf::loadView('keuangan.pdf.neracaNew', [
+            'neraca' => $neraca,
+            'labaRugi' => $labaRugi,
+            'logs' => $logs,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+        ])->setPaper('a4', 'portrait');
 
-            // Output PDF langsung di browser
-            return $pdf->stream("Laporan_Neraca_{$bulan}_{$tahun}.pdf");
+        // Output PDF langsung di browser
+        return $pdf->stream("Laporan_Neraca_{$bulan}_{$tahun}.pdf");
     }
     public function neracaSaldo2(request $request)
     {
         $logs = Activity::where([
-                'causer_id'=>auth()->user()->id,
-                'log_name' => 'ikm'
-            ])
+            'causer_id' => auth()->user()->id,
+            'log_name' => 'ikm'
+        ])
             ->latest()
             ->take(10)
             ->get();
@@ -1043,7 +1079,7 @@ public function neraca()
             // Format input menjadi YYYY-mm-dd
             try {
                 $fromDate = Carbon::parse($tanggal_awal)->format('Y-m-d');
-                $toDate   = Carbon::parse($tanggal_akhir)->format('Y-m-d');
+                $toDate = Carbon::parse($tanggal_akhir)->format('Y-m-d');
 
                 $query->whereRaw(
                     "STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?",
@@ -1065,11 +1101,11 @@ public function neraca()
         $data = $query->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
             ->get();
 
-        return view('keuangan.neracasaldo',[
+        return view('keuangan.neracasaldo', [
             'activeMenu' => 'laporan',
             'active' => 'neracasaldo',
             'logs' => $logs
-        ],compact('data','bulan','tahun'));
+        ], compact('data', 'bulan', 'tahun'));
 
     }
 
@@ -1117,7 +1153,7 @@ public function neraca()
             // Format input menjadi YYYY-mm-dd
             try {
                 $fromDate = Carbon::parse($tanggal_awal)->format('Y-m-d');
-                $toDate   = Carbon::parse($tanggal_akhir)->format('Y-m-d');
+                $toDate = Carbon::parse($tanggal_akhir)->format('Y-m-d');
 
                 $query->whereRaw(
                     "STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?",
@@ -1170,9 +1206,9 @@ public function neraca()
     public function neracaSaldo(request $request)
     {
         $logs = Activity::where([
-                'causer_id'=>auth()->user()->id,
-                'log_name' => 'ikm'
-            ])
+            'causer_id' => auth()->user()->id,
+            'log_name' => 'ikm'
+        ])
             ->latest()
             ->take(10)
             ->get();
@@ -1215,19 +1251,19 @@ public function neraca()
             ->where("keuangan_tables.auth", $auth);
 
         // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
-       if ($periode === 'rentang' && $tanggal_awal && $tanggal_akhir) {
+        if ($periode === 'rentang' && $tanggal_awal && $tanggal_akhir) {
 
-                    try {
-                        $fromDate = Carbon::parse($tanggal_awal)->format('Y-m-d');
-                        $toDate   = Carbon::parse($tanggal_akhir)->format('Y-m-d');
+            try {
+                $fromDate = Carbon::parse($tanggal_awal)->format('Y-m-d');
+                $toDate = Carbon::parse($tanggal_akhir)->format('Y-m-d');
 
-                        $query->whereRaw(
-                            "STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?",
-                            [$fromDate, $toDate]
-                        );
-                    } catch (\Exception $e) {
-                        // Jika format tanggal salah, tidak memfilter
-                }
+                $query->whereRaw(
+                    "STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?",
+                    [$fromDate, $toDate]
+                );
+            } catch (\Exception $e) {
+                // Jika format tanggal salah, tidak memfilter
+            }
         } else {
             // Filter berdasarkan tahun
             $query->whereRaw("YEAR(STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y')) = ?", [$tahun]);
@@ -1241,11 +1277,11 @@ public function neraca()
         $data = $query->groupBy('akun_tables.id', 'akun_tables.kode_akun', 'akun_tables.nama_akun')
             ->get();
 
-        return view('keuangan.neracasaldo',[
+        return view('keuangan.neracasaldo', [
             'activeMenu' => 'laporan',
             'active' => 'neracasaldo',
             'logs' => $logs
-        ],compact('data','bulan','tahun'));
+        ], compact('data', 'bulan', 'tahun'));
 
     }
 
@@ -1283,16 +1319,16 @@ public function neraca()
             'akun.kategori',
             'akunSecond.kategori'
         ])
-        ->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') IS NOT NULL")
-        ->where('auth', $auth);
+            ->whereRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') IS NOT NULL")
+            ->where('auth', $auth);
 
         // Filter berdasarkan tanggal_awal dan tanggal_akhir jika ada
-       if ($periode === 'rentang' && $tanggal_awal && $tanggal_akhir) {
+        if ($periode === 'rentang' && $tanggal_awal && $tanggal_akhir) {
 
             // Format input menjadi YYYY-mm-dd
             try {
                 $fromDate = Carbon::parse($tanggal_awal)->format('Y-m-d');
-                $toDate   = Carbon::parse($tanggal_akhir)->format('Y-m-d');
+                $toDate = Carbon::parse($tanggal_akhir)->format('Y-m-d');
 
                 $query->whereRaw(
                     "STR_TO_DATE(keuangan_tables.tanggal, '%d/%m/%Y') BETWEEN ? AND ?",
@@ -1329,7 +1365,8 @@ public function neraca()
         foreach ($items as $item) {
             $akunList = [$item->akun, $item->akunSecond];
             foreach ($akunList as $akun) {
-                if (!$akun || !$akun->kategori) continue;
+                if (!$akun || !$akun->kategori)
+                    continue;
 
                 $key = $akun->id;
                 if (!isset($addedAkun[$key])) {
@@ -1350,13 +1387,14 @@ public function neraca()
         ];
 
         // Fungsi helper push ke Laba Rugi
-        $pushToLabaRugi = function($akun, $total) use (&$labaRugi, $kategoriMap) {
+        $pushToLabaRugi = function ($akun, $total) use (&$labaRugi, $kategoriMap) {
             $namaKategori = $akun->kategori->nama_kategori;
             $tipeKategori = $kategoriMap[$namaKategori] ?? null;
 
-            if (!$tipeKategori) return; // abaikan jika bukan Laba Rugi
+            if (!$tipeKategori)
+                return; // abaikan jika bukan Laba Rugi
 
-            $saldoItem = (object)[
+            $saldoItem = (object) [
                 'nama_akun' => $akun->nama_akun,
                 'saldo' => $total,
             ];
@@ -1406,11 +1444,11 @@ public function neraca()
             ->orderByRaw("STR_TO_DATE(tanggal, '%d/%m/%Y') ASC")
             ->get();
 
-        return view('keuangan.transaksi',[
+        return view('keuangan.transaksi', [
             'activeMenu' => 'laporan',
             'active' => 'laporan_transaksi',
-            'logs' => Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get()
-        ],compact('transaksi','bulan','tahun'));
+            'logs' => Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get()
+        ], compact('transaksi', 'bulan', 'tahun'));
     }
 
 }

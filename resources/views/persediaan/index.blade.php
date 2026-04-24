@@ -1,5 +1,9 @@
 @extends('layout.main')
 @section('title', 'Management Stok Produk')
+@section('css')
+<link rel="stylesheet" type="text/css" media="screen" href="{{ asset('assets/css/simple-datatables.css') }}" />
+@endsection
+
 @section('container')
 
 <div class="px-2 py-1 mb-4 flex items-center justify-between">
@@ -10,22 +14,22 @@
     </a>
 </div>
 
-<div class=" dark:border-white/10 rounded-lg overflow-hidden">
+<div x-data="main" x-init="init()" class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 p-2 rounded-md">
 
-    <!-- TABEL DESKTOP -->
-    <div class="overflow-y-auto hidden md:block" style="max-height: 80vh;">
-        <table class="w-full min-w-[800px] border-collapse">
-            <thead class="sticky top-0 bg-gray-100 dark:bg-black z-10 text-xs">
-                <tr class="text-center">
-                    <th class="border dark:border-white/10 px-2 py-2 w-10">No</th>
-                    <th class="border dark:border-white/10 px-2 py-2 ">Tanggal</th>
-                    <th class="border dark:border-white/10 px-2 py-2 ">Nomor Transaksi</th>
-                    <th class="border dark:border-white/10 px-2 py-2 "width="50%">Catatan</th>
-                    <th class="border dark:border-white/10 px-2 py-2 ">Dibuat pada</th>
-                    <th class="border dark:border-white/10 px-2 py-2 ">Di Update</th>
-                    <th class="border dark:border-white/10 px-2 py-2">Aksi</th>
-                </tr>
-            </thead>
+    <div class="clean-table-container hidden md:block">
+        <div class="overflow-auto">
+            <table id="myTable" class="whitespace-nowrap w-full">
+                <thead>
+                    <tr class="text-center">
+                        <th class="px-2 py-2 w-10">No</th>
+                        <th class="px-2 py-2 ">Tanggal</th>
+                        <th class="px-2 py-2 ">Nomor Transaksi</th>
+                        <th class="px-2 py-2 "width="50%">Catatan</th>
+                        <th class="px-2 py-2 ">Dibuat pada</th>
+                        <th class="px-2 py-2 ">Di Update</th>
+                        <th class="px-2 py-2">Aksi</th>
+                    </tr>
+                </thead>
             <tbody class="text-sm">
                 @php $no=1; @endphp
                @forelse ($stok as $item)
@@ -45,23 +49,24 @@
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="7" class="border dark:border-white/10 text-center py-6 text-gray-500 dark:text-gray-400">
-                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                            Belum ada riwayat data stok
-                        </td>
-                    </tr>
+                    <!-- Optional: datatables should handle empty state automatically, but we can keep it for safety -->
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <!-- LIST MOBILE -->
-    <div class="block md:hidden divide-y dark:divide-white/10">
-        @php $no = 1; @endphp
-        @forelse ($stok as $item)
+    <div class="block md:hidden">
+        <div class="divide-y dark:divide-white/10">
+        @php 
+            $currentPage = request('page', 1);
+            $itemsPerPage = 10;
+            $mobileStok = collect($stok)->slice(($currentPage - 1) * $itemsPerPage, $itemsPerPage);
+            $totalPages = ceil(count($stok) / $itemsPerPage);
+            $no = ($currentPage - 1) * $itemsPerPage + 1; 
+        @endphp
+        @forelse ($mobileStok as $item)
             <div class="p-3 mb-3 border rounded-lg dark:border-white/10 bg-white dark:bg-white/5 shadow-sm">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-semibold">#{{ $no++ }} - {{ $item->no_transaksi }}</span>
@@ -87,10 +92,76 @@
                 Belum ada data stok yang tersedia
             </div>
         @endforelse
-
+        </div>
+        
+        {{-- Paging for mobile --}}
+        @if($totalPages > 1)
+            <div class="datatable-pagination flex justify-center mt-4 mb-4">
+                <ul>
+                    @if($currentPage > 1)
+                        <li>
+                            <a href="{{ request()->fullUrlWithQuery(['page' => $currentPage - 1]) }}">&laquo;</a>
+                        </li>
+                    @endif
+                    @php
+                        // Limit pagination links to max 5 around current page
+                        $start = max(1, $currentPage - 2);
+                        $end = min($totalPages, $currentPage + 2);
+                    @endphp
+                    @for($i = $start; $i <= $end; $i++)
+                        <li class="{{ $i == $currentPage ? 'active' : '' }}">
+                            <a href="{{ request()->fullUrlWithQuery(['page' => $i]) }}">
+                                {{ $i }}
+                            </a>
+                        </li>
+                    @endfor
+                    @if($currentPage < $totalPages)
+                        <li>
+                            <a href="{{ request()->fullUrlWithQuery(['page' => $currentPage + 1]) }}">&raquo;</a>
+                        </li>
+                    @endif
+                </ul>
+            </div>
+        @endif
     </div>
+
 </div>
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
 <script>
+document.addEventListener("alpine:init", () => {
+    Alpine.data('main', () => ({
+        init() {
+            const tableEl = document.querySelector("#myTable");
+            if (!tableEl) return;
+            
+            const table = new simpleDatatables.DataTable(tableEl, {
+                sortable: false,
+                searchable: true,
+                perPage: 25,
+                perPageSelect: [5, 10, 20, 50, 100],
+                firstLast: false,
+                prevText: '<i class="fas fa-chevron-left text-[10px]"></i>',
+                nextText: '<i class="fas fa-chevron-right text-[10px]"></i>',
+                labels: {
+                    placeholder: 'Cari transaksi...',
+                    searchTitle: 'Cari transaksi',
+                    perPage: '',
+                    noRows: 'Tidak ada data stok ditemukan',
+                    info: 'Menampilkan {start} sampai {end} dari {rows} data'
+                },
+                layout: {
+                    top: '{select}{search}',
+                    bottom: '<div class="datatable-info-container">{info}</div>{pager}'
+                }
+            });
+            
+            const wrapper = tableEl.closest('.datatable-wrapper');
+            if (wrapper) wrapper.classList.add('clean-datatable-wrapper');
+        }
+    }));
+});
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".hapus").forEach(function (btn) {
         btn.addEventListener("click", function (e) {
@@ -118,4 +189,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+@endsection
 @endsection

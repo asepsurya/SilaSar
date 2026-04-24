@@ -1,16 +1,15 @@
    .select2-container--default .select2-selection--single {
-     background-color: rgba(255, 255, 255, 0);
+       background-color: rgba(255, 255, 255, 0);
        border: 1px solid #6b7280;
        padding: 20px;
        border-radius: 8px;
-      
-      
+
+
    }
 
    .select2-container--default .select2-selection__rendered {
        color: #333333;
-       margin-top: -13px;
-       margin-left: -15px;
+       margin-left: 0px;
        margin-right: 10px;
        font-size: 14px;
    }

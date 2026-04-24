@@ -135,7 +135,7 @@
 </div>
 
 <!-- Scripts -->
-<script src="{{ asset('assets/js/simple-datatables.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -194,8 +194,12 @@
                             , perPage: 10
                             , perPageSelect: [10, 20, 50, 100]
                             , firstLast: false
+                            , prevText: '<'
+                            , nextText: '>'
                             , labels: {
-                                perPage: '{select}'
+                                placeholder: 'Cari nama atau statistik'
+                                , searchTitle: 'Cari keaktifan pengguna'
+                                , perPage: ''
                             }
                             , layout: {
                                 top: '{select}{search}'

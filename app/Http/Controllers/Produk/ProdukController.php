@@ -16,9 +16,39 @@ use App\Models\TransaksiProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Str;
 
 class ProdukController extends Controller
 {
+    private function generateProductCode()
+    {
+        $bulanTahun = now()->format('my');
+        $lastProduk = Produk::where('kode_produk', 'like', "PRD-$bulanTahun/%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $nomor = 1;
+        if ($lastProduk) {
+            $parts = explode('/', $lastProduk->kode_produk);
+            if (isset($parts[1]) && is_numeric($parts[1])) {
+                $nomor = intval($parts[1]) + 1;
+            }
+        } else {
+            // Jika tidak ada di bulan ini, coba ambil yang terakhir secara keseluruhan untuk melanjutkan sequence jika diinginkan, 
+            // tapi biasanya reset per bulan. Namun user memberi contoh 1624, mungkin sequence global.
+            // Biar aman kita ambil sequence global saja jika bulan berbeda.
+            $lastAny = Produk::orderBy('id', 'desc')->first();
+            if ($lastAny) {
+                $parts = explode('/', $lastAny->kode_produk);
+                if (isset($parts[1]) && is_numeric($parts[1])) {
+                    $nomor = intval($parts[1]) + 1;
+                }
+            }
+        }
+
+        return "PRD-$bulanTahun/" . str_pad($nomor, 4, '0', STR_PAD_LEFT);
+    }
+
     public function index()
     {
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
@@ -85,10 +115,12 @@ class ProdukController extends Controller
         $category = CategoryProduct::all();
         $akun = Akun::with('kategori')->get();
         $satuans = Satuan::all();
+        $generatedCode = $this->generateProductCode();
+        
         return view('produk.action.add_produk', [
             'activeMenu' => 'produk',
             'active' => 'add_produk',
-        ],compact('category','logs','akun','satuans'));
+        ],compact('category','logs','akun','satuans','generatedCode'));
     }
 
     public function store(Request $request)
@@ -106,13 +138,36 @@ class ProdukController extends Controller
         ]);
 
 
-        $gambarPath = null;
-        if ($request->hasFile('gambar')) {
-            $gambarPath = $request->file('gambar')->store('produk', 'public');
+        $gambarPaths = [];
+        if ($request->filled('cropped_gambar')) {
+            $images = $request->input('cropped_gambar');
+            // If it's a string (old single crop), wrap in array
+            if (!is_array($images)) {
+                $images = [$images];
+            }
+
+            foreach ($images as $imageData) {
+                if (strpos($imageData, 'data:image') === 0) {
+                    $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+                    $imageData = str_replace(' ', '+', $imageData);
+                    $imageName = 'produk/' . Str::random(40) . '.png';
+                    Storage::disk('public')->put($imageName, base64_decode($imageData));
+                    $gambarPaths[] = $imageName;
+                }
+            }
+        } elseif ($request->hasFile('gambar')) {
+            // Fallback for regular multiple file upload if ever used
+            if (is_array($request->file('gambar'))) {
+                foreach ($request->file('gambar') as $file) {
+                    $gambarPaths[] = $file->store('produk', 'public');
+                }
+            } else {
+                $gambarPaths[] = $request->file('gambar')->store('produk', 'public');
+            }
         }
 
         $produk = Produk::create([
-            'kode_produk' => $request->kode_produk ?? 'PRD-' . uniqid(),
+            'kode_produk' => $request->kode_produk ?? $this->generateProductCode(),
             'nama_produk' => $request->nama_produk,
             'harga' => $request->harga,
             'harga_jual' => $request->harga_jual,
@@ -124,7 +179,7 @@ class ProdukController extends Controller
             'kategori' => $request->kategori,
             'satuan' => $request->satuan,
             'satuan_id' => $request->satuan_id,
-            'gambar' => $gambarPath,
+            'gambar' => json_encode($gambarPaths),
             'hpp_id' => $request->hpp_id,
             'pendapatan_id' => $request->pendapatan_id,
             'pendapatan_lainnya_id' => $request->pendapatan_lainnya_id,
@@ -180,15 +235,44 @@ class ProdukController extends Controller
         // Cari data produk yang akan diupdate
         $produk = Produk::findOrFail($request->id);
         activity('ikm')->performedOn($produk)->causedBy(auth()->user())->log('Mengubah Produk '.$request->nama_produk);
-        // Jika ada gambar baru diupload
-        if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada
-            if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
-                Storage::disk('public')->delete($produk->gambar);
+        
+        // Handle Images
+        $currentImages = [];
+        if ($produk->gambar) {
+            $decoded = json_decode($produk->gambar, true);
+            $currentImages = is_array($decoded) ? $decoded : [$produk->gambar];
+        }
+
+        // Images to keep (from the form, to handle removals)
+        $keepImages = $request->input('existing_gambar', []);
+        
+        // Delete images that are no longer in the list
+        foreach ($currentImages as $oldImage) {
+            if (!in_array($oldImage, $keepImages)) {
+                if (Storage::disk('public')->exists($oldImage)) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            }
+        }
+
+        $gambarPaths = $keepImages;
+
+        // Process new cropped images
+        if ($request->filled('cropped_gambar')) {
+            $newImages = $request->input('cropped_gambar');
+            if (!is_array($newImages)) {
+                $newImages = [$newImages];
             }
 
-            // Simpan gambar baru
-            $produk->gambar = $request->file('gambar')->store('produk', 'public');
+            foreach ($newImages as $imageData) {
+                if (strpos($imageData, 'data:image') === 0) {
+                    $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+                    $imageData = str_replace(' ', '+', $imageData);
+                    $imageName = 'produk/' . Str::random(40) . '.png';
+                    Storage::disk('public')->put($imageName, base64_decode($imageData));
+                    $gambarPaths[] = $imageName;
+                }
+            }
         }
 
         // Update data produk
@@ -200,21 +284,55 @@ class ProdukController extends Controller
             'stok' => $request->stok,
             'deskripsi' => $request->deskripsi,
             'berat' => $request->berat ?? 0,
-            'auth' => auth()->user()->id,
             'status' => $request->status,
             'kategori' => $request->kategori,
             'satuan' => $request->satuan,
             'satuan_id' => $request->satuan_id,
-            'gambar' => $produk->gambar,
+            'gambar' => json_encode($gambarPaths),
+            'auth' => auth()->user()->id,
             'hpp_id' => $request->hpp_id,
             'pendapatan_id' => $request->pendapatan_id,
             'pendapatan_lainnya_id' => $request->pendapatan_lainnya_id,
             'persediaan_id'=> $request->persediaan_id,
             'beban_non_inventory_id'=> $request->beban_non_inventory_id,
-
         ]);
 
         return back()->with("success", "Data has been updated successfully!");
+    }
+
+    public function deleteImage(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:produks,id',
+            'image_path' => 'required|string',
+        ]);
+
+        $produk = Produk::findOrFail($request->id);
+        $gambar = json_decode($produk->gambar, true) ?: [];
+
+        // Find and remove the image from the array
+        if (($key = array_search($request->image_path, $gambar)) !== false) {
+            unset($gambar[$key]);
+            
+            // Delete file from storage
+            if (Storage::disk('public')->exists($request->image_path)) {
+                Storage::disk('public')->delete($request->image_path);
+            }
+
+            // Update database
+            $produk->update([
+                'gambar' => json_encode(array_values($gambar))
+            ]);
+
+            activity('ikm')
+                ->performedOn($produk)
+                ->causedBy(auth()->user())
+                ->log('Menghapus satu gambar produk');
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Image not found'], 404);
     }
 
     public function deleteaction($id)
@@ -487,7 +605,7 @@ class ProdukController extends Controller
         }
 
     public function manajemenStokIndex(){
-        $stok = StokTransaksi::where('auth',auth()->id())->get();
+        $stok = StokTransaksi::where('auth',auth()->id())->orderBy('created_at', 'desc')->get();
         $logs = Activity::where(['causer_id'=>auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
 
         return view('persediaan.index',[

@@ -1,262 +1,294 @@
 @extends('layout.main')
-@section('title', 'Data Akun')
+@section('title', 'Riwayat Rekening')
 @section('container')
-<style>
-     @media (max-width: 768px){
-           .p-7{
-            padding: 9px;
-        }
-    }
-    @media (max-width: 768px) {
-  .table-wrapper {
-    transform: scale(0.85);   /* Zoom out */
-    transform-origin: top left;
-    width: 117%;             /* Supaya tetap full */
-  }
-}
-</style>
-<div class="px-2 py-1 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-    <!-- Kiri: Judul -->
-    <h2 class="text-lg font-semibold">History Rekening</h2>
 
-    <!-- Kanan: Tombol -->
-    <div class="flex flex-row items-center gap-2 ml-auto">
-        <button type="button" style="width: 30%;" 
-            @click="window.dispatchEvent(new CustomEvent('filter'))"
-            class="px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2">
-            <span>Filter</span>
-        </button>
-
-        <a href="{{ route('history.cetak-pdf', $id_rekening) . '?' . http_build_query(request()->query()) }}" target="_blank"
-            class="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.828a2 2 0 0 0-.586-1.414l-4.828-4.828A2 2 0 0 0 13.172 2H6zm7 1.414L19.586 10H15a2 2 0 0 1-2-2V3.414zM8 15h8v2H8v-2zm0-4h8v2H8v-2z"/>
-            </svg>
-            Cetak PDF
-        </a>
-    </div>
-</div>
-
- <div x-data="{ open: false }" @filter.window="open = true" @close-modal.window="open = false">
-            <!-- Overlay -->
-            <div
-                class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto"
-                :class="{ 'block': open, 'hidden': !open }"
-            >
-                <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
-                    <!-- Modal Box -->
-                    <div
-                        x-show="open"
-                        x-transition
-                        x-transition.duration.300
-                        class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8"
-                        style="display: none;"
-                    >
-                        <!-- Header -->
-                        <div class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
-                            <h5 class="font-semibold text-lg">Filter</h5>
-                            <button
-                                type="button"
-                                class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
-                                @click="open = false"
-                            >
-                                <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z" fill="currentcolor" />
-                                    <path d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z" fill="currentcolor" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="p-5">
-                              <form method="GET"  class="flex flex-col gap-5">
-
-
-                                        <!-- Filter Waktu -->
-                                        <div>
-                                            <label class="block text-xs font-semibold text-black/60 dark:text-white/60 mb-1">Periode Waktu</label>
-                                            <div class="flex flex-col gap-2">
-                                                <select name="periode" id="periodeFilter"
-                                                    class="form-select py-2 px-4 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full bg-transparent dark:bg-transparent text-black dark:text-white">
-                                                    <option value="">Semua Waktu</option>
-                                                    <option value="bulanan" {{ request('periode') == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
-                                                    <option value="tahunan" {{ request('periode') == 'tahunan' ? 'selected' : '' }}>Tahunan</option>
-                                                    <option value="rentang" {{ request('periode') == 'rentang' ? 'selected' : '' }}>Rentang Tanggal</option>
-                                                </select>
-                                                <div id="filterBulanan" class="{{ request('periode') == 'bulanan' ? '' : 'hidden' }}">
-                                                    <div class="flex gap-2">
-                                                        <select name="bulan" class="form-select py-2 px-3 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full bg-transparent dark:bg-transparent text-black dark:text-white">
-                                                            <option value="">Pilih Bulan</option>
-                                                            @for($m=1;$m<=12;$m++)
-                                                                <option value="{{ $m }}" {{ request('bulan') == $m ? 'selected' : '' }}>
-                                                                    {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
-                                                                </option>
-                                                            @endfor
-                                                        </select>
-                                                        <select name="tahun_bulan" class="form-select py-2 px-3 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full bg-transparent dark:bg-transparent text-black dark:text-white">
-                                                            <option value="">Pilih Tahun</option>
-                                                            @for($y = date('Y')-5; $y <= date('Y'); $y++)
-                                                                <option value="{{ $y }}" {{ request('tahun_bulan') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                                            @endfor
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div id="filterTahunan" class="{{ request('periode') == 'tahunan' ? '' : 'hidden' }}">
-                                                    <select name="tahun_tahun" class="form-select py-2 px-3 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full bg-transparent dark:bg-transparent text-black dark:text-white">
-                                                        <option value="">Pilih Tahun</option>
-                                                        @for($y = date('Y')-5; $y <= date('Y'); $y++)
-                                                            <option value="{{ $y }}" {{ request('tahun_tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                                        @endfor
-                                                    </select>
-                                                </div>
-                                                <div id="filterRentang" class="{{ request('periode') == 'rentang' ? '' : 'hidden' }}">
-                                                    <div class="flex gap-2">
-                                                        <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}"
-                                                            class="form-input py-2 px-3 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full bg-transparent dark:bg-transparent text-black dark:text-white"
-                                                            placeholder="Tanggal Awal">
-                                                        <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}"
-                                                            class="form-input py-2 px-3 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full bg-transparent dark:bg-transparent text-black dark:text-white"
-                                                            placeholder="Tanggal Akhir">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex justify-end mt-4">
-                                            <button type="submit"
-                                                class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300">
-                                                Terapkan Filter
-                                            </button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function() {
-                                            function showFilterFields() {
-                                                var periode = document.getElementById('periodeFilter').value;
-                                                document.getElementById('filterBulanan').classList.toggle('hidden', periode !== 'bulanan');
-                                                document.getElementById('filterTahunan').classList.toggle('hidden', periode !== 'tahunan');
-                                                document.getElementById('filterRentang').classList.toggle('hidden', periode !== 'rentang');
-                                            }
-                                            document.getElementById('periodeFilter').addEventListener('change', showFilterFields);
-                                            showFilterFields();
-                                            $('#mitraFilter').select2({
-                                                width: '100%',
-                                                placeholder: "Cari Mitra...",
-                                                allowClear: true
-                                            });
-                                        });
-                                    </script>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div x-data="historyManager()" class="pb-10">
+    <!-- Header Section -->
+    <div class="px-2 py-1 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <a href="{{ route('akun.rekening') }}"
+            class="w-8 h-8 rounded-lg border border-black/10 dark:border-white/10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+            <i class="fas fa-arrow-left text-xs text-gray-400"></i>
+          </a>
+          <h2 class="text-2xl font-black text-black dark:text-white tracking-tight">Riwayat Rekening</h2>
         </div>
-<div class="border bg-white dark:bg-white/5 dark:border-white/10 border-black/10 p-4 rounded-md">
-    <p class="text-sm font-semibold text-gray-500 mb-3">Riwayat Transaksi</p>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1 ml-10">
+          Data Mutasi: <span class="text-blue-600 dark:text-blue-400">{{ $id_rekening }}</span>
+        </p>
+      </div>
 
-    <div id="saldo-akhir" class="mt-3 flex justify-between items-center font-bold mb-5">
-        <span>Saldo Akhir:</span>
-        <span id="saldo-value"></span>
+      <div class="flex items-center gap-3">
+        <button @click="showFilter = true"
+          class="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 transition flex items-center gap-2">
+          <i class="fas fa-filter"></i>
+          <span>Filter Data</span>
+        </button>
+        <a href="{{ route('history.cetak-pdf', $id_rekening) . '?' . http_build_query(request()->query()) }}"
+          target="_blank"
+          class="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-lg shadow-red-500/20 transition duration-150 border-b-4 border-red-800 active:border-b-0 active:translate-y-1 flex items-center gap-2">
+          <i class="fas fa-file-pdf"></i>
+          <span>Cetak laporan</span>
+        </a>
+      </div>
     </div>
 
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+        <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Saldo Akhir</p>
+        <h3 class="text-xl font-black text-black dark:text-white tracking-tight">
+          Rp{{ number_format($histories->last()->saldo ?? 0, 0, ',', '.') }}
+        </h3>
+      </div>
+      <div class="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+        <p class="text-[10px] font-black uppercase text-green-500 tracking-widest mb-1">Total Debit (+)</p>
+        <h3 class="text-xl font-black text-green-600 dark:text-green-400 tracking-tight">
+          Rp{{ number_format($histories->sum('debit'), 0, ',', '.') }}
+        </h3>
+      </div>
+      <div class="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+        <p class="text-[10px] font-black uppercase text-red-500 tracking-widest mb-1">Total Kredit (-)</p>
+        <h3 class="text-xl font-black text-red-600 dark:text-red-400 tracking-tight">
+          Rp{{ number_format($histories->sum('kredit'), 0, ',', '.') }}
+        </h3>
+      </div>
+      <div class="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+        <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Total Mutasi</p>
+        <h3 class="text-xl font-black text-black dark:text-white tracking-tight">
+          {{ $histories->count() }} <span class="text-[10px] text-gray-400 uppercase ml-1">Baris</span>
+        </h3>
+      </div>
+    </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const rows = document.querySelectorAll("table tbody tr");
-    if (rows.length > 0) {
-      const lastRow = rows[rows.length - 1];
-      const saldoCell = lastRow.cells[5]; // kolom ke-6 = saldo
-      document.getElementById("saldo-value").innerText = 'Rp.' + saldoCell.innerText;
-    }
-  });
-</script>
+    <!-- Multi-Column List View -->
+    <div
+      class="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-gray-50/50 dark:bg-white/5 border-b border-black/5 dark:border-white/5 text-gray-400 uppercase">
+              <th class="px-6 py-4 text-[10px] font-black tracking-widest w-16">No</th>
+              <th class="px-6 py-4 text-[10px] font-black tracking-widest">Waktu & Transaksi</th>
+              <th class="px-6 py-4 text-[10px] font-black tracking-widest text-right">Debit (+)</th>
+              <th class="px-6 py-4 text-[10px] font-black tracking-widest text-right">Kredit (-)</th>
+              <th class="px-6 py-4 text-[10px] font-black tracking-widest text-right">Saldo</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-black/5 dark:divide-white/5">
+            @forelse($histories as $index => $history)
+              <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                @click="showDetail('{{ $history->keterangan }}', '{{ $history->tanggal }}', 'Rp{{ number_format($history->debit, 0, ',', '.') }}', 'Rp{{ number_format($history->kredit, 0, ',', '.') }}', 'Rp{{ number_format($history->saldo, 0, ',', '.') }}')">
+                <td class="px-6 py-4 text-xs font-bold text-gray-400">{{ $index + 1 }}</td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-col">
+                    <span
+                      class="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase">{{ $history->tanggal }}</span>
+                    <span
+                      class="font-bold text-black dark:text-white text-sm leading-tight mt-0.5 line-clamp-1">{{ $history->keterangan }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <span
+                    class="text-sm font-bold {{ $history->debit > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-300 dark:text-gray-700' }}">
+                    {{ $history->debit > 0 ? '+Rp' . number_format($history->debit, 0, ',', '.') : '-' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <span
+                    class="text-sm font-bold {{ $history->kredit > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-300 dark:text-gray-700' }}">
+                    {{ $history->kredit > 0 ? '-Rp' . number_format($history->kredit, 0, ',', '.') : '-' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-black text-black dark:text-white tracking-tight">
+                      Rp{{ number_format($history->saldo, 0, ',', '.') }}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="5" class="py-20 text-center">
+                  <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
+                      <i class="fas fa-history fa-2x text-gray-200"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-black dark:text-white tracking-tight uppercase">Belum Ada Mutasi</h4>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-widest">Rekening ini belum
+                      memiliki catatan transaksi.</p>
+                  </div>
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <!-- Filter Modal -->
+    <div x-show="showFilter" x-cloak
+      class="fixed inset-0 bg-black/60 dark:bg-black/80 z-[1000] flex items-center justify-center p-4">
+      <div
+        class="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all"
+        @click.away="showFilter = false">
+        <div
+          class="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
+          <div>
+            <h3 class="text-lg font-black text-black dark:text-white tracking-tight italic">Saring Data Riwayat</h3>
+            <p class="text-[9px] text-gray-400 uppercase tracking-widest font-black mt-0.5">Filter berdasarkan periode
+              waktu</p>
+          </div>
+          <button type="button" @click="showFilter = false"
+            class="text-gray-400 hover:text-red-600 transition-colors p-2">
+            <i class="fas fa-times fa-lg"></i>
+          </button>
+        </div>
 
-  <div class="w-full overflow-x-auto">
-  <div class="table-wrapper">
-    <table class="border text-sm md:text-base w-full">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="px-2 py-1 border">No</th>
-          <th class="px-2 py-1 border">Tanggal</th>
-          <th class="px-2 py-1 border">Keterangan</th>
-          <th class="px-2 py-1 border">Debit</th>
-          <th class="px-2 py-1 border">Kredit</th>
-          <th class="px-2 py-1 border">Saldo</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach($histories as $index => $history)
-        <tr>
-          <td class="px-2 py-1 border text-center">{{ $index+1 }}</td>
-          <td class="px-2 py-1 border whitespace-nowrap">{{ $history->tanggal }}</td>
-          <td class="px-2 py-1 border">{{ $history->keterangan }}</td>
-          <td class="px-2 py-1 border text-right">{{ number_format($history->debit,0,',','.') }}</td>
-          <td class="px-2 py-1 border text-right">{{ number_format($history->kredit,0,',','.') }}</td>
-          <td class="px-2 py-1 border text-right font-semibold">{{ number_format($history->saldo,0,',','.') }}</td>
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
+        <form method="GET" class="p-6 space-y-5">
+          <div class="py-4 px-5 bg-white dark:bg-white/5 rounded-2xl border border-black/10 relative">
+            <label
+              class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black italic">Mode
+              Periode</label>
+            <select name="periode" x-model="filterMode"
+              class="w-full bg-transparent font-bold text-sm focus:outline-none dark:text-white">
+              <option value="">Semua Waktu</option>
+              <option value="bulanan">📅 Per Bulan</option>
+              <option value="tahunan">🗓️ Per Tahun</option>
+              <option value="rentang">📏 Rentang Khusus</option>
+            </select>
+          </div>
+
+          <div x-show="filterMode == 'bulanan'" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="py-4 px-5 bg-white dark:bg-white/5 rounded-2xl border border-black/10">
+                <label
+                  class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Bulan</label>
+                <select name="bulan" class="w-full bg-transparent font-bold text-sm focus:outline-none dark:text-white">
+                  @for($m = 1; $m <= 12; $m++)
+                    <option value="{{ $m }}" {{ request('bulan') == $m ? 'selected' : '' }}>
+                      {{ \Carbon\Carbon::create()->month($m)->locale('id')->monthName }}
+                    </option>
+                  @endfor
+                </select>
+              </div>
+              <div class="py-4 px-5 bg-white dark:bg-white/5 rounded-2xl border border-black/10">
+                <label
+                  class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Tahun</label>
+                <select name="tahun_bulan"
+                  class="w-full bg-transparent font-bold text-sm focus:outline-none dark:text-white">
+                  @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                    <option value="{{ $y }}" {{ request('tahun_bulan') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                  @endfor
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div x-show="filterMode == 'tahunan'"
+            class="py-4 px-5 bg-white dark:bg-white/5 rounded-2xl border border-black/10">
+            <label
+              class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Pilih
+              Tahun</label>
+            <select name="tahun_tahun" class="w-full bg-transparent font-bold text-sm focus:outline-none dark:text-white">
+              @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                <option value="{{ $y }}" {{ request('tahun_tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
+              @endfor
+            </select>
+          </div>
+
+          <div x-show="filterMode == 'rentang'" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="py-4 px-5 bg-white dark:bg-white/5 rounded-2xl border border-black/10">
+                <label
+                  class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Tgl
+                  Mulai</label>
+                <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}"
+                  class="w-full bg-transparent font-bold text-sm focus:outline-none dark:text-white" />
+              </div>
+              <div class="py-4 px-5 bg-white dark:bg-white/5 rounded-2xl border border-black/10">
+                <label
+                  class="block mb-1 text-[10px] text-black/40 dark:text-white/40 uppercase tracking-widest font-black">Tgl
+                  Akhir</label>
+                <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}"
+                  class="w-full bg-transparent font-bold text-sm focus:outline-none dark:text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-4 pt-2">
+            <button type="button" @click="showFilter = false"
+              class="flex-1 px-6 py-3 text-[10px] font-black text-gray-500 uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors">Tutup</button>
+            <button type="submit"
+              class="flex-[2] px-8 py-3 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 transition duration-150 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 uppercase tracking-widest">Terapkan
+              Filter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Detail Row Modal -->
+    <div x-show="showRowDetail" x-cloak
+      class="fixed inset-0 bg-black/60 dark:bg-black/80 z-[1001] flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden p-6"
+        @click.away="showRowDetail = false">
+        <h4
+          class="text-sm font-black text-black dark:text-white uppercase tracking-widest border-b border-black/5 dark:border-white/5 pb-3 mb-4">
+          Rincian Mutasi</h4>
+        <div class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-[10px] text-gray-400 font-bold uppercase">Tanggal</span>
+            <span class="text-xs font-black text-black dark:text-white" x-text="detailData.date"></span>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[10px] text-gray-400 font-bold uppercase">Keterangan</span>
+            <span class="text-xs font-medium text-black dark:text-white leading-relaxed" x-text="detailData.desc"></span>
+          </div>
+          <div class="grid grid-cols-2 gap-4 pt-2">
+            <div class="bg-green-50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100 dark:border-green-800/20">
+              <span class="block text-[8px] font-black text-green-500 uppercase tracking-widest mb-1">Debit (+)</span>
+              <span class="text-xs font-black text-green-600 dark:text-green-400" x-text="detailData.debit"></span>
+            </div>
+            <div class="bg-red-50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100 dark:border-red-800/20">
+              <span class="block text-[8px] font-black text-red-500 uppercase tracking-widest mb-1">Kredit (-)</span>
+              <span class="text-xs font-black text-red-600 dark:text-red-400" x-text="detailData.kredit"></span>
+            </div>
+          </div>
+          <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-black/5 dark:border-white/10 mt-2">
+            <span class="block text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Saldo Setelah
+              Transaksi</span>
+            <span class="text-lg font-black text-black dark:text-white italic tracking-tighter"
+              x-text="detailData.balance"></span>
+          </div>
+        </div>
+        <button @click="showRowDetail = false"
+          class="w-full mt-6 py-3 bg-black dark:bg-white dark:text-black text-white text-[10px] font-black uppercase tracking-[2px] rounded-xl hover:opacity-90 transition-opacity">Tutup
+          Panel</button>
+      </div>
+    </div>
   </div>
-</div>
-<style>
-  /* Sembunyikan kolom lain di layar kecil */
-  @media (max-width: 768px) {
-    table thead th:nth-child(1),
-    table thead th:nth-child(4),
-    table thead th:nth-child(5),
-    table thead th:nth-child(6),
-    table tbody td:nth-child(1),
-    table tbody td:nth-child(4),
-    table tbody td:nth-child(5),
-    table tbody td:nth-child(6) {
-      display: none;
-    }
 
-    /* Biar keterangan panjang jadi ... */
-    table tbody td:nth-child(3) {
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-  }
-</style>
+  <script>
+    function historyManager() {
+      return {
+        showFilter: false,
+        filterMode: "{{ request('periode') }}",
+        showRowDetail: false,
+        detailData: {
+          desc: '',
+          date: '',
+          debit: '',
+          kredit: '',
+          balance: ''
+        },
 
-<!-- Modal -->
-<div id="detail-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg shadow-lg p-5 w-80">
-    <h3 class="text-lg font-semibold mb-3">Detail Transaksi</h3>
-    <div id="modal-content"></div>
-    <button class="mt-4 bg-red-600 text-white px-4 py-2 rounded w-full"
-            onclick="closeModal()">Tutup</button>
-  </div>
-</div>
-
-<script>
-  document.querySelectorAll("table tbody tr").forEach(row => {
-    const keteranganCell = row.cells[2]; // kolom ke-3 = keterangan
-    keteranganCell?.addEventListener("click", () => {
-      if (window.innerWidth <= 768) { // hanya aktif di mobile
-        const cells = row.cells;
-        document.getElementById("modal-content").innerHTML = `
-          <p><strong>No:</strong> ${cells[0].innerText}</p>
-          <p><strong>Tanggal:</strong> ${cells[1].innerText}</p>
-          <p><strong>Keterangan:</strong> ${cells[2].innerText}</p>
-          <p><strong>Debit:</strong> ${cells[3].innerText}</p>
-          <p><strong>Kredit:</strong> ${cells[4].innerText}</p>
-          <p><strong>Saldo:</strong> ${cells[5].innerText}</p>
-        `;
-        document.getElementById("detail-modal").classList.remove("hidden");
+        showDetail(desc, date, debit, kredit, balance) {
+          this.detailData = { desc, date, debit, kredit, balance };
+          this.showRowDetail = true;
+        }
       }
-    });
-  });
-
-  function closeModal() {
-    document.getElementById("detail-modal").classList.add("hidden");
-  }
-</script>
-
-</div>
+    }
+  </script>
 
 @endsection

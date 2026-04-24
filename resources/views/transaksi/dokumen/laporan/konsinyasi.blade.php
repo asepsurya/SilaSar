@@ -158,7 +158,7 @@
                 @endphp
                 @foreach ($transaksi->ProdukTransaksi as $index => $item)
                     @php
-                        $total = $item->barang_keluar * $item->penawaran->harga;
+                        $total = $item->barang_keluar * $item->harga;
                         $grandTotal += $total;
                     @endphp
                     <tr class="group text-xs border-b border-black">
@@ -167,7 +167,7 @@
                         <td class="border-collapse border-black px-1 text-center font-normal">{{ $item->barang_keluar }}</td>
                         <td class="border-collapse border-black px-1 text-center font-normal">Pcs</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">Rp.</td>
-                        <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($item->penawaran->harga, 2, ',', '.') }}</td>
+                        <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($item->harga, 2, ',', '.') }}</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">Rp.</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($total, 2, ',', '.') }}</td>
                     </tr>

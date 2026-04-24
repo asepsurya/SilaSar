@@ -9,185 +9,28 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="{{ asset('assets/fav.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('assets/app_logo_new.png') }}" />
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
 
-        /* Default sembunyikan mobile login */
-        .mobile-login {
-            display: none;
+        body {
+            font-family: 'Inter', sans-serif;
         }
 
-        /* Mobile rules */
-        @media (max-width: 768px) {
-            .dekstop {
-                display: none !important;
-            }
-
-            .mobile-login {
-                display: block;
-            }
-        }
-
-        /* Mobile login styling */
-        .header {
-            background: #1e319d;
-            text-align: center;
-            padding: 50px 20px 80px;
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 36px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        .header p {
-            margin: 5px 0 0;
-            font-size: 18px;
-            color: #ffffff;
-        }
-
-        .login-container {
-            max-width: 400px;
-            background: #fff;
-            margin: -60px auto 0;
-            padding: 30px 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-container h2 {
-            text-align: center;
-            font-size: 22px;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .login-container p {
-            text-align: center;
-            font-size: 12px;
-            color: #777;
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 40px 12px 15px;
-            border-radius: 30px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .input-group i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: #555;
-        }
-
-        .options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            margin-bottom: 20px;
-        }
-
-        .options label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: #333;
-        }
-
-        .options a {
-            color: #555;
-            text-decoration: none;
-        }
-
-        .options a:hover {
-            text-decoration: underline;
-        }
-
-        .btn-login {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: #1e319d;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #ffffff;
-        }
-
-        .btn-login:hover {
-            background: #e1a417;
-        }
-
-        .create-account {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .create-account a {
-            color: #000;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .create-account a:hover {
-            text-decoration: underline;
-        }
-
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        /* Spinner */
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #000;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
          .toggle-container {
             border-radius: 9999px; /* capsule */
             background-color: #f3f4f6; /* bg-gray-100 */
             position: relative;
             display: flex;
             width: 100%; /* full width */
-            max-width: 400px; /* optional max-width agar tidak terlalu lebar di layar besar */
+            max-width: 100%; 
             padding: 8px; /* padding lebih besar */
             cursor: pointer;
             box-sizing: border-box; /* agar padding tidak menambah lebar */
+            margin-top: 1rem;
         }
         .toggle-indicator {
             position: absolute;
@@ -237,7 +80,7 @@
                     
                 <!-- Logo -->
                 <div class="mb-10">
-                    <img src="{{ asset('assets/app_logo.png') }}" alt="App Logo" class="rounded" width="150">
+                    <img src="{{ asset('assets/app_logo_new.png') }}" alt="App Logo" class="rounded" width="200">
                 </div>
 
                 <!-- Heading -->
