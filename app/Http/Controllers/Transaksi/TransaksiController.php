@@ -98,7 +98,7 @@ class TransaksiController extends Controller
             ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('tanggal_transaksi', $tahunTahun);
             })
-            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
             })
             ->get()
@@ -115,7 +115,7 @@ class TransaksiController extends Controller
             ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('tanggal_transaksi', $tahunTahun);
             })
-            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
             })
             ->sum('total');
@@ -131,17 +131,19 @@ class TransaksiController extends Controller
             ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('tanggal_transaksi', $tahunTahun);
             })
-            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(tanggal_transaksi)'), [$awal, $akhir]);
             })
             ->sum('total');
 
         $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
 
+        $kota = Regency::orderBy('name')->get();
+
         return view('transaksi.index', [
             'activeMenu' => 'transaksi',
             'active' => 'transaksi',
-        ], compact('mitra', 'logs', 'transaksi', 'totalTransaksi', 'totalTransaksiluar', 'transaksimobile', 'awal', 'akhir', 'periode', 'bulan', 'tahunBulan', 'tahunTahun'));
+        ], compact('mitra', 'logs', 'transaksi', 'totalTransaksi', 'totalTransaksiluar', 'transaksimobile', 'awal', 'akhir', 'periode', 'bulan', 'tahunBulan', 'tahunTahun', 'kota'));
     }
 
     public function returIndex(Request $request)
@@ -217,7 +219,7 @@ class TransaksiController extends Controller
             ->whereHas('transaksi', function ($query) {
                 $query->where('auth', auth()->id());
             })->sum('barang_retur');
-            
+
         $totalBaris = $returs->total();
         $totalDikembalikan = $alurRetur->sum('jumlah');
 
@@ -277,6 +279,41 @@ class TransaksiController extends Controller
             ->log('Mengembalikan retur ke stok');
 
         return back()->with('success', 'Retur berhasil dikembalikan ke stok.');
+    }
+
+    public function batalKembalikanRetur($id)
+    {
+        $log = StokLog::findOrFail($id);
+
+        if ($log->sumber !== 'retur' || $log->tipe !== 'masuk') {
+            return back()->with('error', 'Log ini tidak dapat dibatalkan.');
+        }
+
+        $produk = Produk::where('kode_produk', $log->kode_produk)->firstOrFail();
+
+        if ($produk->stok < $log->jumlah) {
+            return back()->with('error', 'Stok produk saat ini (' . $produk->stok . ') tidak mencukupi untuk membatalkan pengembalian retur (' . $log->jumlah . ').');
+        }
+
+        DB::transaction(function () use ($log, $produk) {
+            $produk->decrement('stok', $log->jumlah);
+
+            $tp = TransaksiProduct::where('kode_transaksi', $log->referensi)
+                ->where('kode_produk', $log->kode_produk)
+                ->first();
+            if ($tp) {
+                $tp->increment('barang_retur', $log->jumlah);
+
+                activity('ikm')
+                    ->causedBy(auth()->user())
+                    ->performedOn($tp)
+                    ->log('Membatalkan pengembalian retur ke stok');
+            }
+
+            $log->delete();
+        });
+
+        return back()->with('success', 'Berhasil membatalkan pengembalian retur ke stok. Stok telah dikurangi dan retur ditambahkan kembali.');
     }
 
     public function DetailTransaki($id)
@@ -680,7 +717,6 @@ class TransaksiController extends Controller
         foreach ($transaksiProducts as $tp) {
             // Ambil satu produk, bukan Collection
             $product = Produk::where('kode_produk', $tp->kode_produk)->first();
-
             if ($product) {
                 // Tambahkan kembali stok
                 $product->stok += $tp->barang_keluar; // pastikan kolom ini benar
@@ -700,14 +736,15 @@ class TransaksiController extends Controller
 
     public function laporanTransaksi()
     {
-        $awal = request('tanggal_awal');   // contoh: 2025-11-01
-        $akhir = request('tanggal_akhir'); // contoh: 2025-11-30
-
-        $periode = request('periode'); // 'bulanan' / 'tahunan' / null
-        $bulan = request('bulan');     // 1–12
-        $tahun_bulan = request('tahun_bulan'); // contoh: 2025
-        $tahun_tahun = request('tahun_tahun'); // contoh: 2025
-
+        $awal = request('tanggal_awal', now()->startOfMonth()->toDateString());
+        $akhir = request('tanggal_akhir', now()->endOfMonth()->toDateString());
+        $periode = request('periode');
+        $bulan = request('bulan');
+        $tahunBulan = request('tahun_bulan');
+        $tahunTahun = request('tahun_tahun');
+        $id_kota = request('id_kota');
+        $kode_mitra = request('kode_mitra');
+        $status_bayar = request('status_bayar');
         $user = auth()->user();
 
         $laporan = DB::table('transaksis as t')
@@ -721,6 +758,7 @@ class TransaksiController extends Controller
                 't.kode_mitra',
                 'm.nama_mitra as nama_pelanggan',
                 'm.alamat_mitra as alamat',
+                'm.id_kota as kota_mitra',
                 'tp.kode_produk',
                 'p.nama_produk',
                 'tp.barang_keluar',
@@ -728,51 +766,120 @@ class TransaksiController extends Controller
                 'tp.barang_terjual as jumlah',
                 's.nama as satuan',
                 'tp.harga',
-                DB::raw('(tp.barang_terjual * tp.harga) as total')
+                DB::raw('(tp.barang_keluar * tp.harga) as total')
             )
-
-            // 🔹 Filter berdasarkan periode bulanan
-            ->when($periode === 'bulanan' && $bulan && $tahun_bulan, function ($query) use ($bulan, $tahun_bulan) {
-                $query->whereMonth('t.tanggal_transaksi', $bulan)
-                    ->whereYear('t.tanggal_transaksi', $tahun_bulan);
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('t.tanggal_transaksi', $bulan)
+                    ->whereYear('t.tanggal_transaksi', $tahunBulan);
             })
-
-
-            // 🔹 Filter tahunan
-            ->when($periode === 'tahunan' && $tahun_tahun, function ($query) use ($tahun_tahun) {
-                $query->whereYear('t.tanggal_transaksi', $tahun_tahun);
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
+                $q->whereYear('t.tanggal_transaksi', $tahunTahun);
             })
-
-            // 🔹 Filter tanggal manual (prioritas)
-            ->when($awal && $akhir, function ($query) use ($awal, $akhir) {
-                $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
             })
-
-            // 🔐 FILTER AUTH
-            ->when($user->id, function ($query) use ($user) {
-                $query->where('t.auth', $user->id);
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
             })
-
+            ->when($kode_mitra, function ($q) use ($kode_mitra) {
+                $q->where('m.kode_mitra', $kode_mitra);
+            })
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
+            ->where('t.auth', $user->id)
             ->get();
 
+        $pembayaranMasuk = DB::table('transaksis as t')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.kode_transaksi',
+                't.tanggal_pembayaran',
+                't.tanggal_transaksi',
+                'm.nama_mitra as nama_pelanggan',
+                'm.alamat_mitra as alamat',
+                'm.id_kota as kota_mitra',
+                't.total as total'
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('t.tanggal_pembayaran', $bulan)
+                    ->whereYear('t.tanggal_pembayaran', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
+                $q->whereYear('t.tanggal_pembayaran', $tahunTahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(t.tanggal_pembayaran)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
+            })
+            ->when($kode_mitra, function ($q) use ($kode_mitra) {
+                $q->where('m.kode_mitra', $kode_mitra);
+            })
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
+            ->where('t.auth', $user->id)
+            ->where('t.status_bayar', 'Sudah Bayar')
+            ->whereNotNull('t.tanggal_pembayaran')
+            ->orderBy('t.tanggal_pembayaran')
+            ->get();
 
+        $customerSummaries = DB::table('mitras as m')
+            ->join('transaksis as t', 'm.kode_mitra', '=', 't.kode_mitra')
+            ->select(
+                'm.nama_mitra as nama_pelanggan',
+                'm.kode_mitra',
+                DB::raw('count(t.id) as total_transaksi'),
+                DB::raw('sum(t.total) as total_nominal')
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('t.tanggal_transaksi', $bulan)
+                    ->whereYear('t.tanggal_transaksi', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
+                $q->whereYear('t.tanggal_transaksi', $tahunTahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
+            })
+            ->when($kode_mitra, function ($q) use ($kode_mitra) {
+                $q->where('m.kode_mitra', $kode_mitra);
+            })
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
+            ->where('t.auth', $user->id)
+            ->groupBy('m.nama_mitra', 'm.kode_mitra')
+            ->get();
 
-        // 🔸 Perhitungan laba (optional)
-        $labaKotor = ($pendapatan ?? 0) - ($hpp ?? 0);
-        $labaBersih = $labaKotor - ($bebanNonInventory ?? 0);
+        $regencies = DB::table('regencies')->select('name')->orderBy('name')->get();
+        $mitras = DB::table('mitras')->where('auth', $user->id)->select('kode_mitra', 'nama_mitra')->orderBy('nama_mitra')->get();
+        $logs = Activity::where(['causer_id' => auth()->id(), 'log_name' => 'ikm'])->latest()->take(10)->get();
 
-        // 🔸 Ambil log aktivitas
-        $logs = Activity::where([
-            'causer_id' => auth()->user()->id,
-            'log_name' => 'ikm'
-        ])->latest()->take(10)->get();
-
-        // 🔸 Kirim ke view
-        return view('report.laporanTransaksi', [
+        return view('report.transaksi_unified', [
             'activeMenu' => 'laporan_penjualan',
             'active' => 'laporan_penjualan',
-        ], compact('laporan', 'logs', 'awal', 'akhir', 'periode', 'bulan', 'tahun_bulan', 'tahun_tahun'));
-
+            'laporan' => $laporan,
+            'pembayaranMasuk' => $pembayaranMasuk,
+            'customerSummaries' => $customerSummaries,
+            'regencies' => $regencies,
+            'mitras' => $mitras,
+            'logs' => $logs,
+            'awal' => $awal,
+            'akhir' => $akhir,
+            'periode' => $periode,
+            'bulan' => $bulan,
+            'tahun_bulan' => $tahunBulan,
+            'tahun_tahun' => $tahunTahun,
+            'id_kota' => $id_kota,
+            'status_bayar' => $status_bayar,
+            'tab' => request('tab', 'transaksi')
+        ]);
     }
 
     public function exportPDF()
@@ -784,11 +891,14 @@ class TransaksiController extends Controller
         $bulan = request('bulan');          // 1–12
         $tahunBulan = request('tahun_bulan');    // contoh: 2025
         $tahunTahun = request('tahun_tahun');    // contoh: 2025
-        $awal = request('tanggal_awal');           // contoh: 2025-11-01
-        $akhir = request('tanggal_akhir');          // contoh: 2025-11-30
-        $tanggalAwal = request('tanggal_awal');
-        $tanggalAkhir = request('tanggal_akhir');
+        $awal = request('tanggal_awal', now()->startOfMonth()->toDateString());           // contoh: 2025-11-01
+        $akhir = request('tanggal_akhir', now()->endOfMonth()->toDateString());          // contoh: 2025-11-30
+        $tanggalAwal = $awal;
+        $tanggalAkhir = $akhir;
 
+        $id_kota = request('id_kota');
+        $kode_mitra = request('kode_mitra');
+        $status_bayar = request('status_bayar');
         $user = auth()->user(); // user login
 
 
@@ -806,6 +916,7 @@ class TransaksiController extends Controller
                 't.kode_mitra',
                 'm.nama_mitra as nama_pelanggan',
                 'm.alamat_mitra as alamat',
+                'm.id_kota as kota_mitra',
                 'tp.kode_produk',
                 'p.nama_produk',
                 'tp.barang_keluar',
@@ -813,7 +924,7 @@ class TransaksiController extends Controller
                 'tp.barang_terjual as jumlah',
                 's.nama as satuan',
                 'tp.harga',
-                DB::raw('(tp.barang_terjual * tp.harga) as total')
+                DB::raw('(tp.barang_keluar * tp.harga) as total')
             )
 
             // 🔹 Filter bulanan
@@ -821,20 +932,59 @@ class TransaksiController extends Controller
                 $q->whereMonth('t.tanggal_transaksi', $bulan)
                     ->whereYear('t.tanggal_transaksi', $tahunBulan);
             })
-
-            // 🔹 Filter tahunan
             ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
                 $q->whereYear('t.tanggal_transaksi', $tahunTahun);
             })
-
-            // 🔹 Filter tanggal manual (prioritas)
-            ->when($awal && $akhir, function ($q) use ($awal, $akhir) {
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
                 $q->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+            })
+
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
+            })
+            ->when($kode_mitra, function ($q) use ($kode_mitra) {
+                $q->where('m.kode_mitra', $kode_mitra);
+            })
+
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
             })
 
             // 🔐 Filter Auth (selalu aktif)
             ->where('t.auth', $user->id)
 
+            ->get();
+
+        $pembayaranMasuk = DB::table('transaksis as t')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.kode_transaksi',
+                't.tanggal_pembayaran',
+                't.tanggal_transaksi',
+                'm.nama_mitra as nama_pelanggan',
+                'm.alamat_mitra as alamat',
+                't.total as total'
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('t.tanggal_pembayaran', $bulan)
+                    ->whereYear('t.tanggal_pembayaran', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
+                $q->whereYear('t.tanggal_pembayaran', $tahunTahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(t.tanggal_pembayaran)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
+            })
+            ->when($kode_mitra, function ($q) use ($kode_mitra) {
+                $q->where('m.kode_mitra', $kode_mitra);
+            })
+            ->where('t.auth', $user->id)
+            ->where('t.status_bayar', 'Sudah Bayar')
+            ->whereNotNull('t.tanggal_pembayaran')
+            ->orderBy('t.tanggal_pembayaran')
             ->get();
 
 
@@ -850,6 +1000,7 @@ class TransaksiController extends Controller
         // =========================================
         $pdf = Pdf::loadView('report.transaksi', [
             'laporan' => $laporan,
+            'pembayaranMasuk' => $pembayaranMasuk,
             'awal' => $awal,
             'akhir' => $akhir,
             'periode' => $periode,
@@ -858,6 +1009,7 @@ class TransaksiController extends Controller
             'tahunTahun' => $tahunTahun,
             'tanggalAwal' => $tanggalAwal,
             'tanggalAkhir' => $tanggalAkhir,
+            'id_kota' => $id_kota,
         ])->setPaper('a4', 'portrait');
 
 
@@ -868,6 +1020,196 @@ class TransaksiController extends Controller
 
         return $pdf->download($namaFile);
 
+    }
+
+    public function laporanTransaksiRekap()
+    {
+        $awal = request('tanggal_awal', now()->startOfMonth()->toDateString());
+        $akhir = request('tanggal_akhir', now()->endOfMonth()->toDateString());
+        $periode = request('periode');
+        $bulan = request('bulan');
+        $tahun_bulan = request('tahun_bulan');
+        $tahun_tahun = request('tahun_tahun');
+
+        $id_kota = request('id_kota');
+        $user = auth()->user();
+
+        $laporan = DB::table('transaksis as t')
+            ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+            ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+            ->leftJoin('satuans as s', 'p.satuan_id', '=', 's.id')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.id',
+                't.kode_transaksi',
+                't.tanggal_transaksi',
+                't.kode_mitra',
+                'm.nama_mitra as nama_pelanggan',
+                'm.id_kota as kota_mitra',
+                'm.alamat_mitra as alamat',
+                'tp.kode_produk',
+                'p.nama_produk',
+                'tp.barang_keluar',
+                'tp.barang_retur',
+                'tp.barang_terjual as jumlah',
+                's.nama as satuan',
+                'tp.harga',
+                DB::raw('(tp.barang_keluar * tp.harga) as total')
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahun_bulan, function ($query) use ($bulan, $tahun_bulan) {
+                $query->whereMonth('t.tanggal_transaksi', $bulan)
+                    ->whereYear('t.tanggal_transaksi', $tahun_bulan);
+            })
+            ->when($periode === 'tahunan' && $tahun_tahun, function ($query) use ($tahun_tahun) {
+                $query->whereYear('t.tanggal_transaksi', $tahun_tahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($query) use ($awal, $akhir) {
+                $query->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($query) use ($id_kota) {
+                $query->where('m.id_kota', $id_kota);
+            })
+            ->where('t.auth', $user->id)
+            ->where('t.status_bayar', 'Sudah Bayar')
+            ->get();
+
+        $pembayaranMasuk = DB::table('transaksis as t')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.id',
+                't.kode_transaksi',
+                't.tanggal_pembayaran',
+                't.tanggal_transaksi',
+                'm.nama_mitra as nama_pelanggan',
+                'm.id_kota as kota_mitra',
+                'm.alamat_mitra as alamat',
+                't.total as total'
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahun_bulan, function ($query) use ($bulan, $tahun_bulan) {
+                $query->whereMonth('t.tanggal_pembayaran', $bulan)
+                    ->whereYear('t.tanggal_pembayaran', $tahun_bulan);
+            })
+            ->when($periode === 'tahunan' && $tahun_tahun, function ($query) use ($tahun_tahun) {
+                $query->whereYear('t.tanggal_pembayaran', $tahun_tahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($query) use ($awal, $akhir) {
+                $query->whereBetween(DB::raw('DATE(t.tanggal_pembayaran)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($query) use ($id_kota) {
+                $query->where('m.id_kota', $id_kota);
+            })
+            ->where('t.auth', $user->id)
+            ->where('t.status_bayar', 'Sudah Bayar')
+            ->whereNotNull('t.tanggal_pembayaran')
+            ->orderBy('t.tanggal_pembayaran')
+            ->get();
+
+        $logs = Activity::where([
+            'causer_id' => auth()->user()->id,
+            'log_name' => 'ikm'
+        ])->latest()->take(10)->get();
+
+        return view('report.laporanTransaksiRekap', [
+            'activeMenu' => 'laporan_penjualan',
+            'active' => 'laporan_penjualan',
+        ], compact('laporan', 'pembayaranMasuk', 'logs', 'awal', 'akhir', 'periode', 'bulan', 'tahun_bulan', 'tahun_tahun', 'id_kota'));
+    }
+
+    public function exportPDFRekap()
+    {
+        $awal = request('tanggal_awal', now()->startOfMonth()->toDateString());
+        $akhir = request('tanggal_akhir', now()->endOfMonth()->toDateString());
+        $periode = request('periode');
+        $bulan = request('bulan');
+        $tahunBulan = request('tahun_bulan');
+        $tahunTahun = request('tahun_tahun');
+        $id_kota = request('id_kota');
+        $user = auth()->user();
+
+        $laporan = DB::table('transaksis as t')
+            ->leftJoin('transaksi_products as tp', 't.kode_transaksi', '=', 'tp.kode_transaksi')
+            ->leftJoin('produks as p', 'tp.kode_produk', '=', 'p.kode_produk')
+            ->leftJoin('satuans as s', 'p.satuan_id', '=', 's.id')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.id',
+                't.kode_transaksi',
+                't.tanggal_transaksi',
+                't.kode_mitra',
+                'm.nama_mitra as nama_pelanggan',
+                'm.id_kota as kota_mitra',
+                'm.alamat_mitra as alamat',
+                'tp.kode_produk',
+                'p.nama_produk',
+                'tp.barang_keluar',
+                'tp.barang_retur',
+                'tp.barang_terjual as jumlah',
+                's.nama as satuan',
+                'tp.harga',
+                DB::raw('(tp.barang_keluar * tp.harga) as total')
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('t.tanggal_transaksi', $bulan)
+                    ->whereYear('t.tanggal_transaksi', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
+                $q->whereYear('t.tanggal_transaksi', $tahunTahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(t.tanggal_transaksi)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
+            })
+            ->where('t.auth', $user->id)
+            ->where('t.status_bayar', 'Sudah Bayar')
+            ->get();
+
+        $pembayaranMasuk = DB::table('transaksis as t')
+            ->leftJoin('mitras as m', 't.kode_mitra', '=', 'm.kode_mitra')
+            ->select(
+                't.id',
+                't.kode_transaksi',
+                't.tanggal_pembayaran',
+                't.tanggal_transaksi',
+                'm.nama_mitra as nama_pelanggan',
+                'm.id_kota as kota_mitra',
+                'm.alamat_mitra as alamat',
+                't.total as total'
+            )
+            ->when($periode === 'bulanan' && $bulan && $tahunBulan, function ($q) use ($bulan, $tahunBulan) {
+                $q->whereMonth('t.tanggal_pembayaran', $bulan)
+                    ->whereYear('t.tanggal_pembayaran', $tahunBulan);
+            })
+            ->when($periode === 'tahunan' && $tahunTahun, function ($q) use ($tahunTahun) {
+                $q->whereYear('t.tanggal_pembayaran', $tahunTahun);
+            })
+            ->when((!$periode || $periode === 'rentang') && $awal && $akhir, function ($q) use ($awal, $akhir) {
+                $q->whereBetween(DB::raw('DATE(t.tanggal_pembayaran)'), [$awal, $akhir]);
+            })
+            ->when($id_kota, function ($q) use ($id_kota) {
+                $q->where('m.id_kota', $id_kota);
+            })
+            ->where('t.auth', $user->id)
+            ->where('t.status_bayar', 'Sudah Bayar')
+            ->whereNotNull('t.tanggal_pembayaran')
+            ->orderBy('t.tanggal_pembayaran')
+            ->get();
+
+        $pdf = Pdf::loadView('report.transaksi_rekap', [
+            'laporan' => $laporan,
+            'pembayaranMasuk' => $pembayaranMasuk,
+            'awal' => $awal,
+            'akhir' => $akhir,
+            'periode' => $periode,
+            'bulan' => $bulan,
+            'tahunBulan' => $tahunBulan,
+            'tahunTahun' => $tahunTahun,
+            'id_kota' => $id_kota,
+        ])->setPaper('a4', 'portrait');
+
+        $namaFile = 'laporan-penjualan-rekap-' . now()->format('Ymd_His') . '-' . rand(1000, 9999) . '.pdf';
+        return $pdf->download($namaFile);
     }
 
     public function savePdf(Request $request)
