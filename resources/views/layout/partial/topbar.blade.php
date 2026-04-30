@@ -174,14 +174,15 @@
                     </li>
 
                     <li class="h-px bg-black/5 block my-1"></li>
-                    <li class="p-3">
-                        <form method="POST" action="{{ route('logout') }}" class="flex items-center">
+                    <li >
+                        <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
                             @csrf
-                            <button type="submit" class="text-black dark:text-white flex items-center w-full text-left">
-                                <x-icon name="sign-out" class="text-gray-600 mr-2" />
-                                Sign Out
-                            </button>
                         </form>
+                        <button type="button" onclick="confirmLogout()"
+                            class="text-black dark:text-white flex items-center w-full text-left">
+                            <x-icon name="sign-out" class="mr-2" />
+                            Sign Out
+                        </button>
                     </li>
 
                 </ul>

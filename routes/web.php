@@ -39,6 +39,7 @@ Route::get('/register/success/{token}', [RegisterController::class, 'successRegi
 Route::post('/check-email', [RegisterController::class, 'checkEmail'])->name('check.email');
 Route::post('/register/auth', [RegisterController::class, 'registerAction'])->name('register.add')->middleware('guest');
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+Route::get('/logout', [LogoutController::class, 'logout']);
 
 
 // ------------------------------------------------

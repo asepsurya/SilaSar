@@ -19,34 +19,32 @@ class CheckPerusahaanAndVerified
      */
     public function handle(Request $request, Closure $next): Response
     {
-           // Kalau di halaman login, register, perusahaan.index → skip middleware
+        // Kalau di halaman login, register, perusahaan.index → skip middleware
         if ($request->is('create/perusahaan/auth') || $request->routeIs('perusahaan.create')) {
             return $next($request);
         }
 
         if (Auth::check()) {
-        $user = Auth::user();
+            $user = Auth::user();
 
-        $perusahaan = \App\Models\Perusahaan::where('auth', $user->id)->first();
-        
-        if (!$perusahaan) {
-            $token = Crypt::encryptString($user->id);
-           return redirect('/create/perusahaan/auth?token=' . $token)
-            ->with('Perhatian', 'Anda belum mendaftarkan data perusahaan.');
-        }
+            $perusahaan = \App\Models\Perusahaan::where('auth', $user->id)->first();
 
-        if (!$user->email_verified_at) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return redirect('/login')->with('status', 'Akun Anda belum terverifikasi.');
-        }
-   
-        // Share ke view
-        View::share('perusahaan_sidebar', $perusahaan);
+            if (!$perusahaan) {
+                $token = Crypt::encryptString($user->id);
+                return redirect('/create/perusahaan/auth?token=' . $token)
+                    ->with('Perhatian', 'Anda belum mendaftarkan data perusahaan.');
+            }
+
+            if (!$user->email_verified_at) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect('/login')->with('status', 'Akun Anda belum terverifikasi.');
+            }
+
+            // Share ke view
+            View::share('perusahaan_sidebar', $perusahaan);
             return $next($request);
-    }
-
-
+        }
     }
 }

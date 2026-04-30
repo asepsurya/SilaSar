@@ -661,10 +661,10 @@
 
                     if (data.length > 0) {
                         resultsEl.innerHTML = data.map(item => `
-                                                                                                                                                                                            <div class="search-item" onclick="selectSearchLocation(${item.lat}, ${item.lon}, '${item.display_name.replace(/'/g, "\\'")}')">
-                                                                                                                                                                                                ${item.display_name}
-                                                                                                                                                                                            </div>
-                                                                                                                                                                                        `).join('');
+                                                                                                                                                                                                                                                                                                <div class="search-item" onclick="selectSearchLocation(${item.lat}, ${item.lon}, '${item.display_name.replace(/'/g, "\\'")}')">
+                                                                                                                                                                                                                                                                                                    ${item.display_name}
+                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                            `).join('');
                         resultsEl.classList.remove('hidden');
                     } else {
                         resultsEl.innerHTML = '<div class="p-3 text-xs text-gray-400">Lokasi tidak ditemukan</div>';
@@ -829,13 +829,13 @@
                     icon: L.divIcon({
                         className: 'custom-marker',
                         html: `
-                                                                                                                                                                                            <div class="marker-pin-wrapper" style="position: relative; width: 32px; height: 32px;">
-                                                                                                                                                                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-                                                                                                                                                                                                    <path d="M12 21C16 17.5 19 14.4087 19 10.5C19 6.63401 15.866 3.5 12 3.5C8.13401 3.5 5 6.63401 5 10.5C5 14.4087 8 17.5 12 21Z" fill="${markerColor}" stroke="white" stroke-width="1.5"/>
-                                                                                                                                                                                                    <circle cx="12" cy="10.5" r="3" fill="white"/>
-                                                                                                                                                                                                </svg>
-                                                                                                                                                                                            </div>
-                                                                                                                                                                                        `,
+                                                                                                                                                                                                                                                                                                <div class="marker-pin-wrapper" style="position: relative; width: 32px; height: 32px;">
+                                                                                                                                                                                                                                                                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                                                                                                                                                                                                                                                                                                        <path d="M12 21C16 17.5 19 14.4087 19 10.5C19 6.63401 15.866 3.5 12 3.5C8.13401 3.5 5 6.63401 5 10.5C5 14.4087 8 17.5 12 21Z" fill="${markerColor}" stroke="white" stroke-width="1.5"/>
+                                                                                                                                                                                                                                                                                                        <circle cx="12" cy="10.5" r="3" fill="white"/>
+                                                                                                                                                                                                                                                                                                    </svg>
+                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                            `,
                         iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32]
                     })
                 }).addTo(map);
@@ -845,23 +845,23 @@
                 const btnClass = toko.is_checked ? 'bg-amber-500 hover:bg-amber-600' : 'bg-green-600 hover:bg-green-700';
 
                 const contentString = `
-                                                                                                                                                                                    <div class="p-2 font-sans max-w-[220px]">
-                                                                                                                                                                                        <div class="flex justify-between items-start mb-1 gap-2">
-                                                                                                                                                                                            <h3 class="font-bold text-sm m-0 leading-tight">${toko.nama}</h3>
-                                                                                                                                                                                            <span class="text-[9px] px-2 py-0.5 rounded-none font-bold whitespace-nowrap" style="background:${status.bg}; color:${status.color}; border:1px solid rgba(0,0,0,0.05)">${status.label}</span>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                        <p class="text-[11px] text-gray-500 mb-3 leading-relaxed">${toko.alamat}</p>
-                                                                                                                                                                                        <img src="${fotoUrl}" class="w-full h-24 object-cover rounded-none mb-3 shadow-sm border border-gray-100">
-                                                                                                                                                                                        <div class="flex flex-col gap-2">
-                                                                                                                                                                                            <button onclick="window.toggleStatus(${toko.id})" class="block w-full text-center bg-red-600 text-white text-[11px] font-bold py-2 rounded-none transition-colors shadow-md shadow-blue-100 ${toko.is_new ? 'hidden' : ''}">${btnLabel}</button>
+                                                                                                                                                                                                                                                                                        <div class="p-2 font-sans max-w-[220px]">
+                                                                                                                                                                                                                                                                                            <div class="flex justify-between items-start mb-1 gap-2">
+                                                                                                                                                                                                                                                                                                <h3 class="font-bold text-sm m-0 leading-tight">${toko.nama}</h3>
+                                                                                                                                                                                                                                                                                                <span class="text-[9px] px-2 py-0.5 rounded-none font-bold whitespace-nowrap" style="background:${status.bg}; color:${status.color}; border:1px solid rgba(0,0,0,0.05)">${status.label}</span>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <p class="text-[11px] text-gray-500 mb-3 leading-relaxed">${toko.alamat}</p>
+                                                                                                                                                                                                                                                                                            <img src="${fotoUrl}" class="w-full h-24 object-cover rounded-none mb-3 shadow-sm border border-gray-100">
+                                                                                                                                                                                                                                                                                            <div class="flex flex-col gap-2">
+                                                                                                                                                                                                                                                                                                <button onclick="window.toggleStatus(${toko.id})" class="block w-full text-center bg-red-600 text-white text-[11px] font-bold py-2 rounded-none transition-colors shadow-md shadow-blue-100 ${toko.is_new ? 'hidden' : ''}">${btnLabel}</button>
 
-                                                                                                                                                                                            <a href="${gmapsLink}" target="_blank"
-                                                                                                                                                                                               class="custom-gmaps-link block w-full text-center text-white bg-blue-600 hover:bg-blue-700 text-[11px] py-2 rounded-none shadow-md shadow-blue-100">
-                                                                                                                                                                                               Buka di Google Maps
-                                                                                                                                                                                            </a>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                `;
+                                                                                                                                                                                                                                                                                                <a href="${gmapsLink}" target="_blank"
+                                                                                                                                                                                                                                                                                                   class="custom-gmaps-link block w-full text-center text-white bg-blue-600 hover:bg-blue-700 text-[11px] py-2 rounded-none shadow-md shadow-blue-100">
+                                                                                                                                                                                                                                                                                                   Buka di Google Maps
+                                                                                                                                                                                                                                                                                                </a>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                    `;
 
                 marker.bindPopup(contentString);
                 marker.tokoId = toko.id;
@@ -919,42 +919,42 @@
                 const selectedClasses = isSelected ? 'border-blue-500 dark:border-blue-400 ring-1 ring-blue-500 dark:ring-blue-400 shadow-lg' : 'border-gray-200 dark:border-white/10 shadow-sm';
 
                 listHtml += `
-                                                                                                        <div id="card-${toko.id}" class="border ${selectedClasses} dark:bg-black rounded-none p-4 hover:shadow-md bg-white dark:bg-slate-800 flex flex-col gap-1 cursor-pointer transition-all mb-3 relative" onclick="window.handleCardClick(${toko.latitude}, ${toko.longitude}, ${toko.id})">
-                                                                                                            <div class="flex justify-between items-start w-full gap-2">
-                                                                                                                <h3 class="font-bold text-gray-900 dark:text-white text-[13px] leading-snug break-words">${toko.nama}</h3>
-                                                                                                                <span class="px-2.5 py-1 rounded-none text-[10px] font-bold ${status.bg} ${status.text} shrink-0">${status.label}</span>
-                                                                                                            </div>
+                                                                                                                                                                                                            <div id="card-${toko.id}" class="border ${selectedClasses} dark:bg-black rounded-none p-4 hover:shadow-md bg-white dark:bg-slate-800 flex flex-col gap-1 cursor-pointer transition-all mb-3 relative" onclick="window.handleCardClick(${toko.latitude}, ${toko.longitude}, ${toko.id})">
+                                                                                                                                                                                                                <div class="flex justify-between items-start w-full gap-2">
+                                                                                                                                                                                                                    <h3 class="font-bold text-gray-900 dark:text-white text-[13px] leading-snug break-words">${toko.nama}</h3>
+                                                                                                                                                                                                                    <span class="px-2.5 py-1 rounded-none text-[10px] font-bold ${status.bg} ${status.text} shrink-0">${status.label}</span>
+                                                                                                                                                                                                                </div>
 
-                                                                                                            <div class="flex items-start text-gray-500 dark:text-gray-400 text-[11px] mt-1">
-                                                                                                                <svg class="w-3.5 h-3.5 mr-1 shrink-0 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                                                                                                <span class="break-words leading-relaxed">${toko.alamat}</span>
-                                                                                                            </div>
+                                                                                                                                                                                                                <div class="flex items-start text-gray-500 dark:text-gray-400 text-[11px] mt-1">
+                                                                                                                                                                                                                    <svg class="w-3.5 h-3.5 mr-1 shrink-0 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                                                                                                                                                                                                    <span class="break-words leading-relaxed">${toko.alamat}</span>
+                                                                                                                                                                                                                </div>
 
-                                                                                                            ${imgHtml}
+                                                                                                                                                                                                                ${imgHtml}
 
-                                                                                                            <div class="flex flex-col mt-3 gap-2">
-                                                                                                                <div class="flex justify-between items-center">
-                                                                                                                    <div class="flex flex-col">
-                                                                                                                        ${phoneHtml ? phoneHtml.replace('mt-2', 'mt-0') : ''}
-                                                                                                                        ${distHtml ? `<div class="mt-1">${distHtml}</div>` : ''}
-                                                                                                                    </div>
-                                                                                                                    <button onclick="event.stopPropagation(); window.showDirectRoute(${toko.latitude}, ${toko.longitude}, '${toko.nama.replace(/'/g, "\\'")}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-none text-[10px] font-bold transition-colors flex items-center gap-1 shrink-0 shadow-md">
-                                                                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.448a2 2 0 011.106-1.79L9 2l5 2.5 5.447-2.724A2 2 0 0121 3.552v9.934a2 2 0 01-1.106 1.791L15 18l-6 2z"></path></svg>
-                                                                                                                        Rute
-                                                                                                                    </button>
-                                                                                                                </div>
-                                                                                                                <button onclick="event.stopPropagation(); window.showProposedItems(${toko.id})" class="w-full btn  hover:bg-blue-700  py-2 rounded-none text-[10px] font-bold transition-colors uppercase tracking-widest shadow-sm">
-                                                                                                                    Daftar Barang Diajukan
-                                                                                                                </button>
-                                                                                                            </div>
+                                                                                                                                                                                                                <div class="flex flex-col mt-3 gap-2">
+                                                                                                                                                                                                                    <div class="flex justify-between items-center">
+                                                                                                                                                                                                                        <div class="flex flex-col">
+                                                                                                                                                                                                                            ${phoneHtml ? phoneHtml.replace('mt-2', 'mt-0') : ''}
+                                                                                                                                                                                                                            ${distHtml ? `<div class="mt-1">${distHtml}</div>` : ''}
+                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        <button onclick="event.stopPropagation(); window.showDirectRoute(${toko.latitude}, ${toko.longitude}, '${toko.nama.replace(/'/g, "\\'")}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-none text-[10px] font-bold transition-colors flex items-center gap-1 shrink-0 shadow-md">
+                                                                                                                                                                                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.448a2 2 0 011.106-1.79L9 2l5 2.5 5.447-2.724A2 2 0 0121 3.552v9.934a2 2 0 01-1.106 1.791L15 18l-6 2z"></path></svg>
+                                                                                                                                                                                                                            Rute
+                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                    <button onclick="event.stopPropagation(); window.showProposedItems(${toko.id})" class="w-full btn  hover:bg-blue-700  py-2 rounded-none text-[10px] font-bold transition-colors uppercase tracking-widest shadow-sm">
+                                                                                                                                                                                                                        Daftar Barang Diajukan
+                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                </div>
 
-                                                                                                            <input type="checkbox" class="hidden" id="cb-${toko.id}" value="${toko.id}">
+                                                                                                                                                                                                                <input type="checkbox" class="hidden" id="cb-${toko.id}" value="${toko.id}">
 
-                                                                                                            <div id="check-icon-${toko.id}" class="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full p-1 hidden shadow border-2 border-white">
-                                                                                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    `;
+                                                                                                                                                                                                                <div id="check-icon-${toko.id}" class="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full p-1 hidden shadow border-2 border-white">
+                                                                                                                                                                                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                        `;
             });
 
             container.innerHTML = listHtml;
@@ -1061,23 +1061,23 @@
             Swal.fire({
                 title: 'Opsi & Filter',
                 html: `
-                                                                                                                                                                                    <div class="space-y-4 text-left p-2">
-                                                                                                                                                                                        <div id="user-location-info" class="text-[11px] bg-gray-50 p-3 border border-gray-100 mb-4">
-                                                                                                                                                                                            ${userPos ? '<span class="text-green-600 font-bold">✅ Lokasi GPS Aktif</span>' : '<span class="text-amber-600 font-bold">⚠️ GPS Tidak Aktif</span>'}
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Urutan List</p>
-                                                                                                                                                                                        <div class="grid grid-cols-2 gap-2">
-                                                                                                                                                                                            <button onclick="Swal.clickConfirm(); sortToko('asc')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-none text-[10px] transition shadow-md uppercase tracking-wider">Terdekat</button>
-                                                                                                                                                                                            <button onclick="Swal.clickConfirm(); sortToko('desc')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-none text-[10px] transition shadow-md uppercase tracking-wider">Terjauh</button>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                        <hr class="border-gray-100">
-                                                                                                                                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Alat Jalan</p>
-                                                                                                                                                                                        <button onclick="Swal.clickConfirm(); calculateRoute()" class="w-full btn btn-primary py-3 rounded-none font-bold text-xs transition shadow-md uppercase tracking-widest flex items-center justify-center gap-2">
-                                                                                                                                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.448a2 2 0 011.106-1.79L9 2l5 2.5 5.447-2.724A2 2 0 0121 3.552v9.934a2 2 0 01-1.106 1.791L15 18l-6 2z"></path></svg>
-                                                                                                                                                                                            Mulai Rute
-                                                                                                                                                                                        </button>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                `,
+                                                                                                                                                                                                                                                                                        <div class="space-y-4 text-left p-2">
+                                                                                                                                                                                                                                                                                            <div id="user-location-info" class="text-[11px] bg-gray-50 p-3 border border-gray-100 mb-4">
+                                                                                                                                                                                                                                                                                                ${userPos ? '<span class="text-green-600 font-bold">✅ Lokasi GPS Aktif</span>' : '<span class="text-amber-600 font-bold">⚠️ GPS Tidak Aktif</span>'}
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Urutan List</p>
+                                                                                                                                                                                                                                                                                            <div class="grid grid-cols-2 gap-2">
+                                                                                                                                                                                                                                                                                                <button onclick="Swal.clickConfirm(); sortToko('asc')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-none text-[10px] transition shadow-md uppercase tracking-wider">Terdekat</button>
+                                                                                                                                                                                                                                                                                                <button onclick="Swal.clickConfirm(); sortToko('desc')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-none text-[10px] transition shadow-md uppercase tracking-wider">Terjauh</button>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <hr class="border-gray-100">
+                                                                                                                                                                                                                                                                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Alat Jalan</p>
+                                                                                                                                                                                                                                                                                            <button onclick="Swal.clickConfirm(); calculateRoute()" class="w-full btn btn-primary py-3 rounded-none font-bold text-xs transition shadow-md uppercase tracking-widest flex items-center justify-center gap-2">
+                                                                                                                                                                                                                                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.448a2 2 0 011.106-1.79L9 2l5 2.5 5.447-2.724A2 2 0 0121 3.552v9.934a2 2 0 01-1.106 1.791L15 18l-6 2z"></path></svg>
+                                                                                                                                                                                                                                                                                                Mulai Rute
+                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                    `,
                 showConfirmButton: false,
                 showCloseButton: true,
                 customClass: { popup: 'rounded-none' }
@@ -1128,7 +1128,6 @@
                 easeLinearity: 0.25
             });
             const marker = markers.find(m => m.tokoId === id);
-            if (marker) marker.openPopup();
             window.collapseBottomSheet();
         }
 
@@ -1141,145 +1140,201 @@
                 title: 'Memuat Data...',
                 didOpen: () => { Swal.showLoading(); },
                 allowOutsideClick: false,
-                customClass: { popup: 'rounded-none' }
+                customClass: { popup: 'rounded-3xl' }
             });
 
             try {
                 const res = await fetch(`/api/toko/${tokoId}/items-by-id`, {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
 
-                if (!res.ok) {
-                    throw new Error(`Gagal memuat data (${res.status})`);
-                }
-
+                if (!res.ok) throw new Error(`Gagal memuat data (${res.status})`);
                 const json = await res.json();
 
                 if (json.status === 'success') {
                     const items = json.data || [];
                     const transactions = json.transactions || [];
+                    const totalTransVal = transactions.reduce((sum, tr) => sum + (Number(tr.total) || 0), 0);
 
                     let itemsHtml = '';
                     if (items.length > 0) {
                         items.forEach(item => {
                             const namaProduk = item.produk ? item.produk.nama_produk : 'Produk Tidak Diketahui';
-                            const stokProduk = item.produk && item.produk.stok !== undefined && item.produk.stok !== null
-                                ? Number(item.produk.stok)
-                                : null;
-                            const satuanProduk = item.produk && item.produk.satuan && item.produk.satuan.nama
-                                ? item.produk.satuan.nama
-                                : '';
+                            const stokProduk = item.produk && item.produk.stok !== undefined && item.produk.stok !== null ? Number(item.produk.stok) : null;
+                            const satuanProduk = item.produk && item.produk.satuan && item.produk.satuan.nama ? item.produk.satuan.nama : '';
+
                             itemsHtml += `
-                                                                                                                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-white/10 dark:bg-slate-900 dark:hover:border-blue-500/40">
-                                                                                                                        <div class="flex items-start justify-between gap-3">
-                                                                                                                            <div class="min-w-0">
-                                                                                                                                <p class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Produk Diajukan</p>
-                                                                                                                                <h5 class="mt-1 text-sm font-bold leading-snug text-slate-900 dark:text-white">${namaProduk}</h5>
-                                                                                                                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Kode: ${item.kode_produk}</p>
-                                                                                                                            </div>
-                                                                                                                            <div class="text-right shrink-0">
-                                                                                                                                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-500">Harga</p>
-                                                                                                                                <p class="mt-1 text-sm font-extrabold text-blue-600 dark:text-blue-400">Rp ${new Intl.NumberFormat('id-ID').format(item.harga || 0)}</p>
-                                                                                                                            </div>
-                                                                                                                        </div>
-                                                                                                                        <div class="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-800/80">
-                                                                                                                            <div>
-                                                                                                                                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Stok Terbaru</p>
-                                                                                                                                <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">${stokProduk !== null ? new Intl.NumberFormat('id-ID').format(stokProduk) : '-'} ${satuanProduk}</p>
-                                                                                                                            </div>
-                                                                                                                            <span class="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                                                                                                                ${stokProduk !== null && stokProduk > 0 ? 'Tersedia' : 'Cek Stok'}
-                                                                                                                            </span>
-                                                                                                                        </div>
-                                                                                                                    </div>
-                                                                                                                `;
+                                        <div class="group p-4 border-b border-slate-50 dark:border-white/5 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-all">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <div class="flex items-center gap-4 flex-1 min-w-0">
+                                                    <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:rotate-6 transition-transform flex-shrink-0">
+                                                        <i class="ph ph-package text-2xl"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[14px] font-black text-slate-900 dark:text-white truncate mb-0.5 leading-tight">${namaProduk}</p>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-[9px] px-2 py-0.5 bg-slate-100 dark:bg-white/10 rounded font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">${item.kode_produk}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right flex-shrink-0">
+                                                    <div class="flex items-baseline justify-end gap-1 mb-0.5">
+                                                        <span class="text-[10px] font-bold text-slate-400">Rp</span>
+                                                        <p class="text-[16px] font-black text-blue-600 dark:text-blue-400 leading-none tracking-tight">${new Intl.NumberFormat('id-ID').format(item.harga || 0)}</p>
+                                                    </div>
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <div class="w-1.5 h-1.5 rounded-full ${stokProduk > 0 ? 'bg-emerald-500' : 'bg-slate-300'}"></div>
+                                                        <p class="text-[11px] font-bold ${stokProduk > 0 ? 'text-emerald-600' : 'text-slate-400'} tracking-tighter">
+                                                            ${stokProduk !== null ? new Intl.NumberFormat('id-ID').format(stokProduk) : '0'} ${satuanProduk}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
                         });
                     } else {
-                        itemsHtml = '<div class="text-center py-10 text-gray-400 text-xs italic">Belum ada barang diajukan.</div>';
+                        itemsHtml = `
+                                    <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                                        <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-white/5 flex items-center justify-center mb-4">
+                                            <i class="ph ph-package-open text-4xl opacity-20"></i>
+                                        </div>
+                                        <p class="text-xs font-bold uppercase tracking-widest opacity-50">Belum ada barang diajukan</p>
+                                    </div>
+                                `;
                     }
 
                     let transHtml = '';
                     if (transactions.length > 0) {
                         transactions.forEach(tr => {
                             const date = new Date(tr.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-                            const detailUrl = `/transaksi/${tr.id}`;
                             transHtml += `
-                                                                                                                    <a href="${detailUrl}" target="_blank" rel="noopener noreferrer" class="block p-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-white/5 rounded-none mb-2 flex justify-between items-center transition-hover hover:bg-white dark:hover:bg-slate-700">
-                                                                                                                        <div class="flex flex-col text-left">
-                                                                                                                            <span class="text-[10px] font-bold text-gray-900 dark:text-white">${tr.kode_transaksi}</span>
-                                                                                                                            <span class="text-[9px] text-gray-500 dark:text-gray-400 uppercase tracking-tighter mt-0.5">${date}</span>
-                                                                                                                        </div>
-                                                                                                                        <div class="text-right">
-                                                                                                                            <span class="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Rp ${new Intl.NumberFormat('id-ID').format(tr.total_harga || 0)}</span>
-                                                                                                                            <span class="text-[9px] font-bold uppercase tracking-[0.12em] text-blue-600 dark:text-blue-400">Detail</span>
-                                                                                                                        </div>
-                                                                                                                    </a>
-                                                                                                                `;
+                                        <a href="/transaksi/${tr.id}" target="_blank" class="block p-4 rounded-3xl border border-slate-100 dark:border-white/5 bg-white dark:bg-slate-900/50 mb-3 hover:border-blue-400/30 hover:shadow-xl hover:shadow-blue-500/5 transition-all group relative overflow-hidden">
+                                            <div class="flex justify-between items-center relative z-10">
+                                                <div class="flex items-center gap-3 min-w-0">
+                                                    <div class="w-11 h-11 rounded-2xl bg-slate-50 dark:bg-white/5 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                                        <i class="ph ph-receipt text-xl"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[13px] font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors truncate mb-0.5 leading-tight">${tr.kode_transaksi}</p>
+                                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${date}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right flex-shrink-0">
+                                                    <div class="flex items-baseline justify-end gap-1 mb-0.5">
+                                                        <span class="text-[9px] font-bold text-slate-400">Rp</span>
+                                                        <p class="text-[15px] font-black text-emerald-600 dark:text-emerald-400 leading-none tracking-tight">${new Intl.NumberFormat('id-ID').format(tr.total || 0)}</p>
+                                                    </div>
+                                                    <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center justify-end gap-1">
+                                                        Detail <i class="ph ph-arrow-right text-xs"></i>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/0 to-blue-600/0 group-hover:to-blue-600/[0.03] transition-all"></div>
+                                        </a>
+                                    `;
                         });
                     } else {
-                        transHtml = '<div class="text-center py-10 text-gray-400 text-xs italic">Belum ada riwayat transaksi.</div>';
+                        transHtml = `
+                                    <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                                        <div class="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-white/5 flex items-center justify-center mb-4">
+                                            <i class="ph ph-receipt text-4xl opacity-20"></i>
+                                        </div>
+                                        <p class="text-xs font-bold uppercase tracking-widest opacity-50">Belum ada riwayat transaksi</p>
+                                    </div>
+                                `;
                     }
 
                     const dashboardHtml = `
-                                                                                                                                                                                        <div class="flex flex-col h-full dark:bg-black overflow-hidden font-sans">
-                                                                                                                                                                                            <!-- Custom Header -->
-                                                                                                                                                                                            <div class="p-5 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-black">
-                                                                                                                                                                                                <div class="text-left">
-                                                                                                                                                                                                    <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">${namaToko}</h3>
-                                                                                                                                                                                                    <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-widest uppercase">KODE MITRA: ${kodeMitra}</p>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                                <div class="flex gap-2">
-                                                                                                                                                                                                    <div class="bg-blue-100 dark:bg-blue-900/30 px-3 py-1.5 rounded-none border border-blue-200 dark:border-blue-800">
-                                                                                                                                                                                                        <p class="text-[9px] text-blue-800 dark:text-blue-300 font-bold uppercase tracking-widest">Items</p>
-                                                                                                                                                                                                        <p class="text-sm font-black text-blue-600 dark:text-blue-400">${items.length}</p>
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                    <div class="bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1.5 rounded-none border border-emerald-200 dark:border-emerald-800">
-                                                                                                                                                                                                        <p class="text-[9px] text-emerald-800 dark:text-emerald-300 font-bold uppercase tracking-widest">Trans</p>
-                                                                                                                                                                                                        <p class="text-sm font-black text-emerald-600 dark:text-emerald-400">${transactions.length}</p>
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                            </div>
+                                <div class="flex flex-col h-full bg-white dark:bg-black font-sans text-slate-900 dark:text-white overflow-hidden">
+                                    <!-- Premium Header -->
+                                    <div class="p-8 md:p-10 border-b border-slate-100 dark:border-white/10 bg-white dark:bg-black">
+                                        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                                            <!-- Left: Profile -->
+                                            <div class="flex items-center gap-5 w-full md:w-auto">
+                                                <div class="w-16 h-16 rounded-[2rem] bg-blue-600 flex items-center justify-center text-white shadow-2xl shadow-blue-500/20">
+                                                    <i class="ph ph-storefront text-3xl"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="flex items-center gap-3 mb-1.5">
+                                                        <span class="px-2.5 py-0.5 bg-blue-600 text-white text-[10px] font-black rounded uppercase tracking-[0.2em]">Partner</span>
+                                                        <div class="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 rounded">
+                                                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                                            <span class="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">Active</span>
+                                                        </div>
+                                                    </div>
+                                                    <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-none">${namaToko}</h3>
+                                                    <div class="flex items-center gap-2 text-slate-400 text-xs mt-2">
+                                                        <i class="ph ph-fingerprint text-blue-500"></i>
+                                                        <span class="font-bold tracking-[0.15em] uppercase">${kodeMitra}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                                                                                                                                                                            <!-- Main Content (Columns) -->
-                                                                                                                                                                                            <div class="flex flex-row gap-4 overflow-hidden mt-4" style="height: 500px;">
-                                                                                                                                                                                                <div class="w-1/2 p-5 overflow-y-auto custom-scrollbar border border-gray-100 dark:border-white/5 rounded-xl bg-white dark:bg-black">
-                                                                                                                                                                                                    <div class="mb-4 flex items-center justify-between gap-2">
-                                                                                                                                                                                                        <h4 class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                                                                                                                                                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                                                                                                                                                                                                             Barang Diajukan
-                                                                                                                                                                                                        </h4>
-                                                                                                                                                                                                        <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Stok</span>
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                    <div class="space-y-2">
-                                                                                                                                                                                                        ${itemsHtml}
-                                                                                                                                                                                                    </div>
-                                                                                                                                                                                                </div>
+                                            <!-- Right: Summary Stats -->
 
-                                                                                                                                                                                                <div class="w-1/2 p-5 overflow-y-auto custom-scrollbar border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50/30 dark:bg-black">
-                                                                                                                                                                                                    <h4 class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                                                                                                                                                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                                                                                                                                                                                                         Riwayat Transaksi
-                                                                                                                                                                                                    </h4>
-                                                                                                                                                                                                    ${transHtml}
-                                                                                                                                                                                                </div>
-                                                                                                                                                                                            </div>
+                                        </div>
+                                    </div>
 
-                                                                                                                                                                                            <!-- Custom Footer -->
-                                                                                                                                                                                            <div class="p-5 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-black flex justify-end">
-                                                                                                                                                                                                <button onclick="Swal.close()" class="btn btn-primary px-8 py-3 font-bold text-xs uppercase tracking-widest shadow-md">Tutup Dashboard</button>
-                                                                                                                                                                                            </div>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                    `;
+                                    <!-- Dashboard Content -->
+                                    <div class="flex flex-col md:flex-row gap-8 p-8 md:p-10 bg-slate-50/30 dark:bg-black/40 overflow-y-auto md:overflow-hidden" style="max-height: 65vh;">
+                                        <!-- Left: Proposed Items -->
+                                        <div class="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none">
+                                            <div class="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-white dark:bg-slate-900/50 backdrop-blur-md">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                                                        <i class="ph ph-shopping-bag-open text-xl"></i>
+                                                    </div>
+                                                    <h4 class="text-[13px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Daftar Pengajuan</h4>
+                                                </div>
+                                                <span class="text-[10px] font-black px-3 py-1 bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 rounded-full uppercase tracking-tighter border border-blue-100 dark:border-blue-500/10">
+                                                    ${items.length} SKU
+                                                </span>
+                                            </div>
+                                            <div class="flex-1 overflow-y-auto custom-scrollbar p-2">
+                                                ${itemsHtml}
+                                            </div>
+                                        </div>
+
+                                        <!-- Right: Transaction History -->
+                                        <div class="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/20 dark:shadow-none">
+                                            <div class="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-white dark:bg-slate-900/50 backdrop-blur-md">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                                                        <i class="ph ph-clock-counter-clockwise text-xl"></i>
+                                                    </div>
+                                                    <h4 class="text-[13px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Riwayat Sesi</h4>
+                                                </div>
+                                                <span class="text-[10px] font-black px-3 py-1 bg-emerald-50 dark:bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 rounded-full uppercase tracking-tighter border border-emerald-100 dark:border-emerald-500/10">
+                                                    ${transactions.length} Sesi
+                                                </span>
+                                            </div>
+                                            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                                                ${transHtml}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer -->
+                                    <div class="p-8 md:p-10 pt-0 flex justify-end bg-slate-50/30 dark:bg-black/40">
+                                        <button onclick="Swal.close()" class="group w-full btn  md:w-auto px-12 py-5  dark:bg-white text-white dark:text-slate-900 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white dark:hover:text-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                                            <span>Tutup Dashboard</span>
+                                            <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
 
                     Swal.fire({
                         html: dashboardHtml,
                         showConfirmButton: false,
-                        width: '960px',
-                        padding: '1.25rem',
-                        background: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
-                        customClass: { popup: 'rounded-2xl border border-gray-100 dark:border-slate-800 shadow-2xl' },
+                        width: 'min(98vw, 1200px)',
+                        padding: '0',
+                        background: document.documentElement.classList.contains('dark') ? '#000000' : '#ffffff',
+                        customClass: {
+                            popup: 'rounded-[3rem] overflow-hidden border border-slate-200 dark:border-white/10 shadow-2xl shadow-blue-500/10',
+                            htmlContainer: 'p-0 m-0'
+                        },
                         allowOutsideClick: true
                     });
                 } else {
@@ -1287,10 +1342,14 @@
                 }
             } catch (e) {
                 console.error(e);
-                Swal.fire({ icon: 'error', title: 'Error', text: e.message || 'Gagal memuat dashboard mitra.', customClass: { popup: 'rounded-none' } });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: e.message || 'Gagal memuat dashboard mitra.',
+                    customClass: { popup: 'rounded-3xl' }
+                });
             }
         }
-
 
         window.showDirectRoute = async function (lat, lng, nama) {
             if (!userPos) return alert("Mohon aktifkan lokasi GPS Anda.");
@@ -1496,25 +1555,25 @@
             Swal.fire({
                 title: 'Tambah Mitra Baru',
                 html: `
-                                                                                                                                                                                    <div class="text-left space-y-4 font-sans mt-4">
-                                                                                                                                                                                        <div class="mb-3">
-                                                                                                                                                                                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Titik Koordinat (Auto)</label>
-                                                                                                                                                                                            <input type="text" value="${lat}, ${lng}" class="w-full border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black dark:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none cursor-not-allowed" disabled>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                        <div class="mb-3">
-                                                                                                                                                                                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Nama Mitra *</label>
-                                                                                                                                                                                            <input type="text" id="swal_new_nama" class="w-full border border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900 dark:text-white rounded-md px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-gray-400" value="${defaultNama}" placeholder="Contoh: Toko Maju Jaya">
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                        <div class="mb-3">
-                                                                                                                                                                                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">No. Telp (Opsional)</label>
-                                                                                                                                                                                            <input type="text" id="swal_new_no_telp" class="w-full border border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900 dark:text-white rounded-md px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-gray-400" placeholder="Contoh: 081234567890">
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                        <div class="mb-3">
-                                                                                                                                                                                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Alamat Lengkap *</label>
-                                                                                                                                                                                            <textarea id="swal_new_alamat" class="w-full border border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900 dark:text-white rounded-md px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 resize-none" rows="3" placeholder="Masukkan alamat lengkap dengan jelas...">${defaultAlamat}</textarea>
-                                                                                                                                                                                        </div>
-                                                                                                                                                                                    </div>
-                                                                                                                                                                                `,
+                                                                                                                                                                                                                                                                                        <div class="text-left space-y-4 font-sans mt-4">
+                                                                                                                                                                                                                                                                                            <div class="mb-3">
+                                                                                                                                                                                                                                                                                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Titik Koordinat (Auto)</label>
+                                                                                                                                                                                                                                                                                                <input type="text" value="${lat}, ${lng}" class="w-full border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black dark:text-gray-400 rounded-md px-3 py-2 text-sm focus:outline-none cursor-not-allowed" disabled>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <div class="mb-3">
+                                                                                                                                                                                                                                                                                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Nama Mitra *</label>
+                                                                                                                                                                                                                                                                                                <input type="text" id="swal_new_nama" class="w-full border border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900 dark:text-white rounded-md px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-gray-400" value="${defaultNama}" placeholder="Contoh: Toko Maju Jaya">
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <div class="mb-3">
+                                                                                                                                                                                                                                                                                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">No. Telp (Opsional)</label>
+                                                                                                                                                                                                                                                                                                <input type="text" id="swal_new_no_telp" class="w-full border border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900 dark:text-white rounded-md px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-gray-400" placeholder="Contoh: 081234567890">
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                            <div class="mb-3">
+                                                                                                                                                                                                                                                                                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Alamat Lengkap *</label>
+                                                                                                                                                                                                                                                                                                <textarea id="swal_new_alamat" class="w-full border border-gray-300 dark:border-white/20 bg-white dark:bg-slate-900 dark:text-white rounded-md px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 resize-none" rows="3" placeholder="Masukkan alamat lengkap dengan jelas...">${defaultAlamat}</textarea>
+                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                    `,
                 showCancelButton: true,
                 confirmButtonText: 'Simpan Mitra',
                 cancelButtonText: 'Batal',

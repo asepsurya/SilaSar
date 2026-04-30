@@ -185,6 +185,30 @@
         <script src="{{ asset('assets/js/custom.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script src="{{ asset('assets/js/rightsidebar.js') }}"></script>
+        <script>
+            function confirmLogout(formId = 'logout-form') {
+                Swal.fire({
+                    title: 'Yakin ingin keluar?',
+                    text: "Sesi Anda akan diakhiri dan Anda harus login kembali.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Keluar!',
+                    cancelButtonText: 'Batal',
+                    buttonsStyling: false,
+                    customClass: {
+                        popup: 'rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl',
+                        title: 'text-xl font-black text-slate-900 dark:text-white',
+                        htmlContainer: 'text-sm text-slate-500 dark:text-slate-400',
+                        confirmButton: 'p-3  bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-red-500/20 mx-2',
+                        cancelButton: 'p-3  bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded-2xl font-bold text-sm transition-all mx-2'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(formId).submit();
+                    }
+                })
+            }
+        </script>
         @yield('js')
 </body>
 

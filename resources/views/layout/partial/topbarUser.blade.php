@@ -153,13 +153,14 @@
 
                     <li class="h-px bg-black/5 block my-1"></li>
                     <li>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form id="logout-form-user" method="POST" action="{{ route('logout') }}" class="hidden">
                             @csrf
-                            <button type="submit" class="text-black dark:text-white flex items-center w-full text-left">
-                                <x-icon name="sign-out" class=" mr-2" />
-                                Sign Out
-                            </button>
                         </form>
+                        <button type="button" onclick="confirmLogout('logout-form-user')"
+                            class="text-black dark:text-white flex items-center w-full text-left">
+                            <x-icon name="sign-out" class="mr-2" />
+                            Sign Out
+                        </button>
                     </li>
 
                 </ul>

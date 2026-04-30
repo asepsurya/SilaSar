@@ -230,7 +230,8 @@
 
     <!-- Detail Row Modal -->
     <div x-show="showRowDetail" x-cloak
-      class="fixed inset-0 bg-black/60 dark:bg-black/80 z-[1001] flex items-center justify-center p-4">
+      class="fixed inset-0 bg-black/60 dark:bg-black/80 z-[1001] flex items-center justify-center p-4"
+      style="z-index: 999;">
       <div class="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden p-6"
         @click.away="showRowDetail = false">
         <h4
