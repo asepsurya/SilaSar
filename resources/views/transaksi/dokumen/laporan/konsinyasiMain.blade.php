@@ -1,7 +1,7 @@
-﻿ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
     body{
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
     h1, h2, h3 {
         font-family: 'Poppins', sans-serif;
@@ -24,14 +24,43 @@
 
     .address {
         word-wrap: break-word;
-        /* Optionally add a max width for better control */
-        max-width: 300px;
-        /* Or whatever max-width you want */
+        white-space: pre-wrap;
+        overflow: hidden;
+        resize: none;
+        height: auto;
+        line-height: 1.2;
     }
 
-    input:focus {
+    /* PDF Optimization */
+    @media print {
+        .paper {
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 12mm !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+
+    table {
+        border-collapse: collapse !important;
+    }
+
+    .border-thin {
+        border: 0.5px solid black !important;
+    }
+
+    input, textarea {
+        background: transparent;
+        border: none;
+        outline: none;
+    }
+
+    input:focus, textarea:focus {
         outline: none;
         border: none;
+        box-shadow: none;
     }
 
     /* Gaya untuk elemen melayang */
@@ -101,151 +130,168 @@
 
 <form action="{{ route('transaksi.nota.add') }}" method="post" id="myForm">
     @csrf
-     <div class="max-w-[900px] mx-auto p-6 text-black">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="w-36">
+    <div class="max-w-[900px] mx-auto p-6 text-black">
+        <!-- Header Table for PDF Compatibility -->
+        <table class="w-full mb-4 border-none">
+            <tr>
+                <!-- Left Header: Logo & Company Info (50%) -->
+                <td class="w-1/2 align-top text-left pr-4">
+                    <div class="w-36 mb-3">
                         @php
                             $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id);
                             $nama = $perusahaan->nama_perusahaan ?? 'Perusahaan tidak ditemukan';
                             $logo = $perusahaan->logo ? asset('storage/' . $perusahaan->logo) : asset('assets/default_logo.png');
                         @endphp
-                    <img alt="logo" class="w-full h-auto"
-                        height="70" src="{{ $logo }}" width="120" />
-        </div>
+                        <img alt="logo" class="w-full h-auto" height="70" src="{{ $logo }}" width="120" />
+                    </div>
+                    
+                    @php
+                        $alamat = ($perusahaan->alamat ?? '-'). ', ' .
+                        'Kelurahan/Desa ' . ucwords(strtolower($perusahaan->desa->name ?? '-')) . ', ' .
+                        'Kecamatan ' . ucwords(strtolower($perusahaan->kecamatan->name ?? '-')) . ', ' .
+                        'Kota/Kab. ' . ucwords(strtolower( $perusahaan->kota->name ?? '-'));
+                    @endphp
+                    <div class="text-[11px] leading-[13px] space-y-0.5">
+                        <textarea class="address w-full font-medium" name="alamat_company" required oninput="autoResize(this)">{{ $alamat ?? old('alamat_company') ?? $nota->alamat_company ?? '' }}</textarea>
+                        <div class="flex items-center gap-1">
+                            <span class="font-bold w-4">P</span>
+                            <span>:</span>
+                            <input type="text" class="flex-1 text-left" name="telp_company" placeholder="0877366644" required value="{{ str_replace(['P : ', 'P:'], '', $nota->telp_company ?? $perusahaan->telp_perusahaan ?? old('telp_company')) }}">
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="font-bold w-4">E</span>
+                            <span>:</span>
+                            <input type="text" class="flex-1 text-left" name="email_company" placeholder="example@email.com" value="{{ str_replace(['E : ', 'E:'], '', $nota->email_company ?? $perusahaan->email ?? old('email_company')) }}" required>
+                        </div>
+                    </div>
+                </td>
 
-        <div class="text-right">
-            <h1 class="text-2xl font-normal mb-1 "><b>
-                   <input type="text" name="judul" value="{{ 
-                    $nota->judul 
-                        ?? (Request::is('transaksi/invoice*') ? 'INVOICE' 
-                        : (Request::is('transaksi/nota*') ? 'NOTA KONSINYASI' 
-                        : (Request::is('transaksi/kwitansi*') ? 'NOTA PEMBAYARAN' 
-                        : ''))) 
-                }}" class="form-input w-full text-center"/>
-                </b></h1>
-            <input type="hidden" name="type" value="{{ Request::is('transaksi/invoice*') 
-                                    ? 'invoice' 
-                                    : (Request::is('transaksi/nota*') 
-                                        ? 'nota_konsinyasi' 
-                                        : (Request::is('transaksi/kwitansi*') 
-                                            ? 'nota_pembayaran' 
-                                            : '' )) }}">
+                <!-- Right Header: Title & Meta Info (50%) -->
+                <td class="w-1/2 align-top text-right">
+                    <h1 class="text-2xl font-bold mb-4">
+                        <input type="text" name="judul" value="{{ 
+                            $nota->judul 
+                                ?? (Request::is('transaksi/invoice*') ? 'INVOICE' 
+                                : (Request::is('transaksi/nota*') ? 'NOTA KONSINYASI' 
+                                : (Request::is('transaksi/kwitansi*') ? 'NOTA PEMBAYARAN' 
+                                : ''))) 
+                        }}" class="form-input w-full text-right font-bold uppercase"/>
+                    </h1>
+                    <input type="hidden" name="type" value="{{ Request::is('transaksi/invoice*') 
+                                            ? 'invoice' 
+                                            : (Request::is('transaksi/nota*') 
+                                                ? 'nota_konsinyasi' 
+                                                : (Request::is('transaksi/kwitansi*') 
+                                                    ? 'nota_pembayaran' 
+                                                    : '' )) }}">
 
-            <table class="border border-gray-400 text-sm w-[320px] mx-auto text-black">
-                <thead>
-                    <tr class="bg-gray-300 text-center text-xs font-semibold">
-                        <th class="border border-gray-400 px-2 py-1">Nomor Nota</th>
-                        <th class="border border-gray-400 px-2 py-1">Tanggal Transaksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="text-center text-xs font-bold">
-                        <td class="border border-gray-400 px-2 py-1">
-                            <input type="text" class="w-full text-center" name="kode_transaksi" placeholder="B200511" required value="{{ $id ?? old('kode_transaksi') }}">
-                        </td>
-                        <td class="border border-gray-400 px-2 py-1">
-                            <input type="text" class="w-full text-center flatpickr-input" name="tanggal" placeholder="25-jun-2025" value="{{ $nota->tanggal ?? old('tanggal') }}" required>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        </div>
-        @php
-        $alamat = ($perusahaan->alamat ?? '-'). ', ' .
-        'Kelurahan/Desa ' . ucwords(strtolower($perusahaan->desa->name ?? '-')) . ', ' .
-        'Kecamatan ' . ucwords(strtolower($perusahaan->kecamatan->name ?? '-')) . ', ' .
-        'Kota/Kab. ' . ucwords(strtolower( $perusahaan->kota->name ?? '-'));
-        @endphp
-        <div class="mb-1 text-[11px] leading-[13px]">
-            <textarea class="address" name="alamat_company" required oninput="autoResize(this)">{{ $alamat ?? old('alamat_company') ?? $nota->alamat_company ?? '' }}</textarea>
-            <p><input type="text" class="w-full text-left" name="telp_company" placeholder="P. 0877366644" required value="P : {{ $nota->telp_company ?? $perusahaan->telp_perusahaan ?? old('telp_company') }}"></p>
-            <p><input type="text" class="w-full text-left" name="email_company" placeholder="E. example@email.com" value="E : {{$nota->email_company ?? $perusahaan->email ?? old('email_company') }}" required></p>
-        </div>
+                    <table class="border-thin text-sm w-[300px] ml-auto text-black">
+                        <thead>
+                            <tr class="bg-gray-100 text-center text-[10px] font-bold uppercase">
+                                <th class="border-thin px-2 py-1">Nomor Nota</th>
+                                <th class="border-thin px-2 py-1">Tanggal Transaksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center text-xs font-bold">
+                                <td class="border-thin px-2 py-1">
+                                    <input type="text" class="w-full text-center" name="kode_transaksi" placeholder="B200511" required value="{{ $id ?? old('kode_transaksi') }}">
+                                </td>
+                                <td class="border-thin px-2 py-1">
+                                    <input type="text" class="w-full text-center flatpickr-input" name="tanggal" placeholder="25-jun-2025" value="{{ $nota->tanggal ?? old('tanggal') }}" required>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </table>
         <div class="mt-2">
             <hr class="garis-atas">
             <hr class="garis-bawah">
         </div>
-        <div class="text-[12px] leading-[14px] mb-3">
-            <div class="flex space-x-2 text-[11px] leading-[13px]">
-                <div class="w-25 font-bold">Telah Diterima dari &nbsp;</div>
-                <div class="w-1"> :</div>
-                <div class="flex-1 font-normal"> <input type="text" class="w-full text-left" name="kepada" placeholder="PT.INOMARCO INDONESIA " required value="{{$nota->kepada ?? old('kepada') }}"></td>
+        <div class="text-[12px] leading-[14px] mb-3 space-y-1">
+            <div class="flex items-center text-[11px] leading-[13px]">
+                <div class="w-32 font-bold">Telah Diterima dari</div>
+                <div class="w-4 text-center">:</div>
+                <div class="flex-1 font-normal">
+                    <input type="text" class="w-full text-left" name="kepada" placeholder="Nama Penerima" required value="{{$nota->kepada ?? old('kepada') }}">
                 </div>
             </div>
-            <div class="flex space-x-2 text-[11px] leading-[13px]">
-                <div class="w-25  font-bold " style="width: 99px">Alamat</div>
-                <div class="w-1">:</div>
-                <div class="flex-1 font-normal capitalize"><input type="text" class="w-full text-left" name="kota" placeholder="Jl.Khoerlun Tanjung No.41 Kota Tasikmalaya" required value="{{$nota->kota ??  old('kota') }}">
+            <div class="flex items-center text-[11px] leading-[13px]">
+                <div class="w-32 font-bold">Alamat</div>
+                <div class="w-4 text-center">:</div>
+                <div class="flex-1 font-normal capitalize">
+                    <input type="text" class="w-full text-left" name="kota" placeholder="Alamat Lengkap" required value="{{$nota->kota ??  old('kota') }}">
                 </div>
             </div>
-            <div class="flex space-x-2 text-[11px] leading-[13px]">
-                <div class="w-25 font-bold" style="width: 99px">Telepon</div>
-                <div class="w-1">:</div>
-                <div class="flex-1 font-normal"><input type="text" class="w-full text-left" name="telp" value="{{ $nota->telp ?? old('telp') }}" placeholder="082 82x xxxxxxx " required></div>
+            <div class="flex items-center text-[11px] leading-[13px]">
+                <div class="w-32 font-bold">Telepon</div>
+                <div class="w-4 text-center">:</div>
+                <div class="flex-1 font-normal">
+                    <input type="text" class="w-full text-left" name="telp" value="{{ $nota->telp ?? old('telp') }}" placeholder="082xxxxxxx" required>
+                </div>
             </div>
         </div>
 
         <p class="text-[12px]">Pembayaran sejumlah</p>
-        <table class="w-full border-collapse border border-black text-[12px] leading-[14px] mb-2" id="myTable">
+        <table class="w-full border-collapse border-thin text-[12px] leading-[14px] mb-2" id="myTable">
             <thead>
-                <tr class="border border-black bg-white">
-                    <th class="border-collapse border-black px-1 text-center w-[30px] font-semibold">No</th>
-                    <th class="border-collapse border-black px-1 text-left font-semibold">Nama Barang</th>
-                    <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold">Qty</th>
-                    <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold">Unit</th>
-                    <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold">Rp</th>
-                    <th class="border-collapse border-black px-1 text-center w-[100px] font-semibold">Harga Unit</th>
-                    <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold">Rp</th>
-                    <th class="border-collapse border-black px-1 text-center w-[110px] font-semibold">Sub Total Harga</th>
-
+                <tr class="bg-gray-50 border-b border-black">
+                    <th class="border-thin px-2 py-2 text-center w-[35px] font-bold uppercase tracking-tight">No</th>
+                    <th class="border-thin px-2 py-2 text-left font-bold uppercase tracking-tight">Nama Barang / Deskripsi</th>
+                    <th class="border-thin px-2 py-2 text-center w-[50px] font-bold uppercase tracking-tight">Qty</th>
+                    <th class="border-thin px-2 py-2 text-center w-[50px] font-bold uppercase tracking-tight">Unit</th>
+                    <th class="border-thin px-2 py-2 text-center w-[40px] font-bold uppercase tracking-tight">Rp</th>
+                    <th class="border-thin px-2 py-2 text-center w-[110px] font-bold uppercase tracking-tight">Harga Satuan</th>
+                    <th class="border-thin px-2 py-2 text-center w-[40px] font-bold uppercase tracking-tight">Rp</th>
+                    <th class="border-thin px-2 py-2 text-center w-[120px] font-bold uppercase tracking-tight">Sub Total</th>
                 </tr>
             </thead>
             <tbody>
                 @if($nota)
                 @foreach($nota->produk as $index => $produk)
-                <tr class="border  border-black px-1">
-                    <td class="border-collapse border-black px-1 text-center">{{ $index + 1 }}</td>
-                    <td class="border-collapse border-black px-1">
+                <tr class="border-b border-black">
+                    <td class="border-thin px-2 py-1.5 text-center text-gray-500">{{ $index + 1 }}</td>
+                    <td class="border-thin px-2 py-1.5">
                         <input type="hidden" value="{{ $produk->id ?? ''}}" name="id_item[]">
-                        <div class="relative">
-                            <input name="nama_barang[]" class="w-full" value="{{ old('nama_barang.'.$index, $produk->nama_barang) }}" placeholder="Nama Barang atau Produk">
-                            <div class="tooltip">
-                                <a href="{{ route('transaksi.item.delete',$produk->id) }}"><button type="button" onclick="deleteRow(this)" class="bg-red-500 text-white px-2 py-1 rounded">X</button></a>
+                        <div class="relative group">
+                            <input name="nama_barang[]" class="w-full font-medium" value="{{ old('nama_barang.'.$index, $produk->nama_barang) }}" placeholder="Nama Barang atau Produk">
+                            <div class="tooltip no-print">
+                                <a href="{{ route('transaksi.item.delete',$produk->id) }}" onclick="return confirm('Hapus item ini?')">
+                                    <button type="button" class="bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm transition-all">
+                                        <i class="ph ph-x text-xs"></i>
+                                    </button>
+                                </a>
                             </div>
                         </div>
                     </td>
-                    <td class="border-collapse border-black px-1 text-center">
-                        <input name="qty[]" class="w-full text-center" value="{{ old('qty.'.$index, $produk->qty) }}" oninput="calculateTotal(this)" placeholder="Qty">
+                    <td class="border-thin px-2 py-1.5">
+                        <input name="qty[]" class="w-full text-center" value="{{ old('qty.'.$index, $produk->qty) }}" oninput="calculateTotal(this)" placeholder="0">
                     </td>
-                    <td class="border-collapse border-black px-1 text-center">
-                        <input name="unit[]" class="w-full text-center" value="{{ old('unit.'.$index, $produk->unit) }}" placeholder="Pcs">
+                    <td class="border-thin px-2 py-1.5">
+                        <input name="unit[]" class="w-full text-center uppercase" value="{{ old('unit.'.$index, $produk->unit) }}" placeholder="Pcs">
                     </td>
-                    <td class="border-collapse border-black px-1 text-center">
-                        Rp.
+                    <td class="border-thin px-2 py-1.5 text-center text-gray-400">Rp.</td>
+                    <td class="border-thin px-2 py-1.5">
+                        <input name="harga[]" class="w-full text-right" value="{{ old('harga.'.$index, number_format($produk->harga, 0, ',', '.')) }}" oninput="formatCurrency(this); calculateTotal(this)" placeholder="0">
                     </td>
-                    <td class="border-collapse border-black px-1 text-right">
-                        <input name="harga[]" class="w-full text-right" value="{{ old('harga.'.$index, number_format($produk->harga, 0, ',', '.')) }}" oninput="formatCurrency(this); calculateTotal(this)" placeholder="Harga">
+                    <td class="border-thin px-2 py-1.5 text-center text-gray-400">Rp.</td>
+                    <td class="border-thin px-2 py-1.5">
+                        <input name="total[]" class="w-full text-right font-bold" value="{{ old('total.'.$index, number_format($produk->total, 0, ',', '.')) }}" readonly placeholder="0">
                     </td>
-                    <td class="border-collapse border-black px-1 text-center">
-                        Rp.
-                    </td>
-                    <td class="border-collapse border-black px-1 text-right">
-                        <input name="total[]" class="w-full text-right" value="{{ old('total.'.$index, number_format($produk->total, 0, ',', '.')) }}" readonly placeholder="Total">
-                    </td>
-
                 </tr>
                 @endforeach
                 @endif
             </tbody>
             <tr>
-                <td colspan="5"></td>
-                <td class="border-collapse border-black px-1 font-semibold text-right">
+                <td colspan="5" class="border-l border-white"></td>
+                <td class="border-thin px-2 py-2 font-bold text-right uppercase tracking-wider bg-gray-50">
                     TOTAL
                 </td>
-                <td class="border-collapse border-black px-1 font-semibold text-center"> Rp. </td>
-                <td class="border-collapse border-black px-1 font-semibold text-right">
-                    <input type="text" name="grandtotal" id="grandtotal" class="w-full text-right" value="{{ number_format($nota->grandtotal ?? 0, 0, ',', '.') }}">
+                <td class="border-thin px-2 py-2 font-bold text-center bg-gray-50"> Rp. </td>
+                <td class="border-thin px-2 py-2 font-bold text-right bg-gray-50">
+                    <input type="text" name="grandtotal" id="grandtotal" class="w-full text-right font-bold" value="{{ number_format($nota->grandtotal ?? 0, 0, ',', '.') }}">
                 </td>
             </tr>
         </table>
@@ -368,35 +414,37 @@
 
             // Buat baris baru
             const newRow = document.createElement('tr');
-            newRow.classList.add('border', 'border-black');
+            newRow.classList.add('border-b', 'border-black');
             // Tentukan nomor baris baru
             const newRowIndex = tbody.rows.length + 1;
 
             // Tambahkan sel ke baris baru dengan input dan data lama
             newRow.innerHTML = `
-                <td class="border-collapse border-black px-1 text-center font-normal">${newRowIndex}</td>
-                <td class="border-collapse border-black px-1 font-normal">
-                    <div class="relative">
-                        <input name="nama_barang[]" class="w-full"
+                <td class="border-thin px-2 py-1.5 text-center text-gray-500 font-normal">${newRowIndex}</td>
+                <td class="border-thin px-2 py-1.5 font-normal">
+                    <div class="relative group">
+                        <input name="nama_barang[]" class="w-full font-medium"
                             placeholder="Nama Barang atau Produk" onclick="showTooltip(this)" value="${namaBarang}" required>
-                        <div class="tooltip">
-                            <button type="button" onclick="deleteRow(this)" class="bg-red-500 text-white px-2 py-1 rounded">X</button>
+                        <div class="tooltip no-print">
+                            <button type="button" onclick="deleteRow(this)" class="bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm transition-all">
+                                <i class="ph ph-x text-xs"></i>
+                            </button>
                         </div>
                     </div>
                 </td>
-                <td class="border-collapse border-black px-1 text-center font-normal">
-                    <input name="qty[]" class="w-full text-center" oninput="calculateTotal(this)" placeholder="Qty" value="${qty}">
+                <td class="border-thin px-2 py-1.5 text-center font-normal">
+                    <input name="qty[]" class="w-full text-center" oninput="calculateTotal(this)" placeholder="0" value="${qty}">
                 </td>
-                <td class="border-collapse border-black px-1 text-center font-normal">
-                    <input name="unit[]" class="w-full text-center" placeholder="Pcs" value="${unit}" required>
+                <td class="border-thin px-2 py-1.5 text-center font-normal">
+                    <input name="unit[]" class="w-full text-center uppercase" placeholder="Pcs" value="${unit}" required>
                 </td>
-                <td class="border-collapse border-black px-1 text-center font-normal">Rp.</td>
-                <td class="border-collapse border-black px-1 text-right font-normal">
-                    <input name="harga[]" placeholder="Harga" class="w-full text-right" oninput="formatCurrency(this); calculateTotal(this)" value="${harga}" required>
+                <td class="border-thin px-2 py-1.5 text-center text-gray-400 font-normal">Rp.</td>
+                <td class="border-thin px-2 py-1.5 text-right font-normal">
+                    <input name="harga[]" placeholder="0" class="w-full text-right" oninput="formatCurrency(this); calculateTotal(this)" value="${harga}" required>
                 </td>
-                <td class="border-collapse border-black px-1 text-center font-normal">Rp.</td>
-                <td class="border-collapse border-black px-1 text-right font-normal">
-                    <input name="total[]" class="w-full text-right" placeholder="Total" readonly value="${total}" required>
+                <td class="border-thin px-2 py-1.5 text-center text-gray-400 font-normal">Rp.</td>
+                <td class="border-thin px-2 py-1.5 text-right font-normal">
+                    <input name="total[]" class="w-full text-right font-bold" placeholder="0" readonly value="${total}" required>
                 </td>
             `;
 
@@ -488,5 +536,3 @@
 
     </script>
 </form>
-</div>
-

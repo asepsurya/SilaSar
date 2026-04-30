@@ -1,169 +1,144 @@
 @extends('layout.main')
 @section('title', 'Nota dan Kwitansi')
 @section('container')
-<style>
+    <div class="space-y-6 animate-in fade-in duration-500">
+        <!-- Header Section -->
+        <div
+            class="bg-lightwhite dark:bg-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 dark:bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-black/5 dark:border-white/10 shadow-sm transition-all duration-300">
+            <div>
+                <h3 class=" font-bold   text-dark dark:text-white">
+                    Nota & Kwitansi
+                </h3>
+                <p class="text-sm text-dark dark:white mt-1">Kelola dokumen transaksi manual Anda di sini.</p>
+            </div>
 
-    @media screen and (max-width: 767px) {
-        .mobile{
-            display: none;
-        }
-        .p-7{
-            padding: 9px;
-        }
-    }
-</style>
-<div class="flex justify-between items-center mb-4  shadow-md rounded-lg">
+            <div class="flex flex-wrap gap-2">
+                @php
+                    function generateTransactionCode()
+                    {
+                        return 'B' . rand(1000000, 9999999);
+                    }
+                    $transactionCode = generateTransactionCode();
+                @endphp
 
-    <!-- Title (Nota & Kwitansi) -->
-    <div class="text-2xl font-bold text-gray-800">
-        <span>Nota</span> & <span>Kwitansi</span>
-    </div>
+                <a href="{{ route('transaksi.nota.manual', $transactionCode) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5  text-sm font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-600/20">
+                    <i class="ph ph-file-plus text-lg"></i>
+                    Konsinyasi
+                </a>
 
-    <!-- Tombol di sebelah kanan -->
-    <div class="flex space-x-2">
-        @php
-        function generateTransactionCode() {
-        // Menghasilkan angka acak 7 digit
-        $randomNumber = rand(1000000, 9999999);
-        // Membuat kode transaksi dengan format B + angka acak
-        $transactionCode = 'B' . $randomNumber;
-        return $transactionCode;
-        }
+                <a href="{{ route('transaksi.invoice.manual', $transactionCode) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5  text-sm font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-600/20">
+                    <i class="ph ph-receipt text-lg"></i>
+                    Invoice
+                </a>
 
-        // Menggunakan fungsi untuk menghasilkan kode transaksi
-        $transactionCode = generateTransactionCode();
-        @endphp
-       <!-- Dropdown for Mobile -->
-<div class="relative md:hidden">
-    <!-- Dropdown Button -->
-    <button id="dropdownButton" class="btn px-4 py-2 text-sm bg-gray-800  rounded-lg w-full text-left hover:bg-gray-700 transition">
-        + Buat  Nota
-    </button>
+                <a href="{{ route('transaksi.kwitansi.manual', $transactionCode) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5  text-sm font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-rose-600/20">
+                    <i class="ph ph-wallet text-lg"></i>
+                    Kwitansi
+                </a>
+            </div>
+        </div>
 
-    <!-- Dropdown Menu -->
-    <div id="dropdownMenu" class="shadow absolute left-0 w-full bg-white dark:bg-black text-gray-800 dark:text-white shadow-lg rounded-lg mt-2 hidden">
-        <a href="{{ route('transaksi.nota.manual', $transactionCode) }}" 
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-            KONSINYASI
-        </a>
-        <a href="{{ route('transaksi.invoice.manual', $transactionCode) }}" 
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-            INVOICE
-        </a>
-        <a href="{{ route('transaksi.kwitansi.manual', $transactionCode) }}" 
-            class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-            KWITANSI
-        </a>
-    </div>
-</div>
+        <!-- Table Section -->
+        <div
+            class="bg-white dark:bg-white/5 rounded-3xl border border-black/5 dark:border-white/10 overflow-hidden shadow-sm transition-all duration-300">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr
+                            class="bg-gray-50/50 dark:bg-white/5 border-b border-black/5 dark:border-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 w-16">#</th>
+                            <th class="px-6 py-4">Tanggal</th>
+                            <th class="px-6 py-4">Kode</th>
+                            <th class="px-6 py-4">Jenis Dokumen</th>
+                            <th class="px-6 py-4">Mitra / Pelanggan</th>
+                            <th class="px-6 py-4">Total</th>
+                            <th class="px-6 py-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                        @foreach($data as $index => $item)
+                            @php
+                                $link = '#';
+                                if ($item->type == 'nota_konsinyasi') {
+                                    $link = route('transaksi.nota.manual', $item->kode_transaksi);
+                                } elseif ($item->type == 'invoice') {
+                                    $link = route('transaksi.invoice.manual', $item->kode_transaksi);
+                                } elseif ($item->type == 'nota_pembayaran') {
+                                    $link = route('transaksi.kwitansi.manual', $item->kode_transaksi);
+                                }
+                            @endphp
+                            <tr onclick="window.location='{{ $link }}'"
+                                class="group hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                            <i class="ph ph-calendar-blank"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-700 dark:text-white">
+                                            {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                                    {{ $item->kode_transaksi }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                                        @if($item->type == 'nota_konsinyasi') bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400
+                                        @elseif($item->type == 'invoice') bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400
+                                        @else bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 @endif">
+                                        {{ str_replace('_', ' ', $item->type) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-sm font-medium text-gray-700 dark:text-white">{{ $item->kepada }}</span>
+                                        <span class="text-[11px] text-gray-400">{{ $item->kota }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                                    Rp {{ number_format($item->grandtotal, 0, ',', '.') }}
+                                </td>
+                                <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
+                                    <div class="flex justify-end gap-1">
+                                        <a href="{{ $link }}"
+                                            class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                            title="Edit">
+                                            <i class="ph ph-pencil-simple text-lg"></i>
+                                        </a>
+                                        <a href="/nota/delete/{{$item->id}}"
+                                            onclick="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')"
+                                            class="p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                                            title="Hapus">
+                                            <i class="ph ph-trash text-lg"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
 
-<!-- Desktop Buttons (Visible on Larger Screens) -->
-<div class="hidden md:flex space-x-4">
-    <!-- Buat Nota Konsinyasi Button -->
-    <a href="{{ route('transaksi.nota.manual', $transactionCode) }}" 
-        class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition">
-        Buat Nota Konsinyasi
-    </a>
-
-    <!-- Buat INVOICE Button -->
-    <a href="{{ route('transaksi.invoice.manual', $transactionCode) }}" 
-        class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 transition">
-        Buat INVOICE
-    </a>
-
-    <!-- Buat Kwitansi Button -->
-    <a href="{{ route('transaksi.kwitansi.manual', $transactionCode) }}" 
-        class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-500 transition">
-        Buat Kwitansi
-    </a>
-</div>
-
-
-<script>
-    // Toggle dropdown visibility when the button is clicked
-    document.getElementById('dropdownButton').addEventListener('click', function() {
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        dropdownMenu.classList.toggle('hidden');
-    });
-</script>
-
-    </div>
-</div>
-<div class="border bg-lightwhite dark:bg-white/5 dark:border-white/10 border-black/10 rounded-md">
-    <div class="">
-        <div class="table-responsive">
-            <table class="table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th class="mobile" >Tanggal</th>
-                        <th class="mobile">Kode Transaksi</th>
-                        <th >Jenis Dokumen</th>
-                        <th class="mobile">Nama Toko / Mitra</th>
-                        <th class="mobile">Total Transaksi</th>
-                        <th ></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $no=1 @endphp
-                    @foreach($data as $item)
-                    @php
-                        if ($item->type == 'nota_konsinyasi') {
-                            $link = route('transaksi.nota.manual', $item->kode_transaksi);
-                        } elseif ($item->type == 'invoice') {
-                            $link = route('transaksi.invoice.manual', $item->kode_transaksi);
-                        } elseif ($item->type == 'nota_pembayaran') {
-                            $link = route('transaksi.kwitansi.manual', $item->kode_transaksi);
-                        } else {
-                            $link = '#'; // fallback kalau type tidak ada
-                        }
-                    @endphp
-                    <tr onclick="window.location='{{ $link }}'" class="border bg-white dark:bg-black p-5 rounded-md cursor-pointer hover:bg-gray-100 ">
-                        <td>{{ $no++ }}</td>
-                        <td class="whitespace-nowrap mobile"><span class="inline-flex items-center rounded-full text-xs justify-center px-2 py-1 bg-lightblue-200 text-black">
-                         <svg class="w-5 h-5 text-black mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10m2-5H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2z" />
-                        </svg> {{ $item->tanggal }}
-                        </span></td>
-                        <td class="mobile"><b>{{ $item->kode_transaksi }}</b></td>
-                        <td >{{ $item->judul }}</td>
-                        <td class="mobile" >{{ $item->kepada }}</td>
-                        <td class="mobile">Rp {{ number_format($item->grandtotal, 0, ',', '.') }}</td>
-                        <td>
-                            
-                             
-                            
-                               <a href="/nota/delete/{{$item->id}}" type="submit" aria-label="Hapus"
-                                    onclick="event.stopPropagation();"
-                                    class="inline-flex items-center justify-center rounded-full p-2 
-                                           text-red-600 hover:text-white hover:bg-red-600 
-                                           focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                                           transition">
-                                    <!-- Ikon Trash -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M6 7h12m-9 0V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2
-                                                 m-7 0v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7
-                                                 M10 11v6m4-6v6"/>
-                                    </svg>
-                                </a>
-                          
-                           
-                        </td>
-                    </tr>
-                
-                    @endforeach
-
-                    @if($data->isEmpty())
-                    <tr>
-                        <td colspan="6" class="text-center py-5"> Belum ada Nota dibuat</td>
-                    </tr>
-                    @endif
-                </tbody>
-            </table>
+                        @if($data->isEmpty())
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <div
+                                            class="p-6 rounded-full bg-gray-50 dark:bg-white/5 text-gray-200 dark:text-gray-700">
+                                            <i class="ph ph-file-x text-6xl"></i>
+                                        </div>
+                                        <p class="text-gray-500 dark:text-gray-400 font-medium">Belum ada nota yang dibuat</p>
+                                        <p class="text-xs text-gray-400">Gunakan tombol di atas untuk membuat dokumen baru.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 @endsection

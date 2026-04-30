@@ -34,6 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
- 
+    'ollama' => [
+        'url' => env('OLLAMA_API_URL', 'https://myollama.scrollwebid.com/api/generate'),
+    ],
 
 ];

@@ -9,10 +9,79 @@
     .select2-container--default .select2-selection__rendered {
         color: #333333;
         margin-top: -13px;
-
         margin-right: 10px;
         font-size: 14px;
     }
+        /* Select2 Custom Styles to match Tailwind form-input */
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border-radius: 0.5rem !important;
+            /* rounded-lg */
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            background-color: transparent !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .dark .select2-container .select2-selection--single {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+      
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+            right: 10px !important;
+        }
+
+        .select2-dropdown {
+            border-radius: 0.5rem !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+            font-size: 0.875rem !important;
+            padding: 4px !important;
+        }
+
+        .dark .select2-dropdown {
+            background-color: #1f2937 !important;
+            /* Tailwind gray-800 */
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .select2-search__field {
+            border-radius: 0.375rem !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            padding: 0.35rem 0.5rem !important;
+        }
+
+        .dark .select2-search__field {
+            background-color: #111827 !important;
+            /* Tailwind gray-900 */
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+        }
+
+        .dark .select2-results__option {
+            color: #d1d5db !important;
+            border-radius: 0.25rem;
+            margin-bottom: 2px;
+        }
+
+        .select2-results__option {
+            border-radius: 0.25rem;
+            margin-bottom: 2px;
+        }
+
+        .dark .select2-results__option--highlighted {
+            background-color: #2563eb !important;
+            /* Tailwind blue-600 */
+            color: #ffffff !important;
+        }
+
+        .select2-results__option--highlighted {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+        }
 </style>
 
 
@@ -422,15 +491,30 @@
                                             </div>
 
                                             <!-- Mitra -->
-                                            <div>
-                                                <label
-                                                    class="block text-xs font-semibold text-black/60 dark:text-white/60 mb-1">Mitra</label>
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-semibold text-black/60 dark:text-white/60 mb-1">Mitra</label>
                                                 <select name="kode_mitra" id="mitraFilter"
                                                     class="form-select py-2 px-4 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full select2 bg-transparent dark:bg-transparent text-black dark:text-white">
                                                     <option value="">Semua Mitra</option>
-                                                    @foreach($mitra as $item)
-                                                        <option value="{{ $item->kode_mitra }}" {{ request('kode_mitra') == $item->kode_mitra ? 'selected' : '' }}>
-                                                            {{ $item->nama_mitra }}
+                                                    @foreach ($mitra as $m)
+                                                        <option value="{{ $m->kode_mitra }}" 
+                                                            {{ request('kode_mitra') == $m->kode_mitra ? 'selected' : '' }}>
+                                                            {{ $m->nama_mitra }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            {{-- Filter Kota --}}
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-semibold text-black/60 dark:text-white/60 mb-1">Kota</label>
+                                                <select name="id_kota" id="kotaFilter"
+                                                    class="form-select py-2 px-4 rounded-lg border border-black/10 dark:border-white/10 text-sm w-full select2 bg-transparent dark:bg-transparent text-black dark:text-white">
+                                                    <option value="">Semua Kota</option>
+                                                    @foreach ($kota as $k)
+                                                        <option value="{{ $k->name }}" 
+                                                            {{ request('id_kota') == $k->name ? 'selected' : '' }}>
+                                                            {{ $k->name }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -663,14 +747,14 @@
                         , perPage: 20
                         , perPageSelect: [5, 10, 20, 50, 100]
                         , firstLast: false
-                        , prevText: '<i class="fas fa-chevron-left text-[10px]"></i>'
-                        , nextText: '<i class="fas fa-chevron-right text-[10px]"></i>'
                         , labels: {
                             placeholder: 'Cari transaksi, mitra, atau status'
                             , searchTitle: 'Cari transaksi'
                             , perPage: ''
                             , noRows: 'Tidak ada data transaksi ditemukan'
                             , info: 'Menampilkan {start} sampai {end} dari {rows} data'
+                            , previous: '<i class="fas fa-chevron-left text-[10px]"></i>'
+                            , next: '<i class="fas fa-chevron-right text-[10px]"></i>'
                         }
                         , layout: {
                             top: '{select}{search}'

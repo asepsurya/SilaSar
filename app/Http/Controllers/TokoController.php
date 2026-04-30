@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\CanvassingVisit;
 use Carbon\Carbon;
+use App\Models\Mitra;
 
 class TokoController extends Controller
 {
@@ -38,6 +39,8 @@ class TokoController extends Controller
                     ->whereMonth('visited_at', $month)
                     ->exists();
 
+                $isNew = $item->created_at ? $item->created_at->diffInDays(now()) < 30 : false;
+
                 return [
                     'id' => $item->id,
                     'nama' => $item->nama_mitra,
@@ -48,6 +51,7 @@ class TokoController extends Controller
                     'is_checked' => $isChecked,
                     'foto' => $item->foto,
                     'kode_mitra' => $item->kode_mitra,
+                    'is_new' => $isNew,
                 ];
             });
 
@@ -106,6 +110,7 @@ class TokoController extends Controller
             'is_checked' => $toko->is_checked,
             'foto' => $toko->foto,
             'kode_mitra' => $toko->kode_mitra,
+            'is_new' => true,
         ];
 
         return response()->json([
@@ -152,7 +157,7 @@ class TokoController extends Controller
     public function getProposedItems($kode_mitra)
     {
         $items = \App\Models\Penawaran::where('kode_mitra', $kode_mitra)
-            ->with('produk')
+            ->with('produk.satuan')
             ->get();
             
         $transactions = \App\Models\Transaksi::where('kode_mitra', $kode_mitra)
@@ -165,5 +170,21 @@ class TokoController extends Controller
             'data' => $items,
             'transactions' => $transactions
         ]);
+    }
+
+    public function getProposedItemsById($id)
+    {
+        $toko = Mitra::where('id', $id)
+            ->where('auth', auth()->id())
+            ->first();
+
+        if (!$toko) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data toko tidak ditemukan.'
+            ], 404);
+        }
+
+        return $this->getProposedItems($toko->kode_mitra);
     }
 }

@@ -17,7 +17,8 @@ class AuthController extends Controller
   // Tampilkan form login
   public function showLoginForm()
   {
-    return view("auth.login"); // Sesuaikan dengan view kamu
+    $captcha = $this->generateCaptchaData();
+    return view("auth.login", compact('captcha'));
   }
 
   // Proses login
@@ -27,7 +28,17 @@ class AuthController extends Controller
     $request->validate([
       "email" => "required|string", // Validasi untuk email atau phone
       "password" => "required|string",
+      "captcha" => "required|string",
     ]);
+
+    // Validasi Captcha
+    if (strtolower($request->captcha) !== strtolower(session('captcha_word'))) {
+      return back()
+        ->withErrors([
+          "captcha" => "Captcha yang Anda masukkan salah.",
+        ])
+        ->withInput();
+    }
 
     // Cek apakah input email atau phone
     $loginField = filter_var($request->email, FILTER_VALIDATE_EMAIL)
@@ -45,10 +56,10 @@ class AuthController extends Controller
       // Login berhasil
       $request->session()->regenerate();
       $user = Auth::user();
-      if ($user->hasRole('admin') || $user->hasRole('superadmin')) {
+      if ($user->hasRole('admin') || $user->hasRole('superadmin') || $user->hasRole('platinum')) {
         // Jika role adalah admin atau superadmin, arahkan ke dashboard keuangan
         return redirect()->route('dashboard')->with('success', 'Berhasil Login, Selamat Datang');
-      }else{
+      } else {
         return redirect()->route('index.keuangan.harian')->with('success', 'Berhasil Login, Selamat Datang');
       }
 
@@ -62,81 +73,80 @@ class AuthController extends Controller
       ->withInput();
   }
 
-  public function index(){
+  public function index()
+  {
     return redirect('/login');
   }
 
-  public function passReset(){
-   // Panggil API provinsi
-    $response = Http::get('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
+  public function passReset()
+  {
+    $captcha = $this->generateCaptchaData();
+    return view('auth.resetpass.index', compact('captcha'));
+  }
 
-    if ($response->ok()) {
+  private function generateCaptchaData()
+  {
+    try {
+      $response = Http::timeout(3)->get('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
+      if ($response->ok()) {
         $provinces = collect($response->json())->pluck('name');
         $captcha = $provinces->random();
-    } else {
+      } else {
         $captcha = 'Indonesia';
+      }
+    } catch (\Exception $e) {
+      $captcha = 'Indonesia';
     }
-
-
     session(['captcha_word' => $captcha]);
-    return view('auth.resetpass.index',compact('captcha'));
+    return $captcha;
   }
 
   public function refreshCaptcha()
   {
-       $response = Http::get('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
-
-    if ($response->ok()) {
-        $provinces = collect($response->json())->pluck('name');
-        $captcha = $provinces->random();
-    } else {
-        $captcha = 'Indonesia';
-    }
-
-
-      session(['captcha_word' => $captcha]);
-
-      return response()->json(['captcha' => $captcha]);
+    $captcha = $this->generateCaptchaData();
+    return response()->json(['captcha' => $captcha]);
   }
 
-    // Bisa kamu letakkan di atas controller, atau di helper file terpisah
-  private  function generateRandomPassword($length = 8) {
-      $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      $password = '';
-      for ($i = 0; $i < $length; $i++) {
-          $password .= $characters[rand(0, strlen($characters) - 1)];
-      }
-      return $password;
+  // Bisa kamu letakkan di atas controller, atau di helper file terpisah
+  private function generateRandomPassword($length = 8)
+  {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $password = '';
+    for ($i = 0; $i < $length; $i++) {
+      $password .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    return $password;
   }
 
 
   public function passResetAction(Request $request)
   {
-      $request->validate([
-          'email' => 'required|email|exists:users,email',
-          'chapta' => 'required'
-      ]);
+    $request->validate([
+      'email' => 'required|email|exists:users,email',
+      'chapta' => 'required'
+    ]);
 
-      if (strtolower($request->chapta) !== strtolower(session('captcha_word'))) {
-          return back()->withErrors(['chapta' => 'Captcha salah']);
-      }
+    if (strtolower($request->chapta) !== strtolower(session('captcha_word'))) {
+      return back()->withErrors(['chapta' => 'Captcha salah']);
+    }
 
-      $password = $this->generateRandomPassword(8);
+    $password = $this->generateRandomPassword(8);
 
-      $user = User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email)->first();
 
-      $user->password = Hash::make($password);
-      $user->save();
+    $user->password = Hash::make($password);
+    $user->save();
 
-      Mail::to($user->email)->send(new ResetPassMail($user->email, $password));
+    Mail::to($user->email)->send(new ResetPassMail($user->email, $password));
 
-      return back()->with('success', 'Password baru sudah dikirim ke email Anda.');
+    return back()->with('success', 'Password baru sudah dikirim ke email Anda.');
   }
 
-  public function passChange(request $request){
+  public function passChange(request $request)
+  {
     $request->validate([
-        'id' => 'required|exists:users,id',
-        'password' => 'required|min:8',
+      'id' => 'required|exists:users,id',
+      'password' => 'required|min:8',
     ]);
 
     $user = User::where('id', $request->id)->first();

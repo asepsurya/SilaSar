@@ -873,35 +873,6 @@
     </div>
     <div id="tab-content-4" class="tab-content hidden p-4">
         <p class="text-sm font-semibold mb-3 text-black/40 dark:text-white/40">Catatan Keuangan</p>
-        @php
-            // Ambil parameter sort dan filter tanggal dari request
-            $sort = request('sort', 'desc');
-            $from = request('from');
-            $to = request('to');
-
-            // Filter transaksi berdasarkan rentang tanggal jika ada
-            $filteredTransaksi = $transaksi;
-            if ($from && $to) {
-                try {
-                    $fromDate = \Carbon\Carbon::createFromFormat('d/m/Y', $from)->startOfDay();
-                    $toDate = \Carbon\Carbon::createFromFormat('d/m/Y', $to)->endOfDay();
-                    $filteredTransaksi = $filteredTransaksi->filter(function ($item) use ($fromDate, $toDate) {
-                        $itemDate = \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal);
-                        return $itemDate->between($fromDate, $toDate);
-                    });
-                } catch (\Exception $e) {
-                    // Jika format salah, tampilkan semua
-                }
-            }
-
-            // Urutkan transaksi berdasarkan tanggal sesuai sort
-            $filteredTransaksi =
-                $sort === 'asc' ? $filteredTransaksi->sortBy(function ($item) {
-                    return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
-                }) : $filteredTransaksi->sortByDesc(function ($item) {
-                    return \Carbon\Carbon::createFromFormat('d/m/Y', $item->tanggal)->format('Y-m-d');
-                });
-        @endphp
 
 
 

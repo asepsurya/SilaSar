@@ -35,7 +35,7 @@
     <!-- sidebar content -->
     <div class="bg-white dark:bg-black h-full">
         <!-- Start Logo -->
-        <div class="flex items-center p-4">
+        <div class="flex items-center p-4 ">
             <!-- Logo Bulat -->
 
 
@@ -69,7 +69,7 @@
         <!-- Start Menu -->
         <ul class="relative h-[calc(100vh-58px)] flex flex-col gap-1 overflow-y-auto overflow-x-hidden p-4 py-0"
             x-data="{ activeMenu: '{{ $activeMenu }}' }" id="menu">
-            <li class="menu nav-item mb-3">
+            <li class="menu nav-item mb-3" id="search-menu-wrapper">
                 @include('layout.partial.seachmenu')
             </li>
 
@@ -94,7 +94,7 @@
 
                     <!-- Label -->
                     <div class="flex items-center">
-                        <x-icon name="dashboard" class="text-gray-600" />
+                        <x-icon name="dashboard" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1">Dashboard</span>
                     </div>
                 </a>
@@ -120,10 +120,10 @@
                 </ul>
             </li>
             <li class="menu nav-item">
-                <h2 class="pl-3 my-2 text-black/60 dark:text-white/40 text-sm"><span>Maping Toko</span></h2>
+
                 <a href="{{ route('canvassing.index') }}" class="{{ $active === 'canvassing' ? 'active' : '' }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="toko" class="text-gray-600" />
+                        <x-icon name="toko" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Canvasing</span>
                     </div>
                 </a>
@@ -143,7 +143,7 @@
                         </svg>
                     </div>
                     <div class="flex items-center">
-                        <x-icon name="grafik" class="text-gray-600" />
+                        <x-icon name="buku_harian" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1">Buku Harian</span>
                     </div>
                 </a>
@@ -170,7 +170,7 @@
                         </svg>
                     </div>
                     <div class="flex items-center">
-                        <x-icon name="grafik" class="text-gray-600" />
+                        <x-icon name="grafik" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1">Keuangan Usaha</span>
                     </div>
                 </a>
@@ -203,7 +203,7 @@
 
                     <!-- Label -->
                     <div class="flex items-center">
-                        <x-icon name="laporan" class="text-gray-600" />
+                        <x-icon name="laporan" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1">Laporan </span>
                     </div>
                 </a>
@@ -261,7 +261,7 @@
                         </svg>
                     </div>
                     <div class="flex items-center">
-                        <x-icon name="forms" class="text-gray-600" />
+                        <x-icon name="forms" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1">Data Produk</span>
                     </div>
                 </a>
@@ -282,7 +282,7 @@
             <li class="menu nav-item">
                 <a href="{{ route('manajemenStok.index') }}" class="{{ $active === 'persediaan' ? 'active' : '' }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="stok" class="text-gray-600" />
+                        <x-icon name="stok" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Manajemen Stok</span>
                     </div>
                 </a>
@@ -290,7 +290,7 @@
             <li class="menu nav-item">
                 <a href="{{ route('index.mitra') }}" class="{{ $active === 'mitra' ? 'active' : '' }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="supplier" class="text-gray-600" />
+                        <x-icon name="supplier" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Data Mitra</span>
                     </div>
                 </a>
@@ -301,7 +301,7 @@
                 <a class="nav-link group {{ $active === 'transaksi' ? 'active' : '' }}"
                     href="{{ route('transaksi.index') }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="layer" class="text-gray-600" />
+                        <x-icon name="layer" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Transaksi</span>
                     </div>
                 </a>
@@ -310,7 +310,7 @@
                 <a class="nav-link group {{ $active === 'retur' ? 'active' : '' }}"
                     href="{{ route('transaksi.retur') }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="stok" class="text-gray-600" />
+                        <x-icon name="retur" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Retur</span>
                     </div>
                 </a>
@@ -320,7 +320,7 @@
             <li class="menu nav-item">
                 <a class="nav-link group {{ $active === 'nota' ? 'active' : '' }}" href="{{ route('nota.index') }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="document" class="text-gray-600" />
+                        <x-icon name="document" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Nota dan Kwitansi</span>
                     </div>
                 </a>
@@ -329,7 +329,7 @@
                 <a class="nav-link group {{ $active === 'laporan_penjualan' ? 'active' : '' }}"
                     href="{{ route('laporan.penjualan') }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="penjualan" class="text-gray-600" />
+                        <x-icon name="penjualan" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Laporan Penjualan</span>
                     </div>
                 </a>
@@ -353,7 +353,7 @@
                             </svg>
                         </div>
                         <div class="flex items-center">
-                            <x-icon name="user" class="text-gray-600" />
+                            <x-icon name="user" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                             <span class="pl-1">Data Pengguna</span>
                         </div>
                     </a>
@@ -371,7 +371,7 @@
                 <a class="nav-link group {{ $active === 'setelan' ? 'active' : '' }}"
                     href="{{ route('perusahaan.setting') }}">
                     <div class="flex pl-5 items-center">
-                        <x-icon name="usaha" class="text-gray-600" />
+                        <x-icon name="usaha" class="text-gray-600 dark:text-gray-300 !text-[22px]" />
                         <span class="pl-1 text-black dark:text-white">Perusahaan Saya</span>
                     </div>
                 </a>

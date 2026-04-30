@@ -257,7 +257,7 @@
                             }
                             });
                          })
-                        .catch(err => co   nsole.error('Error loading data:', err));
+                        .catch(err => console.error('Error loading data:', err));
                   }
                 }));
              });

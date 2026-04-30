@@ -14,12 +14,18 @@
     <!-- Site Title -->
     <title>{{ config('app.name') }} | @yield('title')</title>
 
+    <script>
+        window.OLLAMA_API_URL = "{{ config('services.ollama.url') }}";
+    </script>
+
     <!-- Site favicon -->
     <link rel="shortcut icon" href="{{asset('assets/fav.png')}}" />
 
     <!-- Custom Style -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     {{-- select 2 --}}
     <!-- jQuery (Select2 depends on jQuery) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -34,6 +40,29 @@
     @yield('css')
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom-table.css') }}" />
     <style>
+        /* Sidebar icon normal */
+        .sidebar .ph {
+            font-size: 24px;
+            color: #374151;
+            /* gray-700 */
+            transition: color .2s ease;
+        }
+
+        /* Hover */
+        .sidebar .ph:hover {
+            color: #111827;
+        }
+
+        /* Dark mode */
+        .dark .sidebar .ph {
+            color: #d1d5db;
+            /* gray-300 */
+        }
+
+        .dark .sidebar .ph:hover {
+            color: #ffffff;
+        }
+
         @media (max-width: 768px) {
             .p-7 {
                 padding: 9px;
@@ -78,7 +107,7 @@
 
 <body x-data="main"
     class="antialiased relative font-inter bg-white dark:bg-black text-black dark:text-white text-sm font-normal overflow-x-hidden vertical"
-    :class="[ $store.app.sidebar ? 'toggle-sidebar' : '', $store.app.rightsidebar ? 'right-sidebar' : '', $store.app.menu, $store.app.layout]">
+    :class="[ $store.app.sidebar ? 'toggle-sidebar' : '', $store.app.rightsidebar ? 'right-sidebar' : '', $store.app.menu, $store.app.layout, '{{ Request::is('canvassing*') ? 'is-canvassing' : '' }}' ]">
     <!-- Start Menu Sidebar Olverlay -->
     <div x-cloak class="fixed inset-0 bg-[black]/60 z-40 lg:hidden" :class="{'hidden' : !$store.app.sidebar}"
         @click="$store.app.toggleSidebar()"></div>
@@ -109,9 +138,8 @@
             @endif
             <!-- End Topbar -->
 
-            <!-- Start Content -->
             <div class="flex-1 overflow-y-auto overflow-x-hidden">
-                <div class="p-7" id="container">
+                <div class="{{ Request::is('canvassing*') ? '' : 'p-7' }}" id="container">
                     @yield('container')
                 </div>
             </div>
@@ -119,22 +147,24 @@
 
             <!-- Start Footer -->
 
-            <div class="hidden sm:block">
-                <footer
-                    class="p-7 bg-white dark:bg-black flex flex-wrap items-center justify-center sm:justify-between gap-3">
-                    <p class="text-xs text-black/40 dark:text-white/40">&copy; {{ date('Y') }} {{ config('app.name') }}
-                    </p>
-                    <ul class="flex items-center text-black/40 dark:text-white/40 text-xs gap-5">
-                        {{-- <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="" width="120"></li> --}}
-                        <li>
-                            <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130"
-                                class="block dark:hidden">
-                            <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130"
-                                class="hidden dark:block">
-                        </li>
-                    </ul>
-                </footer>
-            </div>
+            @if(!Request::is('canvassing*'))
+                <div class="hidden sm:block">
+                    <footer
+                        class="p-7 bg-white dark:bg-black flex flex-wrap items-center justify-center sm:justify-between gap-3">
+                        <p class="text-xs text-black/40 dark:text-white/40">&copy; {{ date('Y') }} {{ config('app.name') }}
+                        </p>
+                        <ul class="flex items-center text-black/40 dark:text-white/40 text-xs gap-5">
+                            {{-- <li><img src="{{ asset('assets/BI_Logo.png') }}" alt="" width="120"></li> --}}
+                            <li>
+                                <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130"
+                                    class="block dark:hidden">
+                                <img src="{{ asset('assets/tidessa.png') }}" alt="" srcset="" width="130"
+                                    class="hidden dark:block">
+                            </li>
+                        </ul>
+                    </footer>
+                </div>
+            @endif
             <!-- End Footer -->
         </div>
         <!-- End Content Area -->
@@ -153,6 +183,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
         <!-- Custom js -->
         <script src="{{ asset('assets/js/custom.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="{{ asset('assets/js/rightsidebar.js') }}"></script>
         @yield('js')
 </body>
 

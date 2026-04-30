@@ -1,5 +1,34 @@
 @props(['name'])
 
+@php
+    $phosphorIcons = [
+        'dashboard' => 'squares-four',
+        'toko' => 'storefront',
+        'sidebar' => 'sidebar-simple',
+        'stok' => 'archive-box',
+        'penjualan' => 'chart-bar',
+        'grafik' => 'wallet',
+        'buku_harian' => 'book-open',
+        'laporan' => 'file-text',
+        'usaha' => 'buildings',
+        'supplier' => 'users-three',
+        'layer' => 'shopping-cart',
+        'retur' => 'arrow-u-up-left',
+        'document' => 'receipt',
+        'forms' => 'package',
+        'user' => 'users',
+    ];
+
+    $phosphorSizes = [
+        'sidebar' => 'text-[28px]',
+    ];
+
+    $iconClass = trim(($phosphorSizes[$name] ?? 'text-[20px]') . ' leading-none ' . $attributes->get('class', ''));
+@endphp
+
+@if (isset($phosphorIcons[$name]))
+    <i {{ $attributes->except('class')->merge(['class' => 'ph ph-' . $phosphorIcons[$name] . ' ' . $iconClass]) }}></i>
+@else
 @switch($name)
     @case('dashboard')
         <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -364,3 +393,4 @@
     @default
         <span class="text-red-500">Icon not found</span>
 @endswitch
+@endif

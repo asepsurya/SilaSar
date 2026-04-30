@@ -142,14 +142,14 @@ document.addEventListener("alpine:init", () => {
                 perPage: 25,
                 perPageSelect: [5, 10, 20, 50, 100],
                 firstLast: false,
-                prevText: '<i class="fas fa-chevron-left text-[10px]"></i>',
-                nextText: '<i class="fas fa-chevron-right text-[10px]"></i>',
                 labels: {
                     placeholder: 'Cari transaksi...',
                     searchTitle: 'Cari transaksi',
                     perPage: '',
                     noRows: 'Tidak ada data stok ditemukan',
-                    info: 'Menampilkan {start} sampai {end} dari {rows} data'
+                    info: 'Menampilkan {start} sampai {end} dari {rows} data',
+                    previous: '<i class="fas fa-chevron-left text-[10px]"></i>',
+                    next: '<i class="fas fa-chevron-right text-[10px]"></i>'
                 },
                 layout: {
                     top: '{select}{search}',

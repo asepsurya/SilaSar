@@ -1,24 +1,26 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UpdateController;
-use App\Http\Controllers\Ikm\IkmController;
+use App\Http\Controllers\Api\AppSummaryController;
+use App\Http\Controllers\Api\LogActivityController;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Nota\NotaController;
 use App\Http\Controllers\Auth\LogoutController;
-use App\Http\Controllers\Mitra\MitraController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Dashboard\DashboardAdminController;
+use App\Http\Controllers\Ikm\IkmController;
+use App\Http\Controllers\Keuangan\HistoryController;
+use App\Http\Controllers\Keuangan\HistoryHarianController;
+use App\Http\Controllers\Keuangan\KeuanganController;
+use App\Http\Controllers\Keuangan\KeuanganHarianController;
+use App\Http\Controllers\Laporan\LaporanController;
+use App\Http\Controllers\Mitra\MitraController;
+use App\Http\Controllers\Nota\NotaController;
+use App\Http\Controllers\Perusahaan\PerusahaanController;
 use App\Http\Controllers\Produk\ProdukController;
 use App\Http\Controllers\Region\RegionController;
-use App\Http\Controllers\Laporan\LaporanController;
-use App\Http\Controllers\Keuangan\HistoryController;
-use App\Http\Controllers\Keuangan\KeuanganController;
 use App\Http\Controllers\Transaksi\TransaksiController;
-use App\Http\Controllers\Perusahaan\PerusahaanController;
-use App\Http\Controllers\Keuangan\HistoryHarianController;
-use App\Http\Controllers\Keuangan\KeuanganHarianController;
-use App\Http\Controllers\Dashboard\DashboardAdminController;
+use App\Http\Controllers\UpdateController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', [AuthController::class, 'index'])->middleware('guest');
@@ -42,11 +44,13 @@ Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 // ------------------------------------------------
 // route Regency Administrasi
 // ------------------------------------------------
-Route::post('/getkabupaten',[RegionController::class,'getkabupaten'])->name('getkabupaten');
-Route::post('/getkecamatan',[RegionController::class,'getkecamatan'])->name('getkecamatan');
-Route::post('/getdesa',[RegionController::class,'getdesa'])->name('getdesa');
+Route::post('/getkabupaten', [RegionController::class, 'getkabupaten'])->name('getkabupaten');
+Route::post('/getkecamatan', [RegionController::class, 'getkecamatan'])->name('getkecamatan');
+Route::post('/getdesa', [RegionController::class, 'getdesa'])->name('getdesa');
 
-Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(function () {
+Route::middleware(['auth', 'checkPerusahaan', 'redirectIfNotAdmin'])->group(function () {
+    Route::get('/api/logs/activity', [LogActivityController::class, 'getLogs'])->name('api.logs.activity');
+    Route::get('/api/app-summary', [AppSummaryController::class, 'getSummary'])->name('api.app.summary');
     Route::post('/change-password', [AuthController::class, 'passChange'])->name('passChange')->middleware('auth');
     // ------------------------------------------------
     // Middleware untuk superadmin|admin|pengguna level platinum
@@ -102,6 +106,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/transaksi', [TransaksiController::class, 'transaksiIndex'])->name('transaksi.index');
         Route::get('/retur', [TransaksiController::class, 'returIndex'])->name('transaksi.retur');
         Route::post('/retur/kembalikan', [TransaksiController::class, 'returKembalikan'])->name('transaksi.retur.kembalikan');
+        Route::post('/retur/batal-kembalikan/{id}', [TransaksiController::class, 'batalKembalikanRetur'])->name('transaksi.retur.batal-kembalikan');
         Route::get('/transaksi/{id}', [TransaksiController::class, 'DetailTransaki'])->name('transaksi.detail');
         Route::post('/transaksi/create', [TransaksiController::class, 'transaksiCreate'])->name('transaksi.create');
         Route::post('/transaksi/update', [TransaksiController::class, 'transaksiUpdate'])->name('transaksi.update');
@@ -118,6 +123,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
 
 
         Route::get('/laporan/penjualan', [TransaksiController::class, 'laporanTransaksi'])->name('laporan.penjualan');
+        Route::get('/laporan/penjualan/rekap', [TransaksiController::class, 'laporanTransaksiRekap'])->name('laporan.penjualan.rekap');
         Route::get('/laporan/konsinyasi/{id}', [LaporanController::class, 'laporankionsinyasi'])->name('laporan.konsinyasi');
         Route::get('/laporan/invoice/{id}', [LaporanController::class, 'laporaninvoice'])->name('laporan.invoice');
         Route::get('/laporan/kwitansi/{id}', [LaporanController::class, 'laporankwitansi'])->name('laporan.kwitansi');
@@ -125,6 +131,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::get('/laporan/pdf/labarugi', [LaporanController::class, 'laporanlabarugipdf'])->name('laporan.labarugipdf');
         Route::get('/laporan/pdf/neraca', [LaporanController::class, 'laporanneraca'])->name('laporan.nercapdf');
         Route::get('/laporan/pdf', [TransaksiController::class, 'exportPDF'])->name('laporan.exportPDF');
+        Route::get('/laporan/pdf/rekap', [TransaksiController::class, 'exportPDFRekap'])->name('laporan.exportPDFRekap');
 
 
         // ------------------------------------------------
@@ -148,15 +155,15 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     });
     Route::middleware(['role:superadmin|admin|platinum|gold'])->group(function () {
         // ------------------------------------------------
-         // Route Catatan Keuangan_harian
-         // ------------------------------------------------
-         Route::get('/keuangan/catatan/', [KeuanganHarianController::class, 'index'])->name('index.keuangan.harian');
-         Route::get('/keuangan/calender', [KeuanganHarianController::class, 'kelenderIndex'])->name('keuangan.kalender.harian');
-         Route::post('/catatan/keuangan/add', [KeuanganHarianController::class, 'keuanganAdd'])->name('keuangan.add.harian');
-         Route::post('/catatan/keuangan/update', [KeuanganHarianController::class, 'keuanganUpdate'])->name('keuangan.update.harian');
-         Route::get('/catatan/keuangan/delete/{id}', [KeuanganHarianController::class, 'keuanganDelete'])->name('keuangan.delete.harian');
-         Route::get('/catatan/keuangan/export/pdf', [KeuanganHarianController::class, 'keuanganPDF'])->name('keuangan.pdf.harian');
-         Route::get('/catatan/history/cetakpdf/{id_rekening}', [KeuanganHarianController::class, 'cetakHistoryPDF'])->name('history.cetakpdf.harian');
+        // Route Catatan Keuangan_harian
+        // ------------------------------------------------
+        Route::get('/keuangan/catatan/', [KeuanganHarianController::class, 'index'])->name('index.keuangan.harian');
+        Route::get('/keuangan/calender', [KeuanganHarianController::class, 'kelenderIndex'])->name('keuangan.kalender.harian');
+        Route::post('/catatan/keuangan/add', [KeuanganHarianController::class, 'keuanganAdd'])->name('keuangan.add.harian');
+        Route::post('/catatan/keuangan/update', [KeuanganHarianController::class, 'keuanganUpdate'])->name('keuangan.update.harian');
+        Route::get('/catatan/keuangan/delete/{id}', [KeuanganHarianController::class, 'keuanganDelete'])->name('keuangan.delete.harian');
+        Route::get('/catatan/keuangan/export/pdf', [KeuanganHarianController::class, 'keuanganPDF'])->name('keuangan.pdf.harian');
+        Route::get('/catatan/history/cetakpdf/{id_rekening}', [KeuanganHarianController::class, 'cetakHistoryPDF'])->name('history.cetakpdf.harian');
 
         // ------------------------------------------------
         // Route Akun dan Rekening
@@ -176,7 +183,7 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
     Route::middleware(['role:superadmin|admin|platinum'])->get('/dashboard/keuangan', [DashboardAdminController::class, 'dashboardKeuangan'])->name('dashboard.keuangan');
     Route::middleware(['role:superadmin|admin|platinum|gold'])->get('/dashboard/keuangan_saya', [DashboardAdminController::class, 'dashboardKeuanganSaya'])->name('dashboard.keuangan.harian');
 
-    Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin','role:superadmin|admin|platinum'])->group(function () {
+    Route::middleware(['auth', 'checkPerusahaan', 'redirectIfNotAdmin', 'role:superadmin|admin|platinum'])->group(function () {
         // ------------------------------------------------
         // Route IKM
         // ------------------------------------------------
@@ -231,21 +238,21 @@ Route::middleware(['auth','checkPerusahaan','redirectIfNotAdmin'])->group(functi
         Route::post('/perusahaan/update-stamp', [PerusahaanController::class, 'updateStamp'])->name('perusahaan.update.stamp');
     });
 
-        // ------------------------------------------------
-        // Route Canvassing Toko
-        // ------------------------------------------------
-        Route::get('/canvassing', [\App\Http\Controllers\TokoController::class, 'index'])->name('canvassing.index');
-        Route::post('/canvassing/store', [\App\Http\Controllers\TokoController::class, 'store'])->name('canvassing.store');
-        Route::get('/api/toko', [\App\Http\Controllers\TokoController::class, 'getTokos']);
-        Route::post('/api/rute', [\App\Http\Controllers\TokoController::class, 'rute']);
-        Route::post('/api/toko/{id}/toggle-status', [\App\Http\Controllers\TokoController::class, 'toggleStatus']);
-        Route::get('/api/toko/{kode_mitra}/items', [\App\Http\Controllers\TokoController::class, 'getProposedItems']);
+    // ------------------------------------------------
+    // Route Canvassing Toko
+    // ------------------------------------------------
+    Route::get('/canvassing', [\App\Http\Controllers\TokoController::class, 'index'])->name('canvassing.index');
+    Route::post('/canvassing/store', [\App\Http\Controllers\TokoController::class, 'store'])->name('canvassing.store');
+    Route::get('/api/toko', [\App\Http\Controllers\TokoController::class, 'getTokos']);
+    Route::post('/api/rute', [\App\Http\Controllers\TokoController::class, 'rute']);
+    Route::post('/api/toko/{id}/toggle-status', [\App\Http\Controllers\TokoController::class, 'toggleStatus']);
+    Route::get('/api/toko/{kode_mitra}/items', [\App\Http\Controllers\TokoController::class, 'getProposedItems'])->where('kode_mitra', '.*');
+    Route::get('/api/toko/{id}/items-by-id', [\App\Http\Controllers\TokoController::class, 'getProposedItemsById']);
 
-        // ------------------------------------------------
-        // Route Perusahaan
-        // ------------------------------------------------
-        Route::get('/create/perusahaan/auth', [PerusahaanController::class, 'index'])->middleware('check.auth.perusahaan')->name('perusahaan.index');
-        Route::post('/create/perusahaan', [PerusahaanController::class, 'create'])->name('perusahaan.create');
-        Route::get('/setelan', [PerusahaanController::class, 'PerusahaanSetting'])->name('perusahaan.setting');
+    // ------------------------------------------------
+    // Route Perusahaan
+    // ------------------------------------------------
+    Route::get('/create/perusahaan/auth', [PerusahaanController::class, 'index'])->middleware('check.auth.perusahaan')->name('perusahaan.index');
+    Route::post('/create/perusahaan', [PerusahaanController::class, 'create'])->name('perusahaan.create');
+    Route::get('/setelan', [PerusahaanController::class, 'PerusahaanSetting'])->name('perusahaan.setting');
 });
-

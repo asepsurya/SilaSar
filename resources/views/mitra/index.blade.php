@@ -349,14 +349,14 @@
                     , perPage: 20
                     , perPageSelect: [5, 10, 20, 50, 100]
                     , firstLast: false
-                    , prevText: '<i class="fas fa-chevron-left text-[10px]"></i>'
-                    , nextText: '<i class="fas fa-chevron-right text-[10px]"></i>'
                     , labels: {
                         placeholder: 'Cari transaksi, mitra, atau status'
                     , searchTitle: 'Cari data mitra'
                     , perPage: ''
                     , noRows: 'Tidak ada data mitra tersedia'
                     , info: 'Menampilkan {start} sampai {end} dari {rows} data'
+                    , previous: '<i class="fas fa-chevron-left text-[10px]"></i>'
+                    , next: '<i class="fas fa-chevron-right text-[10px]"></i>'
                     , }
                     , layout: {
                         top: '{select}{search}'
