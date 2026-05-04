@@ -235,13 +235,17 @@ document.addEventListener('alpine:init', () => {
             try {
                 const promptContext = this.buildPromptContext(text);
 
-                const response = await fetch(window.OLLAMA_API_URL || 'https://myollama.scrollwebid.com/api/generate', {
+                const response = await fetch('/api/ai/generate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
                     body: JSON.stringify({
-                        model: 'gemini-3-flash-preview',
+                        model: 'gpt-oss:120b-cloud',
                         prompt: promptContext,
                         stream: true,
+                        web_search: { enabled: true, search_depth: 'high' },
                         options: { temperature: 0.8, top_p: 0.95 }
                     })
                 });
@@ -250,29 +254,40 @@ document.addEventListener('alpine:init', () => {
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
+                let buffer = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n').filter(line => line.trim() !== '');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Keep the last incomplete line in the buffer
 
                     for (const line of lines) {
+                        if (line.trim() === '') continue;
                         try {
                             const data = JSON.parse(line);
+                            if (data.error) {
+                                throw new Error(data.error);
+                            }
                             if (data.response) {
                                 this.chatHistory[aiMsgIndex].content += data.response;
                                 this.$nextTick(() => this.scrollToBottom());
                             }
                         } catch (e) {
-                            console.error('Error parsing stream chunk', e);
+                            if (e.name === 'SyntaxError') {
+                                console.error('Error parsing stream chunk', e);
+                            } else {
+                                throw e; // Re-throw custom server errors
+                            }
                         }
                     }
                 }
             } catch (error) {
                 console.error("AI Chat Error:", error);
-                this.chatHistory[aiMsgIndex].content = "Maaf, sepertinya saya sedang offline atau terjadi masalah koneksi ke server AI.";
+                const errMsg = error.message && error.message !== 'Network error' ? error.message : "Maaf, sepertinya saya sedang offline atau terjadi masalah koneksi ke server AI.";
+                this.chatHistory[aiMsgIndex].content = errMsg;
             } finally {
                 this.isAiTyping = false;
                 this.saveThreads();
@@ -293,6 +308,9 @@ document.addEventListener('alpine:init', () => {
             6. Canvassing Toko: Pemetaan toko, rute pemasaran, dan status rute canvassing.
             7. Laporan Terpadu: Cetak laporan penjualan, stok, neraca, dan keuangan secara otomatis.
             Tugas Anda adalah membantu pengguna memahami data aktivitas mereka dan memberikan insight terkait operasional toko/gudang berdasarkan seluruh menu tersebut.
+            Instruksi Penting:
+            - "Mitra" adalah nama toko, pelanggan, atau pihak yang melakukan pesanan/transaksi.
+            - Jika pengguna menanyakan jumlah pesanan/transaksi sebuah nama (contoh: "fortune"), cari nama tersebut di daftar "Transaksi per Mitra" (misal: "Tbk Fortune"). Jangan keliru menganggapnya sebagai produk.
             `;
 
             const t = userText.toLowerCase();
@@ -311,6 +329,7 @@ document.addEventListener('alpine:init', () => {
                 - Toko di Bandung: ${s.canvassing.toko_bandung.join(', ')}
                 - Total Produk: ${s.produk.total}
                 - Stok Menipis: ${s.produk.stok_menipis.map(p => `${p.nama_produk} (Sisa ${p.stok})`).join(', ')}
+                - Transaksi per Mitra: ${s.transaksi_mitra ? s.transaksi_mitra.map(m => `${m.nama_mitra} (${m.total_pesan}x pesan)`).join(', ') : 'Belum ada data'}
                 `;
             }
 

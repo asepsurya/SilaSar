@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AppSummaryController;
 use App\Http\Controllers\Api\LogActivityController;
 use App\Http\Controllers\Auth\AuthController;
@@ -52,6 +53,7 @@ Route::post('/getdesa', [RegionController::class, 'getdesa'])->name('getdesa');
 Route::middleware(['auth', 'checkPerusahaan', 'redirectIfNotAdmin'])->group(function () {
     Route::get('/api/logs/activity', [LogActivityController::class, 'getLogs'])->name('api.logs.activity');
     Route::get('/api/app-summary', [AppSummaryController::class, 'getSummary'])->name('api.app.summary');
+    Route::post('/api/ai/generate', [AiController::class, 'generate'])->name('api.ai.generate');
     Route::post('/change-password', [AuthController::class, 'passChange'])->name('passChange')->middleware('auth');
     // ------------------------------------------------
     // Middleware untuk superadmin|admin|pengguna level platinum

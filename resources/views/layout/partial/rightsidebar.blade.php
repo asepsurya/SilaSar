@@ -214,7 +214,7 @@
                             <div class="px-4 py-3 rounded-2xl
                                     bg-gray-50 dark:bg-white/5
                                     border border-black/5 dark:border-white/5
-                                    shadow-sm overflow-hidden min-w-0">
+                                    shadow-sm min-w-0" style="overflow-x: auto;">
 
                                 <div class="text-[13px]
                                         leading-relaxed
@@ -269,7 +269,8 @@
                             border border-black/5 dark:border-white/5
                             flex gap-2 items-center">
 
-                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">Sedang memikirkan...</span>
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce ml-1"></span>
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
                             style="animation-delay:.2s"></span>
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"

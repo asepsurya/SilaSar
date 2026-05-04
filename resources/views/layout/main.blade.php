@@ -184,7 +184,7 @@
         <!-- Custom js -->
         <script src="{{ asset('assets/js/custom.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-        <script src="{{ asset('assets/js/rightsidebar.js') }}"></script>
+        <script src="{{ asset('assets/js/rightsidebar.js') }}?v={{ time() }}"></script>
         <script>
             function confirmLogout(formId = 'logout-form') {
                 Swal.fire({

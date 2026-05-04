@@ -59,6 +59,15 @@ class AppSummaryController extends Controller
             ->select('nama_produk', 'stok')
             ->get();
 
+        // 4. Mitra Transaction Count
+        $mitraTransaksi = DB::table('mitras')
+            ->where('mitras.auth', $userId)
+            ->join('transaksis', 'mitras.kode_mitra', '=', 'transaksis.kode_mitra')
+            ->select('mitras.nama_mitra', DB::raw('count(transaksis.id) as total_pesan'))
+            ->groupBy('mitras.id', 'mitras.nama_mitra')
+            ->orderBy('total_pesan', 'desc')
+            ->get();
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -76,7 +85,8 @@ class AppSummaryController extends Controller
                 'produk' => [
                     'total' => $totalProduk,
                     'stok_menipis' => $stokMenipis
-                ]
+                ],
+                'transaksi_mitra' => $mitraTransaksi
             ]
         ]);
     }
