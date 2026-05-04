@@ -201,29 +201,14 @@
                     <!-- AI -->
                     <template x-if="msg.role === 'ai'">
 
-                        <div class="flex gap-3 max-w-[92%] ">
-
-                            <div class="w-8 h-8 rounded-full
-                                    ">
-
-                                <i
-                                    class="ph ph-storefront text-[20px] leading-none text-gray-600 dark:text-gray-300 !text-[22px]"></i>
-
-                            </div>
-
-                            <div class="px-4 py-3 rounded-2xl
-                                    bg-gray-50 dark:bg-white/5
-                                    border border-black/5 dark:border-white/5
-                                    shadow-sm min-w-0" style="overflow-x: auto;">
-
+                        <div class="w-full">
+                            <div class="w-full min-w-0" style="overflow-x: auto;">
                                 <div class="text-[13px]
                                         leading-relaxed
                                         text-gray-800 dark:text-gray-200
                                         ai-prose" x-html="formatMessage(msg.content)">
                                 </div>
-
                             </div>
-
                         </div>
 
                     </template>
@@ -253,31 +238,15 @@
             <!-- Thinking -->
             <template x-if="isAiTyping">
 
-                <div class="flex gap-3">
-
-                    <div class="w-8 h-8 rounded-full
-                            bg-gradient-to-tr from-blue-600 to-indigo-600
-                            flex items-center justify-center
-                            animate-pulse">
-
-                        <i class="ph ph-sparkle text-white text-xs"></i>
-
-                    </div>
-
-                    <div class="px-4 py-3 rounded-2xl
-                            bg-gray-50 dark:bg-white/5
-                            border border-black/5 dark:border-white/5
-                            flex gap-2 items-center">
-
-                        <span class="text-xs text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">Sedang memikirkan...</span>
+                <div class="w-full">
+                    <div class="flex gap-2 items-center">
+                        <span class="text-[13px] text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">Sedang memikirkan...</span>
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce ml-1"></span>
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
                             style="animation-delay:.2s"></span>
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"
                             style="animation-delay:.4s"></span>
-
                     </div>
-
                 </div>
 
             </template>

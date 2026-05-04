@@ -1653,33 +1653,45 @@
 
         // Mobile Bottom Sheet Dragging logic
         const sheet = document.getElementById('canvassing-sidebar');
+        const headerArea = document.getElementById('sidebar-header');
         const handle = document.querySelector('.sheet-handle');
-        let startY, startHeight;
+        let startY, currentY;
 
-        if (handle) {
-            handle.addEventListener('touchstart', (e) => {
+        if (headerArea) {
+            // Touch events for swiping the header
+            headerArea.addEventListener('touchstart', (e) => {
+                // Ignore touch if it's on an input or button
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
                 startY = e.touches[0].clientY;
                 sheet.style.transition = 'none';
-            });
+            }, { passive: true });
 
-            handle.addEventListener('touchmove', (e) => {
-                const currentY = e.touches[0].clientY;
+            headerArea.addEventListener('touchmove', (e) => {
+                if (!startY) return;
+                currentY = e.touches[0].clientY;
                 const deltaY = startY - currentY;
-                if (deltaY > 50) {
+                
+                // Allow dragging down if expanded, or dragging up if collapsed
+                if (deltaY > 20) { // Dragging up
                     sheet.classList.add('expanded');
                     sheet.style.transform = 'translateY(0)';
-                } else if (deltaY < -50) {
+                } else if (deltaY < -20) { // Dragging down
                     sheet.classList.remove('expanded');
                     sheet.style.transform = '';
                 }
-            });
+            }, { passive: true });
 
-            handle.addEventListener('touchend', () => {
+            headerArea.addEventListener('touchend', () => {
+                startY = null;
                 sheet.style.transition = '';
             });
 
-            // Simple tap to toggle
-            handle.addEventListener('click', () => {
+            // Click to toggle (only on header background, not inputs/buttons)
+            headerArea.addEventListener('click', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                // Don't toggle if they just finished a drag
+                if (currentY && Math.abs(startY - currentY) > 20) return;
+                
                 sheet.classList.toggle('expanded');
                 if (sheet.classList.contains('expanded')) {
                     sheet.style.transform = 'translateY(0)';
@@ -1687,6 +1699,18 @@
                     sheet.style.transform = '';
                 }
             });
+        }
+        
+        if (handle) {
+             // Handle can also be tapped
+             handle.addEventListener('click', () => {
+                sheet.classList.toggle('expanded');
+                if (sheet.classList.contains('expanded')) {
+                    sheet.style.transform = 'translateY(0)';
+                } else {
+                    sheet.style.transform = '';
+                }
+             });
         }
     </script>
 @endsection
