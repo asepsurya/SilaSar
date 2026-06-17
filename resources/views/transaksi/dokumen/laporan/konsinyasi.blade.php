@@ -148,6 +148,7 @@
                     <th class="border-collapse border-black px-1 text-right w-[100px] font-semibold">Harga Unit</th>
                     <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold"></th>
                     <th class="border-collapse border-black px-1 text-right w-[110px] font-semibold">Sub Total Harga</th>
+                    <th class="border-collapse border-black px-1 text-center w-[150px] font-semibold">Catatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -170,6 +171,7 @@
                         <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($item->harga, 2, ',', '.') }}</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">Rp.</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($total, 2, ',', '.') }}</td>
+                        <td class="border-collapse border-black px-1 text-right font-normal"></td>
                     </tr>
                 @endforeach
                 @if($transaksi->ongkir > 0)
@@ -199,6 +201,9 @@
                 </tr>
             </tbody>
         </table>
+        <p>
+            Keterangan Lain :
+        </p>
         <p class="text-[11px] leading-[13px]">
             {{ $perusahaan->keterangan_pembayaran }}
         </p>

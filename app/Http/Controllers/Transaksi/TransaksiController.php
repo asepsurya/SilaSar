@@ -533,12 +533,16 @@ class TransaksiController extends Controller
 
     public function konsinyasi($id)
     {
-        $transaksi = Transaksi::where('kode_transaksi', $id)->first();
+        $transaksi = Transaksi::with(['mitra', 'ProdukTransaksi.produk'])
+            ->where('kode_transaksi', $id)
+            ->firstOrFail();
         return view('transaksi.dokumen.index', compact('id', 'transaksi'));
     }
     public function konsinyasidok($id)
     {
-        $transaksi = Transaksi::where('kode_transaksi', $id)->first();
+        $transaksi = Transaksi::with(['mitra', 'ProdukTransaksi.produk'])
+            ->where('kode_transaksi', $id)
+            ->firstOrFail();
         return view('transaksi.dokumen.laporan.konsinyasi', compact('transaksi'));
     }
 

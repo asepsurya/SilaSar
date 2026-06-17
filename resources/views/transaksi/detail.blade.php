@@ -471,523 +471,485 @@
                                     $totalSemua += $total;
                                 @endphp
 
-                                        <tr class="hover:bg-gray-50 dark:hover:bg-black">
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center" width="1%">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-black">
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center" width="1%">
+                                        <button type="button"
+                                            onclick="hapusItem('{{ $transaksi->kode_transaksi ?? '' }}','{{ $row->produk->kode_produk ?? '-' }}')"
+                                            style="color:red;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">{{ $no++ }}
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
+                                        <button type="button"
+                                            class="form-input w-full bg-gray-50 dark:bg-gray-800 border-gray-300 rounded-md text-left cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900"
+                                            onclick="showProductDetail('{{ $row->produk->kode_produk ?? '-'}}')"
+                                            style="padding: 0.5rem 0.75rem;">
+                                            {{ $row->produk->nama_produk ?? '-' }}
+                                        </button>
+                                        <input type="hidden" name="kode_produk[]"
+                                            value="{{ $row->produk->kode_produk ?? '-' }}">
+
+                                        <!-- Modal for product detail -->
+                                        <div id="modal-detail-{{ $row->produk->kode_produk ?? ''}}"
+                                            class="fixed inset-0 z-[99999] flex items-center justify-center hidden"
+                                            style="z-index: 999999">
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-black/30"></div>
+                                            <!-- Modal content -->
+                                            <div
+                                                class="relative bg-white  dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3 rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
                                                 <button type="button"
-                                                    onclick="hapusItem('{{ $transaksi->kode_transaksi ?? '' }}','{{ $row->produk->kode_produk ?? '-' }}')"
-                                                    style="color:red;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
-                                                    </svg>
+                                                    class="absolute top-2 right-2 text-gray-500 hover:text-red-600"
+                                                    onclick="closeProductDetail('{{ $row->produk->kode_produk ?? '=' }}')">
+                                                    &times;
                                                 </button>
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">{{ $no++ }}
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                <button type="button"
-                                                    class="form-input w-full bg-gray-50 dark:bg-gray-800 border-gray-300 rounded-md text-left cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900"
-                                                    onclick="showProductDetail('{{ $row->produk->kode_produk ?? '-'}}')"
-                                                    style="padding: 0.5rem 0.75rem;">
-                                                    {{ $row->produk->nama_produk ?? '-' }}
-                                                </button>
-                                                <input type="hidden" name="kode_produk[]"
-                                                    value="{{ $row->produk->kode_produk ?? '-' }}">
+                                                <h3 class="text-lg font-bold mb-3">Detail Produk Penawaran</h3>
+                                                <div class="">
+                                                    <div>
+                                                        <table
+                                                            class="table-auto border-collapse border border-gray-300 w-full text-sm">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
+                                                                        Kode Produk</td>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2">
+                                                                        {{ $row->produk->kode_produk ?? '-' }}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
+                                                                        Nama Produk</td>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2">
+                                                                        {{ $row->produk->nama_produk ?? '-' }}
+                                                                    </td>
+                                                                </tr>
 
-                                                <!-- Modal for product detail -->
-                                                <div id="modal-detail-{{ $row->produk->kode_produk ?? ''}}"
-                                                    class="fixed inset-0 z-[99999] flex items-center justify-center hidden"
-                                                    style="z-index: 999999">
-                                                    <!-- Overlay -->
-                                                    <div class="absolute inset-0 bg-black/30"></div>
-                                                    <!-- Modal content -->
-                                                    <div
-                                                        class="relative bg-white  dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3 rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
-                                                        <button type="button"
-                                                            class="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-                                                            onclick="closeProductDetail('{{ $row->produk->kode_produk ?? '=' }}')">
-                                                            &times;
-                                                        </button>
-                                                        <h3 class="text-lg font-bold mb-3">Detail Produk Penawaran</h3>
-                                                        <div class="">
-                                                            <div>
-                                                                <table
-                                                                    class="table-auto border-collapse border border-gray-300 w-full text-sm">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
-                                                                                Kode Produk</td>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                                                {{ $row->produk->kode_produk ?? '-' }}
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
-                                                                                Nama Produk</td>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                                                {{ $row->produk->nama_produk ?? '-' }}
-                                                                            </td>
-                                                                        </tr>
-
-                                                                        <tr>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
-                                                                                Harga Hasil Penawaran</td>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                                                Rp.
-                                                                                {{ number_format($row->harga ?? 0, 0, ',', '.') }}
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
-                                                                                Stok Saat ini</td>
-                                                                            <td
-                                                                                class="border dark:border-white/10 border-gray-300 px-3 py-2">
-                                                                                <b>( {{ $row->produk->stok ?? '0'}} )</b> Pcs
-                                                                            </td>
-                                                                        </tr>
-                                                                        <!-- Tambahkan detail lain sesuai kebutuhan -->
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-
-                                                        </div>
-                                                        <button type="button"
-                                                            class="mt-3 w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium  bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition duration-150  right-2 text-white hover:text-red-600"
-                                                            onclick="closeProductDetail('{{ $row->produk->kode_produk ?? '-' }}')">
-                                                            Oke
-                                                        </button>
+                                                                <tr>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
+                                                                        Harga Hasil Penawaran</td>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2">
+                                                                        Rp.
+                                                                        {{ number_format($row->harga ?? 0, 0, ',', '.') }}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold">
+                                                                        Stok Saat ini</td>
+                                                                    <td
+                                                                        class="border dark:border-white/10 border-gray-300 px-3 py-2">
+                                                                        <b>( {{ $row->produk->stok ?? '0'}} )</b> Pcs
+                                                                    </td>
+                                                                </tr>
+                                                                <!-- Tambahkan detail lain sesuai kebutuhan -->
+                                                            </tbody>
+                                                        </table>
                                                     </div>
+
                                                 </div>
-
-                                                <script>
-                                                    function showProductDetail(kode) {
-                                                        document.getElementById('modal-detail-' + kode).classList.remove('hidden');
-                                                    }
-
-                                                    function closeProductDetail(kode) {
-                                                        document.getElementById('modal-detail-' + kode).classList.add('hidden');
-                                                    }
-                                                </script>
-
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                                <span>Rp. </span>
-                                                <input type="text" name="barang_keluar_display[]"
-                                                    class="harga-hidden form-input w-28 text-center border-gray-300 rounded-md harga-input"
-                                                    value="{{ number_format($harga ?? 0, 0, ',', '.') }}" data-index="{{ $index }}"
-                                                    placeholder="0">
-
-                                                <input type="hidden" name="harga_dekstop[]" class="harga-hidden" value="{{ $harga }}">
-
-
-                                                <script>
-                                                    document.querySelectorAll('.harga-input').forEach((input) => {
-                                                        input.addEventListener('input', function (e) {
-                                                            const angka = e.target.value.replace(/[^\d]/g, '');
-                                                            e.target.value = formatRupiah(angka);
-
-                                                            // isi hidden input di bawahnya
-                                                            const hidden = e.target.nextElementSibling;
-                                                            hidden.value = angka;
-                                                        });
-                                                    });
-
-                                                    function formatRupiah(angka) {
-                                                        if (!angka) return 'Rp. 0';
-                                                        return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                                                    }
-                                                </script>
-
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                                <input type="number" name="barang_keluar[]"
-                                                    class="form-input w-20 text-center border-gray-300 rounded-md barang-keluar-input"
-                                                    value="{{ $barang_keluar }}" data-index="{{ $index }}" data-harga="{{ $harga }}">
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                                <input type="number" name="barang_terjual[]"
-                                                    class="form-input w-20 text-center border-gray-300 rounded-md barang-terjual-input"
-                                                    value="{{ $barang_terjual }}" data-index="{{ $index }}">
-
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                                <input type="number" name="barang_retur[]"
-                                                    class="form-input w-20 text-center border-gray-300 rounded-md barang-retur-input"
-                                                    value="{{ $barang_retur }}" data-index="{{ $index }}">
-                                            </td>
-                                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                                <div class="flex items-center justify-center">
-                                                    <span class="mr-1">Rp.</span>
-                                                    <input type="text" name="harga[]" value="{{ number_format($total, 0, ',', '.') }}"
-                                                        class="form-input harga-input w-24 text-right border-gray-300 rounded-md total-harga-input"
-                                                        data-index="{{ $index }}" readonly>
-                                                </div>
-                                            </td>
-                                        </tr>
-                            @empty
-                                    <tr id="noDataRow">
-                                        <td colspan="6" class="border border-gray-300 px-3 py-2 text-center text-gray-500">
-                                            Belum ada
-                                            produk yang ditawarkan.</td>
-                                    </tr>
-                                @endforelse
-
-                                <!-- Ongkir -->
-                                <tr>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
-                                        Ongkir
-                                    </td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                        <div class="flex items-center justify-center">
-                                            <span class="mr-1">Rp.</span>
-                                            <input type="text" name="ongkir" id="ongkir-input"
-                                                class="form-input w-24 text-right border-gray-300 rounded-md"
-                                                value="{{ $transaksi->ongkir ?? '0' }}">
+                                                <button type="button"
+                                                    class="mt-3 w-full sm:w-auto inline-flex items-center justify-center px-5 py-2 text-sm font-medium  bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition duration-150  right-2 text-white hover:text-red-600"
+                                                    onclick="closeProductDetail('{{ $row->produk->kode_produk ?? '-' }}')">
+                                                    Oke
+                                                </button>
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                <!-- Total -->
-                                <tr>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
-                                        Total</td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                        <div class="flex items-center justify-center">
-                                            <span class="mr-1">Rp.</span>
-                                            <input type="text" name="total" id="total-input"
-                                                class="form-input w-24 text-right border-gray-300 rounded-md"
-                                                value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}"
-                                                readonly>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Discount -->
-                                <tr>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
-                                        Discount</td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                        <div class="flex items-center justify-center">
-                                            <span class="mr-1">Rp.</span>
-                                            <input type="text" name="discount" id="discount-input"
-                                                class="form-input w-24 text-right border-gray-300 rounded-md"
-                                                value="{{ number_format($transaksi->diskon, 0, ',', '.') }}">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Grand Total -->
-                                <tr>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-bold text-right">Grand
-                                        Total</td>
-                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center font-bold">
-                                        <div class="flex items-center justify-center">
-                                            <span class="mr-1">Rp.</span>
-                                            <input type="text" name="grand_total" id="grand-total-input"
-                                                class="form-input w-24 text-right border-gray-300 rounded-md font-bold"
-                                                value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}"
-                                                readonly>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tr>
-                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
-                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
-                                    Status Bayar</td>
-                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                    <select name="status_bayar" id="status-bayar-input"
-                                        class="form-input w-full text-center border-gray-300 rounded-md">
-                                        <option value="Belum Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Belum Bayar' ? 'selected' : '' }}>
-                                            Belum Bayar</option>
-                                        <option value="Sudah Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Sudah Bayar' ? 'selected' : '' }}>
-                                            Sudah Bayar</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
-                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
-                                    Tanggal Bayar</td>
-                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                                    <input type="date" name="tanggal_bayar" id="tanggal-bayar-input"
-                                        class="form-input w-full text-center border-gray-300 rounded-md"
-                                        value="{{ old('tanggal_bayar', $transaksi->tanggal_pembayaran ?? '') }}">
-                                </td>
-                            </tr>
-                        </table>
-                        <script>
-                            function formatRupiah(angka) {
-                                return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                            }
 
-                            function parseRupiah(str) {
-                                return parseInt((str || '0').replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
-                            }
-
-                            function updateTotals() {
-                                let total = 0;
-                                document.querySelectorAll('.barang-keluar-input').forEach(function (input) {
-                                    const index = input.dataset.index;
-                                    const harga = parseInt(input.dataset.harga) || 0;
-                                    const jumlahKeluar = parseInt(input.value) || 0;
-
-                                    const barangTerjualInput = document.querySelector('.barang-terjual-input[data-index="' + index +
-                                        '"]');
-                                    const barangReturInput = document.querySelector('.barang-retur-input[data-index="' + index + '"]');
-                                    const totalInput = document.querySelector('.total-harga-input[data-index="' + index + '"]');
-
-                                    let barangTerjual = parseInt(barangTerjualInput?.value) || 0;
-
-
-                                    if (barangTerjual > jumlahKeluar) {
-                                        barangTerjual = jumlahKeluar;
-                                        if (barangTerjualInput) {
-                                            barangTerjualInput.value = barangTerjual;
-                                        }
-                                    }
-
-                                    // Hitung total per baris berdasarkan kondisi
-                                    let totalRow = 0;
-                                    if (barangTerjual > 0) {
-                                        totalRow = barangTerjual * harga; // Jika barang terjual ada, hitung berdasarkan terjual
-                                    } else {
-                                        totalRow = jumlahKeluar * harga; // Jika tidak ada, hitung berdasarkan keluar
-                                    }
-
-                                    if (totalInput) {
-                                        totalInput.value = formatRupiah(totalRow);
-                                    }
-
-                                    // Tambah ke total keseluruhan
-                                    total += totalRow;
-                                });
-
-                                // Update total keseluruhan
-                                const totalInput = document.getElementById('total-input');
-                                if (totalInput) {
-                                    totalInput.value = formatRupiah(total);
-                                }
-
-                                // Ambil ongkir & diskon
-                                const ongkir = parseRupiah(document.getElementById('ongkir-input')?.value);
-                                const discount = parseRupiah(document.getElementById('discount-input')?.value);
-                                const grandTotal = total + ongkir - discount;
-
-                                // Update grand total
-                                const grandTotalInput = document.getElementById('grand-total-input');
-                                if (grandTotalInput) {
-                                    grandTotalInput.value = formatRupiah(grandTotal);
-                                }
-                            }
-                            document.addEventListener('input', function (e) {
-                                if (e.target.classList.contains('barang-terjual-input')) {
-                                    const input = e.target;
-                                    const index = input.dataset.index;
-
-                                    const barangKeluarInput = document.querySelector(`.barang-keluar-input[data-index="${index}"]`);
-                                    const barangReturInput = document.querySelector(`.barang-retur-input[data-index="${index}"]`);
-                                    const harga = parseInt(barangKeluarInput.dataset.harga) || 0;
-
-                                    const jumlahKeluar = parseInt(barangKeluarInput.value) || 0;
-                                    let barangTerjual = parseInt(input.value) || 0;
-
-                                    // Batasi barang terjual maksimal ke barang keluar
-                                    if (barangTerjual > jumlahKeluar) {
-                                        barangTerjual = jumlahKeluar;
-                                        input.value = barangTerjual;
-                                    }
-
-                                    // Hitung barang retur
-                                    const barangRetur = jumlahKeluar - barangTerjual;
-                                    barangReturInput.value = barangRetur;
-
-                                    // Hitung total per baris
-                                    const totalInput = document.querySelector(`.total-harga-input[data-index="${index}"]`);
-                                    const totalRow = barangTerjual * harga;
-                                    totalInput.value = formatRupiah(totalRow);
-
-                                    // Update total & grand total
-                                    updateTotals();
-                                }
-                            });
-
-                            document.addEventListener('DOMContentLoaded', function () {
-                                // Format harga awal saat halaman dimuat
-                                document.querySelectorAll('.total-harga-input').forEach(function (input) {
-                                    input.value = formatRupiah(parseRupiah(input.value));
-                                });
-
-                                // Event listener barang keluar
-                                document.querySelectorAll('.barang-keluar-input').forEach(function (input) {
-                                    input.addEventListener('input', function () {
-                                        updateTotals();
-                                    });
-                                });
-
-                                // Event listener barang terjual
-                                document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
-                                    input.addEventListener('input', function () {
-                                        const index = this.dataset.index;
-
-
-
-                                        const barangKeluar = parseInt(barangKeluarInput?.value) || 0;
-                                        let barangTerjual = parseInt(this.value) || 0;
-
-                                        // Batasi barang terjual tidak boleh lebih dari barang keluar
-                                        if (barangTerjual > barangKeluar) {
-                                            barangTerjual = barangKeluar;
-                                            this.value = barangTerjual;
-                                        }
-
-                                        // Hitung dan isi barang retur
-                                        if (barangReturInput) {
-                                            barangReturInput.value = barangKeluar - barangTerjual;
-                                        }
-
-                                        // Update total keseluruhan
-                                        updateTotals();
-                                    });
-                                });
-
-                                // Event listener ongkir
-                                const ongkirInput = document.getElementById('ongkir-input');
-                                if (ongkirInput) {
-                                    ongkirInput.addEventListener('input', function () {
-                                        this.value = formatRupiah(parseRupiah(this.value));
-                                        updateTotals();
-                                    });
-                                }
-
-                                // Event listener diskon
-                                const discountInput = document.getElementById('discount-input');
-                                if (discountInput) {
-                                    discountInput.addEventListener('input', function () {
-                                        this.value = formatRupiah(parseRupiah(this.value));
-                                        updateTotals();
-                                    });
-                                }
-
-                                // Jalankan update totals pertama kali saat halaman selesai dimuat
-                                updateTotals();
-                            });
-                        </script>
-                    </form>
-
-
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const form = document.getElementById('form-transaksi');
-
-                            // Tambahkan data-default ke setiap input harga
-                            document.querySelectorAll('.harga-hidden').forEach(input => {
-                                input.dataset.default = input.value; // simpan harga awal
-                            });
-
-                            async function kirimData(event) {
-                                const input = event.target;
-                                const isDark = document.documentElement.classList.contains('dark');
-
-                                const result = await Swal.fire({
-                                    title: 'Ubah Penawaran Harga?',
-                                    text: 'Perubahan ini akan memperbarui data penawaran harga di sistem.',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Ya, ubah sekarang',
-                                    cancelButtonText: 'Batal',
-                                    reverseButtons: true,
-                                    background: isDark ? '#0f172a' : '#fff',
-                                    color: isDark ? '#e2e8f0' : '#374151',
-                                    customClass: {
-                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
-                                        title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
-                                        htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
-                                        confirmButton: (isDark
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none'),
-                                        cancelButton: (isDark
-                                            ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg ml-2'
-                                            : 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2'),
-                                    },
-                                    buttonsStyling: false,
-                                });
-
-                                // Jika user klik "Batal", kembalikan ke harga default
-                                if (!result.isConfirmed) {
-                                    const defaultValue = input.dataset.default || '0';
-                                    input.value = defaultValue;
-                                    console.log('Batal diubah. Kembali ke harga default:', defaultValue);
-                                    return;
-                                }
-
-                                // Proses update harga ke server
-                                const formData = new FormData(form);
-
-                                try {
-                                    const res = await fetch('{{ route("transaksi.update") }}', {
-                                        method: 'POST',
-                                        body: formData,
-                                        headers: {
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                                        },
-                                    });
-
-                                    const data = await res.json();
-
-                                    if (data.success) {
-                                        // Simpan harga baru sebagai default
-                                        input.dataset.default = input.value;
-
-                                        await Swal.fire({
-                                            icon: 'success',
-                                            title: 'Harga diperbarui!',
-                                            text: data.message || 'Data penawaran berhasil diperbarui.',
-                                            timer: 1500,
-                                            showConfirmButton: false,
-                                            background: isDark ? '#0f172a' : '#fff',
-                                            color: isDark ? '#e2e8f0' : '#374151',
-                                            customClass: {
-                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
-                                                title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
-                                                htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                        <script>
+                                            function showProductDetail(kode) {
+                                                document.getElementById('modal-detail-' + kode).classList.remove('hidden');
                                             }
-                                        });
-                                        location.reload();
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Gagal!',
-                                            text: data.message || 'Tidak dapat memperbarui harga.',
-                                            confirmButtonText: 'Tutup',
-                                            background: isDark ? '#0f172a' : '#fff',
-                                            color: isDark ? '#e2e8f0' : '#374151',
-                                            customClass: {
-                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
-                                                confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
-                                                title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
-                                                htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
-                                            },
-                                            buttonsStyling: false
-                                        });
-                                    }
 
-                                } catch (err) {
+                                            function closeProductDetail(kode) {
+                                                document.getElementById('modal-detail-' + kode).classList.add('hidden');
+                                            }
+                                        </script>
+
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                        <span>Rp. </span>
+                                        <input type="text" name="barang_keluar_display[]"
+                                            class="harga-hidden form-input w-28 text-center border-gray-300 rounded-md harga-input"
+                                            value="{{ number_format($harga ?? 0, 0, ',', '.') }}" data-index="{{ $index }}"
+                                            placeholder="0">
+
+                                        <input type="hidden" name="harga_dekstop[]" class="harga-hidden" value="{{ $harga }}">
+
+
+                                        <script>
+                                            document.querySelectorAll('.harga-input').forEach((input) => {
+                                                input.addEventListener('input', function (e) {
+                                                    const angka = e.target.value.replace(/[^\d]/g, '');
+                                                    e.target.value = formatRupiah(angka);
+
+                                                    // isi hidden input di bawahnya
+                                                    const hidden = e.target.nextElementSibling;
+                                                    hidden.value = angka;
+                                                });
+                                            });
+
+                                            function formatRupiah(angka) {
+                                                if (!angka) return 'Rp. 0';
+                                                return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                                            }
+                                        </script>
+
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                        <input type="number" name="barang_keluar[]"
+                                            class="form-input w-20 text-center border-gray-300 rounded-md barang-keluar-input"
+                                            value="{{ $barang_keluar }}" data-index="{{ $index }}" data-harga="{{ $harga }}">
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                        <input type="number" name="barang_terjual[]"
+                                            class="form-input w-20 text-center border-gray-300 rounded-md barang-terjual-input"
+                                            value="{{ $barang_terjual }}" data-index="{{ $index }}">
+
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                        <input type="number" name="barang_retur[]"
+                                            class="form-input w-20 text-center border-gray-300 rounded-md barang-retur-input"
+                                            value="{{ $barang_retur }}" data-index="{{ $index }}">
+                                    </td>
+                                    <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                        <div class="flex items-center justify-center">
+                                            <span class="mr-1">Rp.</span>
+                                            <input type="text" name="harga[]" value="{{ number_format($total, 0, ',', '.') }}"
+                                                class="form-input harga-input w-24 text-right border-gray-300 rounded-md total-harga-input"
+                                                data-index="{{ $index }}" readonly>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr id="noDataRow">
+                                    <td colspan="6" class="border border-gray-300 px-3 py-2 text-center text-gray-500">
+                                        Belum ada
+                                        produk yang ditawarkan.</td>
+                                </tr>
+                            @endforelse
+
+                            <!-- Ongkir -->
+                            <tr>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
+                                    Ongkir
+                                </td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center">
+                                        <span class="mr-1">Rp.</span>
+                                        <input type="text" name="ongkir" id="ongkir-input"
+                                            class="form-input w-24 text-right border-gray-300 rounded-md"
+                                            value="{{ $transaksi->ongkir ?? '0' }}">
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Total -->
+                            <tr>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
+                                    Total</td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center">
+                                        <span class="mr-1">Rp.</span>
+                                        <input type="text" name="total" id="total-input"
+                                            class="form-input w-24 text-right border-gray-300 rounded-md"
+                                            value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}"
+                                            readonly>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Discount -->
+                            <tr>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
+                                    Discount</td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                    <div class="flex items-center justify-center">
+                                        <span class="mr-1">Rp.</span>
+                                        <input type="text" name="discount" id="discount-input"
+                                            class="form-input w-24 text-right border-gray-300 rounded-md"
+                                            value="{{ number_format($transaksi->diskon, 0, ',', '.') }}">
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Grand Total -->
+                            <tr>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-bold text-right">Grand
+                                    Total</td>
+                                <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center font-bold">
+                                    <div class="flex items-center justify-center">
+                                        <span class="mr-1">Rp.</span>
+                                        <input type="text" name="grand_total" id="grand-total-input"
+                                            class="form-input w-24 text-right border-gray-300 rounded-md font-bold"
+                                            value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}"
+                                            readonly>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tr>
+                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
+                                Status Bayar</td>
+                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                <select name="status_bayar" id="status-bayar-input"
+                                    class="form-input w-full text-center border-gray-300 rounded-md">
+                                    <option value="Belum Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Belum Bayar' ? 'selected' : '' }}>
+                                        Belum Bayar</option>
+                                    <option value="Sudah Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Sudah Bayar' ? 'selected' : '' }}>
+                                        Sudah Bayar</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2" colspan="6"></td>
+                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
+                                Tanggal Bayar</td>
+                            <td class="border dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                                <input type="date" name="tanggal_bayar" id="tanggal-bayar-input"
+                                    class="form-input w-full text-center border-gray-300 rounded-md"
+                                    value="{{ old('tanggal_bayar', $transaksi->tanggal_pembayaran ?? '') }}">
+                            </td>
+                        </tr>
+                    </table>
+                    <script>
+                        function formatRupiah(angka) {
+                            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                        }
+
+                        function parseRupiah(str) {
+                            return parseInt((str || '0').replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+                        }
+
+                        function updateTotals() {
+                            let total = 0;
+                            document.querySelectorAll('.barang-keluar-input').forEach(function (input) {
+                                const index = input.dataset.index;
+                                const harga = parseInt(input.dataset.harga) || 0;
+                                const jumlahKeluar = parseInt(input.value) || 0;
+
+                                const barangTerjualInput = document.querySelector('.barang-terjual-input[data-index="' + index + '"]');
+                                const barangReturInput = document.querySelector('.barang-retur-input[data-index="' + index + '"]');
+                                const totalInput = document.querySelector('.total-harga-input[data-index="' + index + '"]');
+
+                                let barangTerjual = parseInt(barangTerjualInput?.value) || 0;
+                                let barangRetur = parseInt(barangReturInput?.value) || 0;
+
+                                // --- LOGIKA BARU UNTUK MENANGANI NILAI AWAL ---
+                                let totalRow = 0;
+
+                                if (barangRetur === jumlahKeluar && jumlahKeluar > 0) {
+                                    // Kasus 1: Jika retur dan keluar sama jumlahnya, harga HARUS 0
+                                    totalRow = 0;
+                                } else if (barangRetur > 0) {
+                                    // Kasus 2: Jika ada retur sebagian, hitung berdasarkan (Keluar - Retur) alias yang terjual
+                                    // Jika input terjual kosong/0 tapi retur diisi, kita hitung otomatis sisa terjualnya
+                                    let sisaTerjual = jumlahKeluar - barangRetur;
+                                    totalRow = sisaTerjual * harga;
+                                } else {
+                                    // Kasus 3: Jika retur masih 0 (atau belum diisi), jumlahnya TETAP dihitung penuh dari barang keluar
+                                    totalRow = jumlahKeluar * harga;
+                                }
+
+                                if (totalInput) {
+                                    totalInput.value = formatRupiah(totalRow);
+                                }
+
+                                // Tambah ke total keseluruhan
+                                total += totalRow;
+                            });
+
+                            // Update total keseluruhan
+                            const totalInput = document.getElementById('total-input');
+                            if (totalInput) {
+                                totalInput.value = formatRupiah(total);
+                            }
+
+                            // Ambil ongkir & diskon
+                            const ongkir = parseRupiah(document.getElementById('ongkir-input')?.value);
+                            const discount = parseRupiah(document.getElementById('discount-input')?.value);
+                            const grandTotal = total + ongkir - discount;
+
+                            // Update grand total
+                            const grandTotalInput = document.getElementById('grand-total-input');
+                            if (grandTotalInput) {
+                                grandTotalInput.value = formatRupiah(grandTotal);
+                            }
+                        }
+
+                        // Trigger saat user mengetik di input secara realtime
+                        document.addEventListener('input', function (e) {
+                            const input = e.target;
+                            const index = input.dataset.index;
+
+                            if (!index) return;
+
+                            const barangKeluarInput = document.querySelector(`.barang-keluar-input[data-index="${index}"]`);
+                            const barangTerjualInput = document.querySelector(`.barang-terjual-input[data-index="${index}"]`);
+                            const barangReturInput = document.querySelector(`.barang-retur-input[data-index="${index}"]`);
+
+                            const jumlahKeluar = parseInt(barangKeluarInput?.value) || 0;
+
+                            // Jika user isi kolom Barang Terjual
+                            if (input.classList.contains('barang-terjual-input')) {
+                                let barangTerjual = parseInt(input.value) || 0;
+
+                                if (barangTerjual > jumlahKeluar) {
+                                    barangTerjual = jumlahKeluar;
+                                    input.value = barangTerjual;
+                                }
+
+                                if (barangReturInput) {
+                                    barangReturInput.value = jumlahKeluar - barangTerjual;
+                                }
+                                updateTotals();
+                            }
+
+                            // Jika user isi kolom Barang Retur
+                            if (input.classList.contains('barang-retur-input')) {
+                                let barangRetur = parseInt(input.value) || 0;
+
+                                if (barangRetur > jumlahKeluar) {
+                                    barangRetur = jumlahKeluar;
+                                    input.value = barangRetur;
+                                }
+
+                                if (barangTerjualInput) {
+                                    barangTerjualInput.value = jumlahKeluar - barangRetur;
+                                }
+                                updateTotals();
+                            }
+                        });
+
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Format harga awal saat halaman dibuka
+                            document.querySelectorAll('.total-harga-input').forEach(function (input) {
+                                input.value = formatRupiah(parseRupiah(input.value));
+                            });
+
+                            // Listener jika barang keluar diubah jumlahnya
+                            document.querySelectorAll('.barang-keluar-input').forEach(function (input) {
+                                input.addEventListener('input', function () {
+                                    updateTotals();
+                                });
+                            });
+
+                            // Listener Ongkir & Diskon
+                            ['ongkir-input', 'discount-input'].forEach(id => {
+                                const el = document.getElementById(id);
+                                if (el) {
+                                    el.addEventListener('input', function () {
+                                        this.value = formatRupiah(parseRupiah(this.value));
+                                        updateTotals();
+                                    });
+                                }
+                            });
+
+                            // Jalankan kalkulasi pertama kali saat aplikasi dibuka
+                            updateTotals();
+                        });
+                    </script>
+                </form>
+
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const form = document.getElementById('form-transaksi');
+
+                        // Tambahkan data-default ke setiap input harga
+                        document.querySelectorAll('.harga-hidden').forEach(input => {
+                            input.dataset.default = input.value; // simpan harga awal
+                        });
+
+                        async function kirimData(event) {
+                            const input = event.target;
+                            const isDark = document.documentElement.classList.contains('dark');
+
+                            const result = await Swal.fire({
+                                title: 'Ubah Penawaran Harga?',
+                                text: 'Perubahan ini akan memperbarui data penawaran harga di sistem.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, ubah sekarang',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true,
+                                background: isDark ? '#0f172a' : '#fff',
+                                color: isDark ? '#e2e8f0' : '#374151',
+                                customClass: {
+                                    popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                    title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                    htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                    confirmButton: (isDark
+                                        ? 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none'
+                                        : 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg focus:outline-none'),
+                                    cancelButton: (isDark
+                                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg ml-2'
+                                        : 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2'),
+                                },
+                                buttonsStyling: false,
+                            });
+
+                            // Jika user klik "Batal", kembalikan ke harga default
+                            if (!result.isConfirmed) {
+                                const defaultValue = input.dataset.default || '0';
+                                input.value = defaultValue;
+                                console.log('Batal diubah. Kembali ke harga default:', defaultValue);
+                                return;
+                            }
+
+                            // Proses update harga ke server
+                            const formData = new FormData(form);
+
+                            try {
+                                const res = await fetch('{{ route("transaksi.update") }}', {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                                    },
+                                });
+
+                                const data = await res.json();
+
+                                if (data.success) {
+                                    // Simpan harga baru sebagai default
+                                    input.dataset.default = input.value;
+
+                                    await Swal.fire({
+                                        icon: 'success',
+                                        title: 'Harga diperbarui!',
+                                        text: data.message || 'Data penawaran berhasil diperbarui.',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                        background: isDark ? '#0f172a' : '#fff',
+                                        color: isDark ? '#e2e8f0' : '#374151',
+                                        customClass: {
+                                            popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                            title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                            htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                        }
+                                    });
+                                    location.reload();
+                                } else {
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Koneksi gagal',
-                                        text: 'Tidak dapat menghubungi server. Pastikan koneksi stabil.',
-                                        confirmButtonText: 'OK',
+                                        title: 'Gagal!',
+                                        text: data.message || 'Tidak dapat memperbarui harga.',
+                                        confirmButtonText: 'Tutup',
                                         background: isDark ? '#0f172a' : '#fff',
                                         color: isDark ? '#e2e8f0' : '#374151',
                                         customClass: {
@@ -999,450 +961,453 @@
                                         buttonsStyling: false
                                     });
                                 }
-                            }
 
-                            document.querySelectorAll('.harga-hidden').forEach(input => {
-                                input.addEventListener('change', kirimData);
-                            });
-                        });
-                    </script>
-
-                </div>
-                <form action="{{ route('transaksi.update') }}" method="POST" id="form-transaksi-mobile">
-                    @csrf
-                    <div class="md:hidden space-y-2">
-                        <div class="hidden">
-                            <input type="date" id="tanggal_transaksi_new2"
-                                class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
-                                name="tanggal_transaksi" required />
-
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    // Set initial value
-                                    document.getElementById('tanggal_transaksi_new2').value = document.getElementById('tanggal_transaksi').value;
-
-                                    // Sync value on change/input
-                                    document.getElementById('tanggal_transaksi').addEventListener('change', function () {
-                                        document.getElementById('tanggal_transaksi_new2').value = this.value;
-                                    });
-                                    document.getElementById('tanggal_transaksi').addEventListener('input', function () {
-                                        document.getElementById('tanggal_transaksi_new2').value = this.value;
-                                    });
+                            } catch (err) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Koneksi gagal',
+                                    text: 'Tidak dapat menghubungi server. Pastikan koneksi stabil.',
+                                    confirmButtonText: 'OK',
+                                    background: isDark ? '#0f172a' : '#fff',
+                                    color: isDark ? '#e2e8f0' : '#374151',
+                                    customClass: {
+                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
+                                        title: 'text-lg font-semibold ' + (isDark ? 'text-white' : 'text-gray-800'),
+                                        htmlContainer: (isDark ? 'text-gray-300' : 'text-gray-600'),
+                                    },
+                                    buttonsStyling: false
                                 });
-                            </script>
-                            <input type="text"
-                                class="form-input w-full rounded-md border-gray-300  text-gray-800 font-bold text-lg"
-                                name="nomor_transaksi" value="{{ $transaksi->kode_transaksi }}" readonly />
-                            <input type="text"
-                                class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
-                                name="kode_mitra" value="{{ $mitra->kode_mitra }}" readonly />
-                            {{-- ------------------------------------------- --}}
-                            {{-- -----------Data -------------------------- --}}
-                        </div>
-                        @php $totalSemua_mobile = 0; @endphp
+                            }
+                        }
 
-                        @forelse ($product->where('kode_transaksi', $transaksi->kode_transaksi) as $myindex => $row)
+                        document.querySelectorAll('.harga-hidden').forEach(input => {
+                            input.addEventListener('change', kirimData);
+                        });
+                    });
+                </script>
 
-                            <!-- Modal Detail Produk -->
-                            @php
-                                $barang_keluar_mobile = (int) ($row->barang_keluar ?? 0);
-                                $barang_terjual_mobile = (int) ($row->barang_terjual ?? 0);
-                                $barang_retur_mobile = (int) ($row->barang_retur ?? 0);
-                                $harga_mobile = (int) ($row->harga ?? 0);
-                                $total_barang_keluar_mobile = $barang_terjual_mobile + $barang_retur_mobile;
-                                $total_mobile = $barang_keluar_mobile * $harga_mobile;
-                                $totalSemua_mobile += $total_mobile;
-                            @endphp
+            </div>
+            <form action="{{ route('transaksi.update') }}" method="POST" id="form-transaksi-mobile">
+                @csrf
+                <div class="md:hidden space-y-2">
+                    <div class="hidden">
+                        <input type="date" id="tanggal_transaksi_new2"
+                            class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
+                            name="tanggal_transaksi" required />
 
-                            <!-- Item Produk Mobile -->
-                            <div
-                                class="flex items-center justify-between border rounded-lg p-3 bg-white dark:bg-black shadow-sm dark:border-white/10">
-                                <!-- Kiri: Hapus + Nama Produk -->
-                                <div class="flex items-center gap-3">
-                                    <!-- Tombol Hapus -->
-                                    <button type="button"
-                                        onclick="hapusItem('{{ $transaksi->kode_transaksi ?? '-' }}','{{ $row->produk->kode_produk ?? '-' }}')"
-                                        class="text-red-600 hover:text-red-800">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
-                                                                m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
-                                        </svg>
-                                    </button>
-                                    @php
-                                        // Ubah kode produk agar aman untuk dipakai di event name
-                                        $eventId = str_replace(['/', ' ', '.'], '-', strtolower($row->produk->kode_produk ?? ''));
-                                    @endphp
-                                    <!-- Nama Produk -->
-                                    <button type="button" @click="window.dispatchEvent(new CustomEvent('detail-{{ $eventId }}'))"
-                                        class="text-sm font-semibold text-gray-800 hover:text-blue-600">
-                                        {{ $row->produk->nama_produk ?? '-' }}
-                                    </button>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                // Set initial value
+                                document.getElementById('tanggal_transaksi_new2').value = document.getElementById('tanggal_transaksi').value;
 
-                                </div>
+                                // Sync value on change/input
+                                document.getElementById('tanggal_transaksi').addEventListener('change', function () {
+                                    document.getElementById('tanggal_transaksi_new2').value = this.value;
+                                });
+                                document.getElementById('tanggal_transaksi').addEventListener('input', function () {
+                                    document.getElementById('tanggal_transaksi_new2').value = this.value;
+                                });
+                            });
+                        </script>
+                        <input type="text"
+                            class="form-input w-full rounded-md border-gray-300  text-gray-800 font-bold text-lg"
+                            name="nomor_transaksi" value="{{ $transaksi->kode_transaksi }}" readonly />
+                        <input type="text"
+                            class="form-input w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200/50 transition"
+                            name="kode_mitra" value="{{ $mitra->kode_mitra }}" readonly />
+                        {{-- ------------------------------------------- --}}
+                        {{-- -----------Data -------------------------- --}}
+                    </div>
+                    @php $totalSemua_mobile = 0; @endphp
 
-                                <!-- Kanan: Harga -->
-                                <p class="text-sm  font-medium totalku" data-index="{{ $myindex }}">
-                                    Rp.{{ number_format($total_mobile ?? 0, 0, ',', '.') }}
-                                </p>
+                    @forelse ($product->where('kode_transaksi', $transaksi->kode_transaksi) as $myindex => $row)
+
+                        <!-- Modal Detail Produk -->
+                        @php
+                            $barang_keluar_mobile = (int) ($row->barang_keluar ?? 0);
+                            $barang_terjual_mobile = (int) ($row->barang_terjual ?? 0);
+                            $barang_retur_mobile = (int) ($row->barang_retur ?? 0);
+                            $harga_mobile = (int) ($row->harga ?? 0);
+                            $total_barang_keluar_mobile = $barang_terjual_mobile + $barang_retur_mobile;
+                            $total_mobile = $barang_keluar_mobile * $harga_mobile;
+                            $totalSemua_mobile += $total_mobile;
+                        @endphp
+
+                        <!-- Item Produk Mobile -->
+                        <div
+                            class="flex items-center justify-between border rounded-lg p-3 bg-white dark:bg-black shadow-sm dark:border-white/10">
+                            <!-- Kiri: Hapus + Nama Produk -->
+                            <div class="flex items-center gap-3">
+                                <!-- Tombol Hapus -->
+                                <button type="button"
+                                    onclick="hapusItem('{{ $transaksi->kode_transaksi ?? '-' }}','{{ $row->produk->kode_produk ?? '-' }}')"
+                                    class="text-red-600 hover:text-red-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
+                                                                                                                                                                                    m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
+                                    </svg>
+                                </button>
+                                @php
+                                    // Ubah kode produk agar aman untuk dipakai di event name
+                                    $eventId = str_replace(['/', ' ', '.'], '-', strtolower($row->produk->kode_produk ?? ''));
+                                @endphp
+                                <!-- Nama Produk -->
+                                <button type="button" @click="window.dispatchEvent(new CustomEvent('detail-{{ $eventId }}'))"
+                                    class="text-sm font-semibold text-gray-800 hover:text-blue-600">
+                                    {{ $row->produk->nama_produk ?? '-' }}
+                                </button>
+
                             </div>
-                            <!-- Modal -->
-                            <div x-data="{ open: false }" @detail-{{ $eventId }}.window="open = true"
-                                @close-modal.window="open = false">
-                                <!-- Overlay -->
-                                <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto"
-                                    :class="{ 'block': open, 'hidden': !open }">
-                                    <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
-                                        <!-- Modal Box -->
-                                        <div x-show="open" x-transition x-transition.duration.300
-                                            class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8"
-                                            style="display: none;">
-                                            <!-- Header -->
-                                            <div
-                                                class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
-                                                <h5 class="font-semibold text-lg">Detail Transaksi</h5>
-                                                <button type="button"
-                                                    class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
-                                                    @click="open = false">
-                                                    <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z"
-                                                            fill="currentcolor" />
-                                                        <path
-                                                            d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z"
-                                                            fill="currentcolor" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <div class="p-0">
-                                                <table
-                                                    class="w-full text-sm border border-gray-300 dark:border-white/10 rounded-lg overflow-hidden">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 w-1/3 px-3 py-2 font-medium">
-                                                                Kode
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 w-2/3 px-3 py-2">
-                                                                {{ $row->produk->kode_produk ?? '-' }}
-                                                                <input type="hidden" name="kode_produk[]"
-                                                                    value="{{ $row->produk->kode_produk ?? '-' }}">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                Nama
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                {{ $row->produk->nama_produk ?? '-' }}
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                Harga <span class="text-red-600">*</span>
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="text" name="barang_keluar_display[]"
-                                                                    class="harga-mobile form-input w-full  border-gray-300 dark:border-white/10 rounded-md harga-input"
-                                                                    value="{{ number_format($harga_mobile ?? 0, 0, ',', '.') }}"
-                                                                    data-index="{{ $index }}" placeholder="0">
 
-                                                                <input type="hidden" name="harga_mobile[]" class="harga-hidden"
-                                                                    value="{{ $harga_mobile }}">
-                                                                <script>
-                                                                    document.querySelectorAll('.harga-mobile').forEach(input => {
-                                                                        input.addEventListener('input', e => {
-                                                                            // Ambil angka murni tanpa titik atau huruf
-                                                                            const angka = e.target.value.replace(/[^\d]/g, '');
+                            <!-- Kanan: Harga -->
+                            <p class="text-sm  font-medium totalku" data-index="{{ $myindex }}">
+                                Rp.{{ number_format($total_mobile ?? 0, 0, ',', '.') }}
+                            </p>
+                        </div>
+                        <!-- Modal -->
+                        <div x-data="{ open: false }" @detail-{{ $eventId }}.window="open = true"
+                            @close-modal.window="open = false">
+                            <!-- Overlay -->
+                            <div class="fixed inset-0 bg-black/60 dark:bg-white/10 z-[999] hidden overflow-y-auto"
+                                :class="{ 'block': open, 'hidden': !open }">
+                                <div class="flex items-center justify-center min-h-screen px-4" @click.self="open = false">
+                                    <!-- Modal Box -->
+                                    <div x-show="open" x-transition x-transition.duration.300
+                                        class="bg-white dark:bg-black relative shadow-3xl border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8"
+                                        style="display: none;">
+                                        <!-- Header -->
+                                        <div
+                                            class="flex bg-white dark:bg-black border-b border-black/10 dark:border-white/10 items-center justify-between px-5 py-3">
+                                            <h5 class="font-semibold text-lg">Detail Transaksi</h5>
+                                            <button type="button"
+                                                class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
+                                                @click="open = false">
+                                                <svg class="w-5 h-5" width="32" height="32" viewBox="0 0 32 32" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z"
+                                                        fill="currentcolor" />
+                                                    <path
+                                                        d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z"
+                                                        fill="currentcolor" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="p-0">
+                                            <table
+                                                class="w-full text-sm border border-gray-300 dark:border-white/10 rounded-lg overflow-hidden">
+                                                <tbody>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 w-1/3 px-3 py-2 font-medium">
+                                                            Kode
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 w-2/3 px-3 py-2">
+                                                            {{ $row->produk->kode_produk ?? '-' }}
+                                                            <input type="hidden" name="kode_produk[]"
+                                                                value="{{ $row->produk->kode_produk ?? '-' }}">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                            Nama
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                            {{ $row->produk->nama_produk ?? '-' }}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                            Harga <span class="text-red-600">*</span>
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                            <input type="text" name="barang_keluar_display[]"
+                                                                class="harga-mobile form-input w-full  border-gray-300 dark:border-white/10 rounded-md harga-input"
+                                                                value="{{ number_format($harga_mobile ?? 0, 0, ',', '.') }}"
+                                                                data-index="{{ $index }}" placeholder="0">
 
-                                                                            // Format tampilan ribuan (misal: 15.000)
-                                                                            e.target.value = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+                                                            <input type="hidden" name="harga_mobile[]" class="harga-hidden"
+                                                                value="{{ $harga_mobile }}">
+                                                            <script>
+                                                                document.querySelectorAll('.harga-mobile').forEach(input => {
+                                                                    input.addEventListener('input', e => {
+                                                                        // Ambil angka murni tanpa titik atau huruf
+                                                                        const angka = e.target.value.replace(/[^\d]/g, '');
 
-                                                                            // Ambil input hidden di bawahnya
-                                                                            const hidden = e.target.parentElement.querySelector('.harga-hidden');
-                                                                            if (hidden) hidden.value = angka; // update value-nya
-                                                                        });
+                                                                        // Format tampilan ribuan (misal: 15.000)
+                                                                        e.target.value = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+
+                                                                        // Ambil input hidden di bawahnya
+                                                                        const hidden = e.target.parentElement.querySelector('.harga-hidden');
+                                                                        if (hidden) hidden.value = angka; // update value-nya
                                                                     });
-                                                                </script>
+                                                                });
+                                                            </script>
 
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                Barang Keluar <span class="text-red-600">*</span>
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="number" name="barang_keluar[]"
-                                                                    class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-keluar-input-mobile"
-                                                                    value="{{ $barang_keluar_mobile }}"
-                                                                    data-harga="{{ $harga_mobile }}" data-index="{{ $myindex }}"
-                                                                    min="0">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                Barang Terjual <span class="text-red-600">*</span>
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="number" name="barang_terjual[]"
-                                                                    class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-terjual-input-mobile"
-                                                                    value="{{ $barang_terjual_mobile }}" data-index="{{ $myindex }}"
-                                                                    min="0">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                Barang Retur <span class="text-red-600">*</span>
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                <input type="number" name="barang_retur[]"
-                                                                    class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-retur-input-mobile"
-                                                                    value="{{ $barang_retur_mobile }}" data-index="{{ $myindex }}"
-                                                                    min="0">
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td
-                                                                class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
-                                                                Total
-                                                            </td>
-                                                            <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
-                                                                Rp. <input type="text" name="total_item[]"
-                                                                    value="{{ number_format($total_mobile, 0, ',', '.') }}"
-                                                                    class="form-input harga-input w-full  border-gray-300 dark:border-white/10 rounded-md total-harga-input-mobile"
-                                                                    data-index="{{ $myindex }}" readonly>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                            Barang Keluar <span class="text-red-600">*</span>
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                            <input type="number" name="barang_keluar[]"
+                                                                class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-keluar-input-mobile"
+                                                                value="{{ $barang_keluar_mobile }}"
+                                                                data-harga="{{ $harga_mobile }}" data-index="{{ $myindex }}"
+                                                                min="0">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                            Barang Terjual <span class="text-red-600">*</span>
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                            <input type="number" name="barang_terjual[]"
+                                                                class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-terjual-input-mobile"
+                                                                value="{{ $barang_terjual_mobile }}" data-index="{{ $myindex }}"
+                                                                min="0">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                            Barang Retur <span class="text-red-600">*</span>
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                            <input type="number" name="barang_retur[]"
+                                                                class="form-input w-full  border-gray-300 dark:border-white/10 rounded-md barang-retur-input-mobile"
+                                                                value="{{ $barang_retur_mobile }}" data-index="{{ $myindex }}"
+                                                                min="0">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td
+                                                            class="border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 font-medium px-3 py-2">
+                                                            Total
+                                                        </td>
+                                                        <td class="border border-gray-300 dark:border-white/10 px-3 py-2">
+                                                            Rp. <input type="text" name="total_item[]"
+                                                                value="{{ number_format($total_mobile, 0, ',', '.') }}"
+                                                                class="form-input harga-input w-full  border-gray-300 dark:border-white/10 rounded-md total-harga-input-mobile"
+                                                                data-index="{{ $myindex }}" readonly>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
 
 
-                                                <div class="mt-5 p-2">
-                                                    <button type="button"
-                                                        class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-                                                        @click="open = false">
-                                                        Oke
-                                                    </button>
-                                                </div>
+                                            <div class="mt-5 p-2">
+                                                <button type="button"
+                                                    class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                                                    @click="open = false">
+                                                    Oke
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
 
 
-                            <!-- JS Modal Handler -->
-                            <script>
-                                function showProductDetail2(kode) {
-                                    const modal = document.getElementById('modal-detail2-' + kode);
-                                    modal.classList.remove('hidden');
-                                    modal.classList.add('flex');
-                                }
+                        <!-- JS Modal Handler -->
+                        <script>
+                            function showProductDetail2(kode) {
+                                const modal = document.getElementById('modal-detail2-' + kode);
+                                modal.classList.remove('hidden');
+                                modal.classList.add('flex');
+                            }
 
-                                function closeProductDetail2(kode) {
-                                    const modal = document.getElementById('modal-detail2-' + kode);
-                                    modal.classList.remove('flex');
-                                    modal.classList.add('hidden');
-                                }
-                            </script>
-                        @empty
-                            <!-- Tidak Ada Produk -->
-                            <div class="border border-gray-300 px-3 py-2 text-center text-gray-500 rounded-md bg-white">
-                                Belum ada produk yang ditawarkan.
-                            </div>
-                        @endforelse
-                    </div>
+                            function closeProductDetail2(kode) {
+                                const modal = document.getElementById('modal-detail2-' + kode);
+                                modal.classList.remove('flex');
+                                modal.classList.add('hidden');
+                            }
+                        </script>
+                    @empty
+                        <!-- Tidak Ada Produk -->
+                        <div class="border border-gray-300 px-3 py-2 text-center text-gray-500 rounded-md bg-white">
+                            Belum ada produk yang ditawarkan.
+                        </div>
+                    @endforelse
+                </div>
 
-            </div>
+        </div>
 
-            <div class="md:hidden">
+        <div class="md:hidden">
 
-                <table class="w-full mt-6 border-collapse border border-gray-300  dark:border-white/10">
-                    <!-- Ongkir -->
-                    <tr>
+            <table class="w-full mt-6 border-collapse border border-gray-300  dark:border-white/10">
+                <!-- Ongkir -->
+                <tr>
 
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
-                            Ongkir
-                        </td>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                            <div class="flex items-center justify-center">
-                                <span class="mr-1">Rp.</span>
-                                <input type="text" name="ongkir" id="ongkir-input-mobile"
-                                    class="form-input w-24 text-right border-gray-300 rounded-md"
-                                    value="{{ $transaksi->ongkir ?? '0' }}">
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Total -->
-                    <tr>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">
+                        Ongkir
+                    </td>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                        <div class="flex items-center justify-center">
+                            <span class="mr-1">Rp.</span>
+                            <input type="text" name="ongkir" id="ongkir-input-mobile"
+                                class="form-input w-24 text-right border-gray-300 rounded-md"
+                                value="{{ $transaksi->ongkir ?? '0' }}">
+                        </div>
+                    </td>
+                </tr>
+                <!-- Total -->
+                <tr>
 
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Total</td>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                            <div class="flex items-center justify-center">
-                                <span class="mr-1">Rp.</span>
-                                <input type="text" name="total" id="total-input-mobile"
-                                    class="form-input w-24 text-right border-gray-300 rounded-md"
-                                    value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}" readonly>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Discount -->
-                    <tr>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Total</td>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                        <div class="flex items-center justify-center">
+                            <span class="mr-1">Rp.</span>
+                            <input type="text" name="total" id="total-input-mobile"
+                                class="form-input w-24 text-right border-gray-300 rounded-md"
+                                value="{{ $transaksi->total ?? number_format($totalSemua, 0, ',', '.') }}" readonly>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Discount -->
+                <tr>
 
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Discount
-                        </td>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                            <div class="flex items-center justify-center">
-                                <span class="mr-1">Rp.</span>
-                                <input type="text" name="discount" id="discount-input-mobile"
-                                    class="form-input w-24 text-right border-gray-300 rounded-md"
-                                    value="{{ number_format($transaksi->diskon, 0, ',', '.') }}">
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Grand Total -->
-                    <tr>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Discount
+                    </td>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                        <div class="flex items-center justify-center">
+                            <span class="mr-1">Rp.</span>
+                            <input type="text" name="discount" id="discount-input-mobile"
+                                class="form-input w-24 text-right border-gray-300 rounded-md"
+                                value="{{ number_format($transaksi->diskon, 0, ',', '.') }}">
+                        </div>
+                    </td>
+                </tr>
+                <!-- Grand Total -->
+                <tr>
 
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-bold text-right">Grand Total</td>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center font-bold">
-                            <div class="flex items-center justify-center">
-                                <span class="mr-1">Rp.</span>
-                                <input type="text" name="grand_total" id="grand-total-input-mobile"
-                                    class="form-input w-24 text-right border-gray-300 rounded-md font-bold"
-                                    value="{{ $transaksi->total ?? number_format($totalSemua_mobile, 0, ',', '.') }}" readonly>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Status Bayar
-                        </td>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                            <select name="status_bayar" id="status-bayar-input-mobile"
-                                class="form-input w-full text-center border-gray-300 rounded-md">
-                                <option value="Belum Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Belum Bayar' ? 'selected' : '' }}>
-                                    Belum Bayar</option>
-                                <option value="Sudah Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Sudah Bayar' ? 'selected' : '' }}>
-                                    Sudah Bayar</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Tanggal
-                            Bayar</td>
-                        <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
-                            <input type="date" name="tanggal_bayar" id="tanggal-bayar-input-mobile"
-                                class="form-input w-full text-center border-gray-300 rounded-md"
-                                value="{{ old('tanggal_bayar', $transaksi->tanggal_pembayaran ?? '') }}">
-                        </td>
-                    </tr>
-                </table>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const form = document.getElementById('form-transaksi-mobile');
-                        const isDark = document.documentElement.classList.contains('dark');
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-bold text-right">Grand Total</td>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center font-bold">
+                        <div class="flex items-center justify-center">
+                            <span class="mr-1">Rp.</span>
+                            <input type="text" name="grand_total" id="grand-total-input-mobile"
+                                class="form-input w-24 text-right border-gray-300 rounded-md font-bold"
+                                value="{{ $transaksi->total ?? number_format($totalSemua_mobile, 0, ',', '.') }}" readonly>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Status Bayar
+                    </td>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                        <select name="status_bayar" id="status-bayar-input-mobile"
+                            class="form-input w-full text-center border-gray-300 rounded-md">
+                            <option value="Belum Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Belum Bayar' ? 'selected' : '' }}>
+                                Belum Bayar</option>
+                            <option value="Sudah Bayar" {{ old('status_bayar', $transaksi->status_bayar ?? '') == 'Sudah Bayar' ? 'selected' : '' }}>
+                                Sudah Bayar</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 font-semibold text-right">Tanggal
+                        Bayar</td>
+                    <td class="border  dark:border-white/10 border-gray-300 px-3 py-2 text-center">
+                        <input type="date" name="tanggal_bayar" id="tanggal-bayar-input-mobile"
+                            class="form-input w-full text-center border-gray-300 rounded-md"
+                            value="{{ old('tanggal_bayar', $transaksi->tanggal_pembayaran ?? '') }}">
+                    </td>
+                </tr>
+            </table>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.getElementById('form-transaksi-mobile');
+                    const isDark = document.documentElement.classList.contains('dark');
 
-                        // 💰 Format input ke ribuan (Rupiah-style)
-                        document.querySelectorAll('.harga-mobile').forEach(input => {
-                            input.dataset.default = input.value; // simpan nilai awal
+                    // 💰 Format input ke ribuan (Rupiah-style)
+                    document.querySelectorAll('.harga-mobile').forEach(input => {
+                        input.dataset.default = input.value; // simpan nilai awal
 
-                            input.addEventListener('input', e => {
-                                const angka = e.target.value.replace(/\D/g, '');
-                                e.target.value = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+                        input.addEventListener('input', e => {
+                            const angka = e.target.value.replace(/\D/g, '');
+                            e.target.value = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+                        });
+
+                        input.addEventListener('change', async (e) => {
+                            const angkaBersih = e.target.value.replace(/\D/g, '');
+
+                            const result = await Swal.fire({
+                                title: 'Ubah Penawaran Harga?',
+                                text: 'Perubahan ini akan memperbarui data penawaran harga di sistem.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, ubah sekarang',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true,
+                                background: isDark ? '#0f172a' : '#fff',
+                                color: isDark ? '#e2e8f0' : '#374151',
+                                customClass: {
+                                    popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                    confirmButton: (isDark
+                                        ? 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg'
+                                        : 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg'),
+                                    cancelButton: (isDark
+                                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg ml-2'
+                                        : 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2'),
+                                },
+                                buttonsStyling: false,
                             });
 
-                            input.addEventListener('change', async (e) => {
-                                const angkaBersih = e.target.value.replace(/\D/g, '');
+                            // ❌ Batal ubah
+                            if (!result.isConfirmed) {
+                                e.target.value = e.target.dataset.default; // kembalikan harga semula
+                                return;
+                            }
 
-                                const result = await Swal.fire({
-                                    title: 'Ubah Penawaran Harga?',
-                                    text: 'Perubahan ini akan memperbarui data penawaran harga di sistem.',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Ya, ubah sekarang',
-                                    cancelButtonText: 'Batal',
-                                    reverseButtons: true,
-                                    background: isDark ? '#0f172a' : '#fff',
-                                    color: isDark ? '#e2e8f0' : '#374151',
-                                    customClass: {
-                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
-                                        confirmButton: (isDark
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg'),
-                                        cancelButton: (isDark
-                                            ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg ml-2'
-                                            : 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2'),
+                            // 📨 Kirim data ke server via AJAX
+                            const formData = new FormData(form);
+                            formData.set(e.target.name, angkaBersih); // pastikan nilai bersih dikirim
+
+                            try {
+                                const res = await fetch(form.action, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                                     },
-                                    buttonsStyling: false,
                                 });
 
-                                // ❌ Batal ubah
-                                if (!result.isConfirmed) {
-                                    e.target.value = e.target.dataset.default; // kembalikan harga semula
-                                    return;
-                                }
+                                const data = await res.json();
 
-                                // 📨 Kirim data ke server via AJAX
-                                const formData = new FormData(form);
-                                formData.set(e.target.name, angkaBersih); // pastikan nilai bersih dikirim
+                                if (data.success) {
+                                    e.target.dataset.default = e.target.value; // simpan harga baru
 
-                                try {
-                                    const res = await fetch(form.action, {
-                                        method: 'POST',
-                                        body: formData,
-                                        headers: {
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                                        },
+                                    await Swal.fire({
+                                        icon: 'success',
+                                        title: 'Harga diperbarui!',
+                                        text: data.message || 'Data penawaran berhasil diperbarui.',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                        background: isDark ? '#0f172a' : '#fff',
+                                        color: isDark ? '#e2e8f0' : '#374151',
+                                        customClass: {
+                                            popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                        }
                                     });
 
-                                    const data = await res.json();
-
-                                    if (data.success) {
-                                        e.target.dataset.default = e.target.value; // simpan harga baru
-
-                                        await Swal.fire({
-                                            icon: 'success',
-                                            title: 'Harga diperbarui!',
-                                            text: data.message || 'Data penawaran berhasil diperbarui.',
-                                            timer: 1500,
-                                            showConfirmButton: false,
-                                            background: isDark ? '#0f172a' : '#fff',
-                                            color: isDark ? '#e2e8f0' : '#374151',
-                                            customClass: {
-                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
-                                            }
-                                        });
-
-                                        location.reload();
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Gagal!',
-                                            text: data.message || 'Tidak dapat memperbarui harga.',
-                                            confirmButtonText: 'Tutup',
-                                            background: isDark ? '#0f172a' : '#fff',
-                                            color: isDark ? '#e2e8f0' : '#374151',
-                                            customClass: {
-                                                popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
-                                                confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
-                                            },
-                                            buttonsStyling: false
-                                        });
-                                    }
-
-                                } catch (err) {
+                                    location.reload();
+                                } else {
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Koneksi gagal',
-                                        text: 'Tidak dapat menghubungi server. Pastikan koneksi stabil.',
-                                        confirmButtonText: 'OK',
+                                        title: 'Gagal!',
+                                        text: data.message || 'Tidak dapat memperbarui harga.',
+                                        confirmButtonText: 'Tutup',
                                         background: isDark ? '#0f172a' : '#fff',
                                         color: isDark ? '#e2e8f0' : '#374151',
                                         customClass: {
@@ -1452,558 +1417,574 @@
                                         buttonsStyling: false
                                     });
                                 }
-                            });
-                        });
 
-                        // Sebelum submit form (jaga-jaga kalau submit manual)
-                        form.addEventListener('submit', () => {
-                            document.querySelectorAll('.harga-hidden').forEach(el => {
-                                el.value = el.value.replace(/\D/g, '');
-                            });
+                            } catch (err) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Koneksi gagal',
+                                    text: 'Tidak dapat menghubungi server. Pastikan koneksi stabil.',
+                                    confirmButtonText: 'OK',
+                                    background: isDark ? '#0f172a' : '#fff',
+                                    color: isDark ? '#e2e8f0' : '#374151',
+                                    customClass: {
+                                        popup: 'rounded-2xl shadow-lg border ' + (isDark ? 'border-white/10' : 'border-gray-200'),
+                                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg',
+                                    },
+                                    buttonsStyling: false
+                                });
+                            }
                         });
                     });
-                </script>
-                <script>
-                    // Format angka ke format Rupiah (mis: 15000 → 15.000)
-                    function formatRupiah(angka) {
-                        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                    }
 
-                    // Ubah format Rupiah ke angka (mis: "15.000" → 15000)
-                    function parseRupiah(str) {
-                        return parseInt((str || '0').replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
-                    }
-
-                    // Update semua total (subtotal per produk, total, grand total)
-                    function updateTotals2() {
-                        let total = 0;
-
-                        document.querySelectorAll('.barang-keluar-input-mobile').forEach(function (input) {
-                            const index = input.dataset.index;
-                            const harga = parseInt(input.dataset.harga) || 0;
-                            const jumlahKeluar = parseInt(input.value) || 0;
-
-                            // Ambil input terjual & retur berdasarkan index
-                            const barangTerjualInput = document.querySelector(`.barang-terjual-input-mobile[data-index="${index}"]`);
-                            const barangReturInput = document.querySelector(`.barang-retur-input-mobile[data-index="${index}"]`);
-                            const totalInput = document.querySelector(`.total-harga-input-mobile[data-index="${index}"]`);
-                            const totalInputku = document.querySelector(`.totalku[data-index="${index}"]`);
-
-                            let barangTerjual = parseInt(barangTerjualInput?.value) || 0;
-
-                            // Batasi terjual tidak lebih dari keluar
-                            if (barangTerjual > jumlahKeluar) {
-                                barangTerjual = jumlahKeluar;
-                                barangTerjualInput.value = barangTerjual;
-                            }
-
-                            // Hitung total per produk
-                            const totalRow = (barangTerjual > 0 ? barangTerjual : jumlahKeluar) * harga;
-                            if (totalInput) totalInput.value = formatRupiah(totalRow);
-
-                            if (totalInputku) {
-                                totalInputku.textContent = "Rp. " + formatRupiah(totalRow);
-                            }
-
-                            total += totalRow;
+                    // Sebelum submit form (jaga-jaga kalau submit manual)
+                    form.addEventListener('submit', () => {
+                        document.querySelectorAll('.harga-hidden').forEach(el => {
+                            el.value = el.value.replace(/\D/g, '');
                         });
-
-                        // Tampilkan total semua produk
-                        const totalInput2 = document.getElementById('total-input-mobile');
-                        if (totalInput2) totalInput2.value = formatRupiah(total);
-
-                        // Tambahkan ongkir & diskon
-                        const ongkir = parseRupiah(document.getElementById('ongkir-input-mobile')?.value);
-                        const discount = parseRupiah(document.getElementById('discount-input-mobile')?.value);
-                        const grandTotal = total + ongkir - discount;
-
-                        const grandTotalInput2 = document.getElementById('grand-total-input-mobile');
-                        if (grandTotalInput2) grandTotalInput2.value = formatRupiah(grandTotal);
-                    }
-
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Format ulang total awal di semua input .total-harga-input-mobile
-                        document.querySelectorAll('.total-harga-input-mobile').forEach(function (input) {
-                            input.value = formatRupiah(parseRupiah(input.value));
-                        });
-
-                        // Event input: barang keluar
-                        document.querySelectorAll('.barang-keluar-input-mobile').forEach(function (input) {
-                            input.addEventListener('input', updateTotals2);
-                        });
-
-                        // Event input: barang terjual
-                        document.querySelectorAll('.barang-terjual-input-mobile').forEach(function (input) {
-                            input.addEventListener('input', function () {
-                                const index = this.dataset.index;
-
-                                const barangKeluarInput = document.querySelector(`.barang-keluar-input-mobile[data-index="${index}"]`);
-                                const barangReturInput = document.querySelector(`.barang-retur-input-mobile[data-index="${index}"]`);
-
-                                const barangKeluar = parseInt(barangKeluarInput?.value) || 0;
-                                let barangTerjual = parseInt(this.value) || 0;
-
-                                // Batasi terjual tidak melebihi keluar
-                                if (barangTerjual > barangKeluar) {
-                                    barangTerjual = barangKeluar;
-                                    this.value = barangTerjual;
-                                }
-
-                                // Update barang retur secara otomatis
-                                if (barangReturInput) {
-                                    barangReturInput.value = barangKeluar - barangTerjual;
-                                }
-
-                                updateTotals2();
-                            });
-                        });
-
-                        // Event input: ongkir
-                        const ongkirInput2 = document.getElementById('ongkir-input-mobile');
-                        if (ongkirInput2) {
-                            ongkirInput2.addEventListener('input', function () {
-                                this.value = formatRupiah(parseRupiah(this.value));
-                                updateTotals2();
-                            });
-                        }
-
-                        // Event input: diskon
-                        const discountInput2 = document.getElementById('discount-input-mobile');
-                        if (discountInput2) {
-                            discountInput2.addEventListener('input', function () {
-                                this.value = formatRupiah(parseRupiah(this.value));
-                                updateTotals2();
-                            });
-                        }
-
-                        // Jalankan saat halaman dimuat pertama kali
-                        updateTotals2();
                     });
-                </script>
-
-            </div>
-            </form>
-
-        </div>
-        <!-- Tombol Simpan -->
-        <div class="md:hidden mt-6 flex justify-end">
-            <button type="button" onclick="document.getElementById('form-transaksi-mobile').submit();"
-                class="w-full inline-flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full shadow transition duration-150">
-                <i class="fas fa-save"></i> Simpan Data
-            </button>
-        </div>
-
-        <!-- Dropdown Aksi -->
-        <div class="md:hidden mt-4">
-
-            <select id="action-selector"
-                class="form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
-                <option selected disabled>-- Cetak Nota --</option>
-
-                @php
-                    $bolehKonsinyasi = $product->where('barang_terjual', '>', 0)->count() > 0 ||
-                        $product->where('barang_keluar', '>', 0)->count() > 0;
-                    $bolehInvoice = $product->where('barang_terjual', '>', 0)->count() > 0;
-                    $bolehKwitansi = $transaksi->status_bayar === 'Sudah Bayar';
-                @endphp
-
-                <option value="konsinyasi" @if(!$bolehKonsinyasi) disabled @endif>📝 Buat Nota Konsinyasi</option>
-                <option value="invoice" @if(!$bolehInvoice) disabled @endif>📄 Buat Invoice</option>
-                <option value="kwitansi" @if(!$bolehKwitansi) disabled @endif>🧾 Buat Kwitansi</option>
-            </select>
+                });
+            </script>
             <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const select = document.getElementById('action-selector');
-                    const kode = @json($transaksi->kode_transaksi);
-                    const id = @json($transaksi->id);
+                // Format angka ke format Rupiah (mis: 15000 → 15.000)
+                function formatRupiah(angka) {
+                    return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                }
 
-                    select?.addEventListener('change', function () {
-                        const value = this.value;
-                        let url = '';
+                // Ubah format Rupiah ke angka (mis: "15.000" → 15000)
+                function parseRupiah(str) {
+                    return parseInt((str || '0').replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+                }
 
-                        switch (value) {
-                            case 'konsinyasi':
-                                url = `{{ route('transaksi.konsinyasi', ['id' => '__KODE__', 'type' => 'konsinyasi']) }}`.replace('__KODE__', kode);
-                                url += `&trans=${id}`;
-                                break;
-                            case 'invoice':
-                                url = `{{ route('transaksi.kwitansi', ['id' => '__KODE__', 'type' => 'invoice']) }}`.replace('__KODE__', kode);
-                                url += `&trans=${id}`;
-                                break;
-                            case 'kwitansi':
-                                url = `{{ route('transaksi.invoce', ['id' => '__KODE__', 'type' => 'kwitansi']) }}`.replace('__KODE__', kode);
-                                url += `&trans=${id}`;
-                                break;
+                // Update semua total (subtotal per produk, total, grand total)
+                function updateTotals2() {
+                    let total = 0;
+
+                    document.querySelectorAll('.barang-keluar-input-mobile').forEach(function (input) {
+                        const index = input.dataset.index;
+                        const harga = parseInt(input.dataset.harga) || 0;
+                        const jumlahKeluar = parseInt(input.value) || 0;
+
+                        // Ambil input terjual & retur berdasarkan index
+                        const barangTerjualInput = document.querySelector(`.barang-terjual-input-mobile[data-index="${index}"]`);
+                        const barangReturInput = document.querySelector(`.barang-retur-input-mobile[data-index="${index}"]`);
+                        const totalInput = document.querySelector(`.total-harga-input-mobile[data-index="${index}"]`);
+                        const totalInputku = document.querySelector(`.totalku[data-index="${index}"]`);
+
+                        let barangTerjual = parseInt(barangTerjualInput?.value) || 0;
+
+                        // Batasi terjual tidak lebih dari keluar
+                        if (barangTerjual > jumlahKeluar) {
+                            barangTerjual = jumlahKeluar;
+                            barangTerjualInput.value = barangTerjual;
                         }
 
-                        if (url) {
-                            window.open(url, '_blank');
+                        // Hitung total per produk
+                        const totalRow = (barangTerjual > 0 ? barangTerjual : jumlahKeluar) * harga;
+                        if (totalInput) totalInput.value = formatRupiah(totalRow);
+
+                        if (totalInputku) {
+                            totalInputku.textContent = "Rp. " + formatRupiah(totalRow);
                         }
 
-                        this.selectedIndex = 0;
+                        total += totalRow;
                     });
+
+                    // Tampilkan total semua produk
+                    const totalInput2 = document.getElementById('total-input-mobile');
+                    if (totalInput2) totalInput2.value = formatRupiah(total);
+
+                    // Tambahkan ongkir & diskon
+                    const ongkir = parseRupiah(document.getElementById('ongkir-input-mobile')?.value);
+                    const discount = parseRupiah(document.getElementById('discount-input-mobile')?.value);
+                    const grandTotal = total + ongkir - discount;
+
+                    const grandTotalInput2 = document.getElementById('grand-total-input-mobile');
+                    if (grandTotalInput2) grandTotalInput2.value = formatRupiah(grandTotal);
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Format ulang total awal di semua input .total-harga-input-mobile
+                    document.querySelectorAll('.total-harga-input-mobile').forEach(function (input) {
+                        input.value = formatRupiah(parseRupiah(input.value));
+                    });
+
+                    // Event input: barang keluar
+                    document.querySelectorAll('.barang-keluar-input-mobile').forEach(function (input) {
+                        input.addEventListener('input', updateTotals2);
+                    });
+
+                    // Event input: barang terjual
+                    document.querySelectorAll('.barang-terjual-input-mobile').forEach(function (input) {
+                        input.addEventListener('input', function () {
+                            const index = this.dataset.index;
+
+                            const barangKeluarInput = document.querySelector(`.barang-keluar-input-mobile[data-index="${index}"]`);
+                            const barangReturInput = document.querySelector(`.barang-retur-input-mobile[data-index="${index}"]`);
+
+                            const barangKeluar = parseInt(barangKeluarInput?.value) || 0;
+                            let barangTerjual = parseInt(this.value) || 0;
+
+                            // Batasi terjual tidak melebihi keluar
+                            if (barangTerjual > barangKeluar) {
+                                barangTerjual = barangKeluar;
+                                this.value = barangTerjual;
+                            }
+
+                            // Update barang retur secara otomatis
+                            if (barangReturInput) {
+                                barangReturInput.value = barangKeluar - barangTerjual;
+                            }
+
+                            updateTotals2();
+                        });
+                    });
+
+                    // Event input: ongkir
+                    const ongkirInput2 = document.getElementById('ongkir-input-mobile');
+                    if (ongkirInput2) {
+                        ongkirInput2.addEventListener('input', function () {
+                            this.value = formatRupiah(parseRupiah(this.value));
+                            updateTotals2();
+                        });
+                    }
+
+                    // Event input: diskon
+                    const discountInput2 = document.getElementById('discount-input-mobile');
+                    if (discountInput2) {
+                        discountInput2.addEventListener('input', function () {
+                            this.value = formatRupiah(parseRupiah(this.value));
+                            updateTotals2();
+                        });
+                    }
+
+                    // Jalankan saat halaman dimuat pertama kali
+                    updateTotals2();
                 });
             </script>
 
         </div>
+        </form>
 
-        <div class="flex flex-wrap gap-3 mt-6 justify-between ">
+    </div>
+    <!-- Tombol Simpan -->
+    <div class="md:hidden mt-6 flex justify-end">
+        <button type="button" onclick="document.getElementById('form-transaksi-mobile').submit();"
+            class="w-full inline-flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full shadow transition duration-150">
+            <i class="fas fa-save"></i> Simpan Data
+        </button>
+    </div>
 
-            <button type="button" onclick="document.getElementById('form-transaksi').submit();"
-                class="hidden md:block inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150">
-                Simpan Data
-            </button>
+    <!-- Dropdown Aksi -->
+    <div class="md:hidden mt-4">
 
+        <select id="action-selector"
+            class="form-select py-2.5 px-4 w-full text-black dark:text-white border border-black/10 dark:border-white/10 rounded-lg placeholder:text-black/20 dark:placeholder:text-white/20 focus:border-black dark:focus:border-white/10 focus:ring-0 focus:shadow-none;">
+            <option selected disabled>-- Cetak Nota --</option>
 
-            <div class="flex flex-wrap gap-3 hidden md:block">
-                <a href="{{ route('transaksi.konsinyasi', ['id' => $transaksi->kode_transaksi, 'type' => 'konsinyasi', 'trans' => $transaksi->id]) }}"
-                    target="_BLANK"
-                    class="inline-flex items-center px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
-                    id="btn-konsinyasi" disabled>
-                    Buat Nota Konsinyasi
-                </a>
-                <a href="{{ route('transaksi.kwitansi', ['id' => $transaksi->kode_transaksi, 'type' => 'invoice', 'trans' => $transaksi->id]) }}"
-                    target="_BLANK"
-                    class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
-                    id="btn-invoice" @php
-                        $adaTerjual = false;
-                        foreach ($penawaran as $row) {
-                            if (($row->barang_terjual ?? 0) > 0) {
-                                $adaTerjual = true;
-                                break;
-                            }
-                    } @endphp @if (!$adaTerjual) disabled style="opacity:0.5;pointer-events:none;"
-    @endif>
-                    Buat Invoice
-                </a>
-                <a href="{{ route('transaksi.invoce', ['id' => $transaksi->kode_transaksi, 'type' => 'kwitansi', 'trans' => $transaksi->id]) }}"
-                    target="_BLANK"
-                    class="inline-flex items-center px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
-                    id="btn-kwitansi2" @if ($transaksi->status_bayar === 'Belum Bayar') disabled
-                    style="opacity:0.5; pointer-events:none;" @endif>
-                    Buat Kwitansi
-                </a>
-            </div>
-        </div>
+            @php
+                $bolehKonsinyasi = $product->where('barang_terjual', '>', 0)->count() > 0 ||
+                    $product->where('barang_keluar', '>', 0)->count() > 0;
+                $bolehInvoice = $product->where('barang_terjual', '>', 0)->count() > 0;
+                $bolehKwitansi = $transaksi->status_bayar === 'Sudah Bayar';
+            @endphp
 
+            <option value="konsinyasi" @if(!$bolehKonsinyasi) disabled @endif>📝 Buat Nota Konsinyasi</option>
+            <option value="invoice" @if(!$bolehInvoice) disabled @endif>📄 Buat Invoice</option>
+            <option value="kwitansi" @if(!$bolehKwitansi) disabled @endif>🧾 Buat Kwitansi</option>
+        </select>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                function updateButtons() {
-                    const status = document.getElementById('status-bayar-input')?.value; // Status bayar input
-                    const tanggal = document.getElementById('tanggal-bayar-input')?.value; // Tanggal bayar input
-                    const btnKwitansi = document.getElementById('btn-kwitansi'); // Tombol Kwitansi
-                    const btnKwitansi2 = document.getElementById('btn-kwitansi2'); // Tombol Kwitansi2
-                    const btnKonsinyasi = document.getElementById('btn-konsinyasi'); // Tombol Konsinyasi
+                const select = document.getElementById('action-selector');
+                const kode = @json($transaksi->kode_transaksi);
+                const id = @json($transaksi->id);
 
-                    // Tombol Kwitansi dan Kwitansi2
-                    if (!status || !tanggal) {
-                        // Jika status atau tanggal belum ada, disable kedua tombol
+                select?.addEventListener('change', function () {
+                    const value = this.value;
+                    let url = '';
 
-                        btnKwitansi2.setAttribute('disabled', true);
-                        btnKwitansi2.style.opacity = 0.5;
-                        btnKwitansi2.style.pointerEvents = 'none';
-                    } else if (status === 'Sudah Bayar') {
-
-
-                        btnKwitansi2.removeAttribute('disabled');
-                        btnKwitansi2.style.opacity = 1;
-                        btnKwitansi2.style.pointerEvents = '';
-                    } else {
-
-
-                        btnKwitansi2.setAttribute('disabled', true);
-                        btnKwitansi2.style.opacity = 0.5;
-                        btnKwitansi2.style.pointerEvents = 'none';
+                    switch (value) {
+                        case 'konsinyasi':
+                            url = `{{ route('transaksi.konsinyasi', ['id' => '__KODE__', 'type' => 'konsinyasi']) }}`.replace('__KODE__', kode);
+                            url += `&trans=${id}`;
+                            break;
+                        case 'invoice':
+                            url = `{{ route('transaksi.kwitansi', ['id' => '__KODE__', 'type' => 'invoice']) }}`.replace('__KODE__', kode);
+                            url += `&trans=${id}`;
+                            break;
+                        case 'kwitansi':
+                            url = `{{ route('transaksi.invoce', ['id' => '__KODE__', 'type' => 'kwitansi']) }}`.replace('__KODE__', kode);
+                            url += `&trans=${id}`;
+                            break;
                     }
 
-                    // Tombol Konsinyasi (aktif jika ada barang terjual yang diisi)
-                    let adaTerjual = false;
-                    document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
-                        if (parseInt(input.value) > 0) adaTerjual = true; // Jika ada barang yang terjual
-                    });
-
-                    if (adaTerjual) {
-                        btnKonsinyasi.removeAttribute('disabled'); // Menghapus disabled pada tombol Konsinyasi
-                        btnKonsinyasi.style.opacity = 1; // Mengatur opacity ke normal
-                        btnKonsinyasi.style.pointerEvents = ''; // Mengizinkan interaksi
-                    } else {
-                        btnKonsinyasi.setAttribute('disabled', true); // Menonaktifkan tombol Konsinyasi
-                        btnKonsinyasi.style.opacity = 0.5; // Mengatur opacity agar terlihat dinonaktifkan
-                        btnKonsinyasi.style.pointerEvents = 'none'; // Menonaktifkan pointer events
+                    if (url) {
+                        window.open(url, '_blank');
                     }
 
-
-                    // Tombol Konsinyasi (aktif jika ada barang keluar yang diisi)
-                    const barangKeluarInput = document.querySelectorAll('.barang-keluar-input');
-                    let barangKeluarTerisi = false;
-
-                    // Pengecekan jika ada barang keluar yang diisi
-                    barangKeluarInput.forEach(function (input) {
-                        if (parseInt(input.value) > 0) barangKeluarTerisi =
-                            true; // Jika ada barang keluar terisi
-                    });
-
-                    if (barangKeluarTerisi) {
-                        btnKonsinyasi.removeAttribute('disabled'); // Menghapus disabled pada tombol Konsinyasi
-                        btnKonsinyasi.style.opacity = 1; // Mengatur opacity ke normal
-                        btnKonsinyasi.style.pointerEvents = ''; // Mengizinkan interaksi
-                    } else {
-                        btnKonsinyasi.setAttribute('disabled', true); // Menonaktifkan tombol Konsinyasi
-                        btnKonsinyasi.style.opacity = 0.5; // Mengatur opacity agar terlihat dinonaktifkan
-                        btnKonsinyasi.style.pointerEvents = 'none'; // Menonaktifkan pointer events
-                    }
-
-                    // Tombol Invoice (hanya aktif jika ada barang terjual)
-                    let adaBarangTerjual = false;
-                    document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
-                        if (parseInt(input.value) > 0) adaBarangTerjual = true;
-                    });
-                    const btnInvoice = document.getElementById('btn-invoice');
-                    if (!adaBarangTerjual) {
-                        btnInvoice.setAttribute('disabled', true);
-                        btnInvoice.style.opacity = 0.5;
-                        btnInvoice.style.pointerEvents = 'none';
-                    } else {
-                        btnInvoice.removeAttribute('disabled');
-                        btnInvoice.style.opacity = 1;
-                        btnInvoice.style.pointerEvents = '';
-                    }
-                }
-
-                // Event listener ketika status bayar berubah
-                document.getElementById('status-bayar-input')?.addEventListener('change', updateButtons);
-
-                // Event listener untuk input tanggal bayar dan barang terjual
-                document.getElementById('tanggal-bayar-input')?.addEventListener('input', updateButtons);
-                document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
-                    input.addEventListener('input',
-                        updateButtons); // Pengecekan setiap kali input barang terjual berubah
+                    this.selectedIndex = 0;
                 });
-
-                // Inisialisasi tombol saat halaman dimuat
-                updateButtons();
             });
         </script>
 
+    </div>
+
+    <div class="flex flex-wrap gap-3 mt-6 justify-between ">
+
+        <button type="button" onclick="document.getElementById('form-transaksi').submit();"
+            class="hidden md:block inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150">
+            Simpan Data
+        </button>
 
 
-        <script>
-            function updateKodeTransaksi(kodeTransaksi, kodeMitra) {
-                const selectedCheckboxes = document.querySelectorAll('input[name="kode_produk[]"]:checked');
-                const kodeProduks = Array.from(selectedCheckboxes).map(cb => cb.value);
+        <div class="flex flex-wrap gap-3 hidden md:block">
+            <a href="{{ route('transaksi.konsinyasi', ['id' => $transaksi->kode_transaksi, 'type' => 'konsinyasi', 'trans' => $transaksi->id]) }}"
+                target="_BLANK"
+                class="inline-flex items-center px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
+                id="btn-konsinyasi" disabled>
+                Buat Nota Konsinyasi
+            </a>
+            <a href="{{ route('transaksi.kwitansi', ['id' => $transaksi->kode_transaksi, 'type' => 'invoice', 'trans' => $transaksi->id]) }}"
+                target="_BLANK"
+                class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
+                id="btn-invoice" @php
+                    $adaTerjual = false;
+                    foreach ($penawaran as $row) {
+                        if (($row->barang_terjual ?? 0) > 0) {
+                            $adaTerjual = true;
+                            break;
+                        }
+                } @endphp @if (!$adaTerjual) disabled style="opacity:0.5;pointer-events:none;"
+    @endif>
+                Buat Invoice
+            </a>
+            <a href="{{ route('transaksi.invoce', ['id' => $transaksi->kode_transaksi, 'type' => 'kwitansi', 'trans' => $transaksi->id]) }}"
+                target="_BLANK"
+                class="inline-flex items-center px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg shadow transition duration-150"
+                id="btn-kwitansi2" @if ($transaksi->status_bayar === 'Belum Bayar') disabled
+                style="opacity:0.5; pointer-events:none;" @endif>
+                Buat Kwitansi
+            </a>
+        </div>
+    </div>
 
-                if (kodeProduks.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Oops!',
-                        text: 'Pilih minimal 1 produk terlebih dahulu.',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg px-4 py-2'
-                        },
-                        buttonsStyling: false
-                    });
-                    return;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function updateButtons() {
+                const status = document.getElementById('status-bayar-input')?.value; // Status bayar input
+                const tanggal = document.getElementById('tanggal-bayar-input')?.value; // Tanggal bayar input
+                const btnKwitansi = document.getElementById('btn-kwitansi'); // Tombol Kwitansi
+                const btnKwitansi2 = document.getElementById('btn-kwitansi2'); // Tombol Kwitansi2
+                const btnKonsinyasi = document.getElementById('btn-konsinyasi'); // Tombol Konsinyasi
+
+                // Tombol Kwitansi dan Kwitansi2
+                if (!status || !tanggal) {
+                    // Jika status atau tanggal belum ada, disable kedua tombol
+
+                    btnKwitansi2.setAttribute('disabled', true);
+                    btnKwitansi2.style.opacity = 0.5;
+                    btnKwitansi2.style.pointerEvents = 'none';
+                } else if (status === 'Sudah Bayar') {
+
+
+                    btnKwitansi2.removeAttribute('disabled');
+                    btnKwitansi2.style.opacity = 1;
+                    btnKwitansi2.style.pointerEvents = '';
+                } else {
+
+
+                    btnKwitansi2.setAttribute('disabled', true);
+                    btnKwitansi2.style.opacity = 0.5;
+                    btnKwitansi2.style.pointerEvents = 'none';
                 }
 
-                fetch('/update-penawaran', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                // Tombol Konsinyasi (aktif jika ada barang terjual yang diisi)
+                let adaTerjual = false;
+                document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
+                    if (parseInt(input.value) > 0) adaTerjual = true; // Jika ada barang yang terjual
+                });
+
+                if (adaTerjual) {
+                    btnKonsinyasi.removeAttribute('disabled'); // Menghapus disabled pada tombol Konsinyasi
+                    btnKonsinyasi.style.opacity = 1; // Mengatur opacity ke normal
+                    btnKonsinyasi.style.pointerEvents = ''; // Mengizinkan interaksi
+                } else {
+                    btnKonsinyasi.setAttribute('disabled', true); // Menonaktifkan tombol Konsinyasi
+                    btnKonsinyasi.style.opacity = 0.5; // Mengatur opacity agar terlihat dinonaktifkan
+                    btnKonsinyasi.style.pointerEvents = 'none'; // Menonaktifkan pointer events
+                }
+
+
+                // Tombol Konsinyasi (aktif jika ada barang keluar yang diisi)
+                const barangKeluarInput = document.querySelectorAll('.barang-keluar-input');
+                let barangKeluarTerisi = false;
+
+                // Pengecekan jika ada barang keluar yang diisi
+                barangKeluarInput.forEach(function (input) {
+                    if (parseInt(input.value) > 0) barangKeluarTerisi =
+                        true; // Jika ada barang keluar terisi
+                });
+
+                if (barangKeluarTerisi) {
+                    btnKonsinyasi.removeAttribute('disabled'); // Menghapus disabled pada tombol Konsinyasi
+                    btnKonsinyasi.style.opacity = 1; // Mengatur opacity ke normal
+                    btnKonsinyasi.style.pointerEvents = ''; // Mengizinkan interaksi
+                } else {
+                    btnKonsinyasi.setAttribute('disabled', true); // Menonaktifkan tombol Konsinyasi
+                    btnKonsinyasi.style.opacity = 0.5; // Mengatur opacity agar terlihat dinonaktifkan
+                    btnKonsinyasi.style.pointerEvents = 'none'; // Menonaktifkan pointer events
+                }
+
+                // Tombol Invoice (hanya aktif jika ada barang terjual)
+                let adaBarangTerjual = false;
+                document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
+                    if (parseInt(input.value) > 0) adaBarangTerjual = true;
+                });
+                const btnInvoice = document.getElementById('btn-invoice');
+                if (!adaBarangTerjual) {
+                    btnInvoice.setAttribute('disabled', true);
+                    btnInvoice.style.opacity = 0.5;
+                    btnInvoice.style.pointerEvents = 'none';
+                } else {
+                    btnInvoice.removeAttribute('disabled');
+                    btnInvoice.style.opacity = 1;
+                    btnInvoice.style.pointerEvents = '';
+                }
+            }
+
+            // Event listener ketika status bayar berubah
+            document.getElementById('status-bayar-input')?.addEventListener('change', updateButtons);
+
+            // Event listener untuk input tanggal bayar dan barang terjual
+            document.getElementById('tanggal-bayar-input')?.addEventListener('input', updateButtons);
+            document.querySelectorAll('.barang-terjual-input').forEach(function (input) {
+                input.addEventListener('input',
+                    updateButtons); // Pengecekan setiap kali input barang terjual berubah
+            });
+
+            // Inisialisasi tombol saat halaman dimuat
+            updateButtons();
+        });
+    </script>
+
+
+
+    <script>
+        function updateKodeTransaksi(kodeTransaksi, kodeMitra) {
+            const selectedCheckboxes = document.querySelectorAll('input[name="kode_produk[]"]:checked');
+            const kodeProduks = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            if (kodeProduks.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops!',
+                    text: 'Pilih minimal 1 produk terlebih dahulu.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg px-4 py-2'
                     },
-                    body: JSON.stringify({
-                        kode_transaksi: kodeTransaksi,
-                        kode_produk: kodeProduks,
-                        kode_mitra: kodeMitra
-                    })
+                    buttonsStyling: false
+                });
+                return;
+            }
+
+            fetch('/update-penawaran', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    kode_transaksi: kodeTransaksi,
+                    kode_produk: kodeProduks,
+                    kode_mitra: kodeMitra
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            if (data.produk_sudah_ada && data.produk_sudah_ada.length > 0) {
-                                Swal.fire({
-                                    icon: 'info',
-                                    title: 'Sebagian produk sudah ada',
-                                    html: 'Produk berikut sudah pernah ditambahkan ke transaksi:<br><b>' + data
-                                        .produk_sudah_ada.join(', ') + '</b>',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        confirmButton: 'bg-green-500 hover:bg-blue-600 text-white font-semibold rounded-lg px-4 py-2'
-                                    },
-                                    buttonsStyling: false
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: 'Berhasil menambahkan produk ke transaksi!',
-                                    confirmButtonText: 'OK',
-                                    customClass: {
-                                        confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg px-4 py-2'
-                                    },
-                                    buttonsStyling: false
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            }
-                        } else {
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.produk_sudah_ada && data.produk_sudah_ada.length > 0) {
                             Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: data.message || 'Gagal menambahkan produk.',
+                                icon: 'info',
+                                title: 'Sebagian produk sudah ada',
+                                html: 'Produk berikut sudah pernah ditambahkan ke transaksi:<br><b>' + data
+                                    .produk_sudah_ada.join(', ') + '</b>',
                                 confirmButtonText: 'OK',
                                 customClass: {
-                                    confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2'
+                                    confirmButton: 'bg-green-500 hover:bg-blue-600 text-white font-semibold rounded-lg px-4 py-2'
                                 },
                                 buttonsStyling: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Berhasil menambahkan produk ke transaksi!',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg px-4 py-2'
+                                },
+                                buttonsStyling: false
+                            }).then(() => {
+                                location.reload();
                             });
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
+                    } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error!',
-                            text: 'Terjadi kesalahan saat mengirim data.',
+                            title: 'Gagal!',
+                            text: data.message || 'Gagal menambahkan produk.',
                             confirmButtonText: 'OK',
                             customClass: {
                                 confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2'
                             },
                             buttonsStyling: false
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat mengirim data.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2'
+                        },
+                        buttonsStyling: false
                     });
-            }
-        </script>
-        <script>
-            function hapusItem(kodeTransaksi, kodeProduk) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Yakin ingin hapus?',
-                    text: 'Data produk ini akan dihapus dari transaksi.',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, hapus',
-                    cancelButtonText: 'Batal',
-                    customClass: {
-                        confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2',
-                        cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg px-4 py-2 ml-2'
-                    },
-                    buttonsStyling: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/hapus-produk-transaksi', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            },
-                            body: JSON.stringify({
-                                kode_transaksi: kodeTransaksi,
-                                kode_produk: kodeProduk
-                            })
+                });
+        }
+    </script>
+    <script>
+        function hapusItem(kodeTransaksi, kodeProduk) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Yakin ingin hapus?',
+                text: 'Data produk ini akan dihapus dari transaksi.',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2',
+                    cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg px-4 py-2 ml-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/hapus-produk-transaksi', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                'content')
+                        },
+                        body: JSON.stringify({
+                            kode_transaksi: kodeTransaksi,
+                            kode_produk: kodeProduk
                         })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Berhasil!',
-                                        text: 'Produk berhasil dihapus dari transaksi.',
-                                        confirmButtonText: 'OK',
-                                        customClass: {
-                                            confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg px-4 py-2'
-                                        },
-                                        buttonsStyling: false
-                                    }).then(() => location.reload());
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Gagal!',
-                                        text: data.message || 'Gagal menghapus produk.',
-                                        confirmButtonText: 'OK',
-                                        customClass: {
-                                            confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2'
-                                        },
-                                        buttonsStyling: false
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: 'Produk berhasil dihapus dari transaksi.',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg px-4 py-2'
+                                    },
+                                    buttonsStyling: false
+                                }).then(() => location.reload());
+                            } else {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error!',
-                                    text: 'Terjadi kesalahan saat menghapus data.',
+                                    title: 'Gagal!',
+                                    text: data.message || 'Gagal menghapus produk.',
                                     confirmButtonText: 'OK',
                                     customClass: {
                                         confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2'
                                     },
                                     buttonsStyling: false
                                 });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan saat menghapus data.',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-4 py-2'
+                                },
+                                buttonsStyling: false
                             });
-                    }
-                });
-            }
-        </script>
-        @if(session('error'))
-            <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: "{{ session('error') }}",
-                });
-            </script>
-        @endif
-
-        @if(session('success'))
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: "{{ session('success') }}",
-                });
-            </script>
-        @endif
-
-        {{--
-        <script>
-            function updateKodeTransaksi(kodeTransaksi, kodeMitra) {
-                const selectedCheckboxes = document.querySelectorAll('input[name="kode_produk[]"]:checked');
-                const kodeProduks = Array.from(selectedCheckboxes).map(cb => cb.value);
-
-                if (kodeProduks.length === 0) {
-                    alert('Pilih minimal 1 produk terlebih dahulu.');
-                    return;
+                        });
                 }
+            });
+        }
+    </script>
+    @if(session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: "{{ session('error') }}",
+            });
+        </script>
+    @endif
 
-                // Kirim via AJAX ke route Laravel
-                fetch('/update-penawaran', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        kode_transaksi: kodeTransaksi,
-                        kode_produk: kodeProduks,
-                        kode_mitra: kodeMitra,
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Berhasil menambahkan produk ke transaksi!');
-                            location.reload();
-                        } else {
-                            alert('Gagal menambahkan produk.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
+    @if(session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: "{{ session('success') }}",
+            });
+        </script>
+    @endif
+
+    {{--
+    <script>
+        function updateKodeTransaksi(kodeTransaksi, kodeMitra) {
+            const selectedCheckboxes = document.querySelectorAll('input[name="kode_produk[]"]:checked');
+            const kodeProduks = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            if (kodeProduks.length === 0) {
+                alert('Pilih minimal 1 produk terlebih dahulu.');
+                return;
             }
-        </script> --}}
+
+            // Kirim via AJAX ke route Laravel
+            fetch('/update-penawaran', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    kode_transaksi: kodeTransaksi,
+                    kode_produk: kodeProduks,
+                    kode_mitra: kodeMitra,
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Berhasil menambahkan produk ke transaksi!');
+                        location.reload();
+                    } else {
+                        alert('Gagal menambahkan produk.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script> --}}
 @endsection
