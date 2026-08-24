@@ -28,7 +28,7 @@
             margin: 0;
             padding: 0;
         }
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .table-bordered th, .table-bordered td {
             border-top: 1px solid #000;
             border-bottom: 1px solid #000;
@@ -36,6 +36,7 @@
             border-right: none;
             padding: 6px 8px;
             font-size: 12px;
+            vertical-align: top;
         }
         .table-bordered thead th {
             background-color: #f2f2f2;
@@ -72,12 +73,18 @@
             color: #666;
         }
         .pagenum:before { content: counter(page); }
+        .nama-barang {
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            white-space: normal;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
     <div class="max-w-[900px] mx-auto p-6 text-black">
         <div class="flex justify-between items-center mb-2">
-            <div style="width: 90px; height: 90px;">
+            <div style="width: 90px, height: 90px;">
                 @php
                     $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id);
                     $nama = $perusahaan->nama_perusahaan ?? 'Perusahaan tidak ditemukan';
@@ -157,7 +164,7 @@
                     <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold">Unit</th>
                     <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold"></th>
                     <th class="border-collapse border-black px-1 text-right w-[100px] font-semibold">Harga Unit</th>
-                    <th class="border-collapse border-black px-1 text-center w-[40px] font-semibold"></th>
+                    <th class="border-collapse border-black px-1 text-right w-[40px] font-semibold"></th>
                     <th class="border-collapse border-black px-1 text-right w-[110px] font-semibold">Sub Total Harga</th>
                 </tr>
             </thead>
@@ -169,18 +176,18 @@
                 @endphp
                 @foreach ($transaksi->ProdukTransaksi as $index => $item)
                     @php
-                        $produkTransaksi = $transaksi->ProdukTransaksi->firstWhere('kode_produk', $item->kode_produk);
-                        $produkjual = $transaksi->penawaran->firstWhere('kode_produk', $item->kode_produk);
-                        $total = $item->barang_terjual * $item->penawaran->harga;
+                        $qty = (int) ($item->barang_terjual ?? $item->barang_keluar ?? 0);
+                        $unitHarga = (float) ($item->harga ?? $item->penawaran->harga ?? 0);
+                        $total = $qty * $unitHarga;
                         $grandTotal += $total;
                     @endphp
                     <tr class="group text-xs border-b border-black">
                         <td class="border-collapse border-black px-1 text-center font-normal">{{ $index + 1 }}</td>
-                        <td class="border-collapse border-black px-1 font-normal">{{ $item->produk->nama_produk }}</td>
-                        <td class="border-collapse border-black px-1 text-center font-normal">{{ $produkTransaksi->barang_terjual ?? '-' }}</td>
+                        <td class="nama-barang border-collapse border-black px-1 font-normal">{{ $item->produk->nama_produk }}</td>
+                        <td class="border-collapse border-black px-1 text-center font-normal">{{ $qty }}</td>
                         <td class="border-collapse border-black px-1 text-center font-normal">Pcs</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">Rp.</td>
-                        <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($item->penawaran->harga, 2, ',', '.') }}</td>
+                        <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($unitHarga, 2, ',', '.') }}</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">Rp.</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">{{ number_format($total, 2, ',', '.') }}</td>
                     </tr>

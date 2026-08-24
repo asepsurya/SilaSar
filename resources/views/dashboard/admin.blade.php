@@ -240,34 +240,44 @@
 
     // Chart Transaksi
     new Chart(document.getElementById('chartTransaksi'), {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: bulanTransaksi,
         datasets: [{
           label: 'Jumlah Transaksi',
           data: totalTransaksi,
-          tension: 0.4,
-          fill: true,
-          backgroundColor: 'rgba(59, 130, 246, 0.15)',
-          borderColor: 'rgba(59, 130, 246, 1)',
-          borderWidth: 2,
-          pointBackgroundColor: '#ffffff',
-          pointBorderColor: 'rgba(59, 130, 246, 1)',
-          pointBorderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 6
+          backgroundColor: 'rgba(59, 130, 246, 0.7)',
+          borderColor: 'rgba(37, 99, 235, 1)',
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
         }]
       },
       options: {
         responsive: true,
         plugins: {
           legend: { display: false },
-          tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(0,0,0,0.8)', padding: 12, cornerRadius: 8, titleFont: { size: 13 }, bodyFont: { size: 13, weight: 'bold' } }
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: 12,
+            cornerRadius: 8,
+            titleFont: { size: 13 },
+            bodyFont: { size: 13, weight: 'bold' }
+          }
         },
         interaction: { mode: 'nearest', axis: 'x', intersect: false },
         scales: {
           x: { grid: { display: false } },
-          y: { grid: { color: 'rgba(0, 0, 0, 0.05)', borderDash: [5, 5] }, beginAtZero: true, border: { display: false } }
+          y: {
+            grid: { color: 'rgba(0, 0, 0, 0.05)', borderDash: [5, 5] },
+            beginAtZero: true,
+            border: { display: false },
+            ticks: {
+              precision: 0
+            }
+          }
         }
       }
     });

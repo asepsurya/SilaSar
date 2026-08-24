@@ -134,7 +134,7 @@
     }
     footer {
         position: fixed;
-        bottom: -60px; 
+        bottom: -60px;
         left: 0;
         right: 0;
         text-align: center;
@@ -147,7 +147,7 @@
     }
     body {
         font-family: 'DejaVu Sans', sans-serif;
-       
+
         line-height: 1.4;
     }
 
@@ -156,7 +156,7 @@
         font-weight: bold;
     }
 
-  
+
     </style>
 </head>
 <body>
@@ -165,8 +165,8 @@
             <tr>
                 <td style="width: 50%;">
                  <img src="{{ $logo
-                    ? public_path('storage/' . $logo) 
-                    : public_path('assets/default_logo.png') }}" 
+                    ? public_path('storage/' . $logo)
+                    : public_path('assets/default_logo.png') }}"
                     alt="Logo" style="width:120px;">
                       <p class="address">{{ $alamat }}</p>
         <p class="address">P. {{ auth()->user()->perusahaanUser->telp_perusahaan }}</p>
@@ -192,7 +192,7 @@
             </tr>
         </table>
 
-     
+
 
         <hr class="garis-atas">
         <hr class="garis-bawah">
@@ -229,12 +229,13 @@
                 </tr>
             </thead>
             <tbody>
-                @php 
+                @php
                     $grandTotal = 0;
                 @endphp
                 @foreach ($transaksi->ProdukTransaksi as $index => $item)
                     @php
-                        $total = $item->barang_keluar * $item->penawaran->harga;
+                        $unitHarga = (float) ($item->harga ?? $item->penawaran->harga ?? 0);
+                        $total = ($item->barang_keluar ?? 0) * $unitHarga;
                         $grandTotal += $total;
                     @endphp
                     <tr>
@@ -243,7 +244,7 @@
                         <td class="text-center">{{ $item->barang_keluar }}</td>
                         <td class="text-center">Pcs</td>
                         <td class="text-right">Rp.</td>
-                        <td class="text-right">{{ number_format($item->penawaran->harga,2,',','.') }}</td>
+                        <td class="text-right">{{ number_format($unitHarga,2,',','.') }}</td>
                         <td class="text-right">Rp.</td>
                         <td class="text-right">{{ number_format($total,2,',','.') }}</td>
                     </tr>
@@ -279,7 +280,7 @@
                 </td>
                 <td class="text-center" style="height:150px; position:relative;">
                     <p><b>Hormat Kami</b></p>
-                
+
                     <div style="margin-top:110px; border-top:1px solid #000; width:150px; margin-left:auto; margin-right:auto;"></div>
                     <p>{{ auth()->user()->perusahaanUser->nama_perusahaan }}</p>
                 </td>

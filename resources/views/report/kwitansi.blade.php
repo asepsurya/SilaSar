@@ -134,7 +134,7 @@
     }
     footer {
         position: fixed;
-        bottom: -60px; 
+        bottom: -60px;
         left: 0;
         right: 0;
         text-align: center;
@@ -147,7 +147,7 @@
     }
     body {
         font-family: 'DejaVu Sans', sans-serif;
-       
+
         line-height: 1.4;
     }
 
@@ -156,7 +156,7 @@
         font-weight: bold;
     }
 
-  
+
     </style>
 </head>
 <body>
@@ -165,8 +165,8 @@
             <tr>
                 <td style="width: 50%;">
                  <img src="{{ $logo
-                    ? public_path('storage/' . $logo) 
-                    : public_path('assets/default_logo.png') }}" 
+                    ? public_path('storage/' . $logo)
+                    : public_path('assets/default_logo.png') }}"
                     alt="Logo" style="width:120px;">
                       <p class="address">{{ $alamat }}</p>
                 <p class="address">P. {{ auth()->user()->perusahaanUser->telp_perusahaan }}</p>
@@ -230,12 +230,13 @@
                 </tr>
             </thead>
             <tbody>
-                @php 
+                @php
                     $grandTotal = 0;
                 @endphp
                 @foreach ($transaksi->ProdukTransaksi as $index => $item)
                     @php
-                        $total = $item->barang_terjual * $item->penawaran->harga;
+                        $unitHarga = (float) ($item->harga ?? $item->penawaran->harga ?? 0);
+                        $total = ($item->barang_terjual ?? 0) * $unitHarga;
                         $grandTotal += $total;
                     @endphp
                     <tr>
@@ -244,7 +245,7 @@
                         <td class="text-center">{{ $item->barang_terjual }}</td>
                         <td class="text-center">Pcs</td>
                         <td class="text-right">Rp.</td>
-                        <td class="text-right">{{ number_format($item->penawaran->harga,2,',','.') }}</td>
+                        <td class="text-right">{{ number_format($unitHarga,2,',','.') }}</td>
                         <td class="text-right">Rp.</td>
                         <td class="text-right">{{ number_format($total,2,',','.') }}</td>
                     </tr>
@@ -289,8 +290,8 @@
             <!-- Kolom Tanda Tangan -->
            <td style="width:30%; text-align:center; vertical-align:top;">
                 <p style="font-size:11px; font-weight:bold; margin-bottom:90px;">Hormat Kami</p>
-                
-            
+
+
                 <!-- Garis tanda tangan -->
                 <div style="border-top:1px solid #000; width:150px; margin:0 auto 4px auto;"></div>
                 <p style="font-size:11px; margin:0;">
@@ -304,7 +305,7 @@
     <div style="position: absolute; top: 40%; left: 50%;
                 transform: translate(-50%, -50%) rotate(-30deg);
                 font-size: 80px; font-weight: bold;
-                color: rgba(15, 207, 101, 0.2); 
+                color: rgba(15, 207, 101, 0.2);
                 white-space: nowrap;">
         LUNAS
     </div>

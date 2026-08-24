@@ -28,9 +28,18 @@ class DashboardAdminController extends Controller
         // Transaksi per bulan
         $transaksiPerBulan = DB::table('transaksis')
             ->select(DB::raw("DATE_FORMAT(tanggal_transaksi, '%M') as bulan"), DB::raw('COUNT(*) as total'))
-            ->where('auth', auth()->user()->id) // tambahkan ini
+            ->where('auth', auth()->user()->id)
             ->groupBy('bulan')
             ->pluck('total', 'bulan');
+
+        $allMonths = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        $transaksiPerBulan = collect($allMonths)->mapWithKeys(function ($month) use ($transaksiPerBulan) {
+            return [$month => (int) ($transaksiPerBulan[$month] ?? 0)];
+        });
 
         // Status pembayaran
         $statusBayar = DB::table('transaksis')
@@ -58,12 +67,20 @@ class DashboardAdminController extends Controller
             ->groupBy('bulan')
             ->pluck('total_untung', 'bulan');
 
+        $keuntungan = collect($allMonths)->mapWithKeys(function ($month) use ($keuntungan) {
+            return [$month => (float) ($keuntungan[$month] ?? 0)];
+        });
+
         // Kerugian
         $kerugian = DB::table('transaksis')
             ->select(DB::raw("DATE_FORMAT(tanggal_transaksi, '%M') as bulan"), DB::raw('SUM(diskon) as total_rugi'))
             ->where('auth', auth()->user()->id) // tambahkan ini
             ->groupBy('bulan')
             ->pluck('total_rugi', 'bulan');
+
+        $kerugian = collect($allMonths)->mapWithKeys(function ($month) use ($kerugian) {
+            return [$month => (float) ($kerugian[$month] ?? 0)];
+        });
 
         $logs = Activity::where(['causer_id' => auth()->user()->id, 'log_name' => 'ikm'])->latest()->take(10)->get();
         $produk_habis = Produk::where('auth', auth()->user()->id)

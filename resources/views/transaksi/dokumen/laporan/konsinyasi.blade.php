@@ -30,7 +30,7 @@
             margin: 0;
             padding: 0;
         }
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .table-bordered th, .table-bordered td {
             border-top: 1px solid #000;
             border-bottom: 1px solid #000;
@@ -38,6 +38,13 @@
             border-right: none;
             padding: 6px 8px;
             font-size: 12px;
+            vertical-align: top;
+        }
+        .nama-barang {
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            white-space: normal;
+            line-height: 1.4;
         }
         .table-bordered thead th {
             background-color: #f2f2f2;
@@ -152,7 +159,7 @@
                 </tr>
             </thead>
             <tbody>
-                @php 
+                @php
                     $grandTotal = 0;
                     $ongkir = $transaksi->ongkir;
                     $diskon = $transaksi->diskon;
@@ -164,7 +171,7 @@
                     @endphp
                     <tr class="group text-xs border-b border-black">
                         <td class="border-collapse border-black px-1 text-center font-normal">{{ $index + 1 }}</td>
-                        <td class="border-collapse border-black px-1 font-normal">{{ $item->produk->nama_produk }}</td>
+                        <td class="nama-barang border-collapse border-black px-1 font-normal">{{ $item->produk->nama_produk }}</td>
                         <td class="border-collapse border-black px-1 text-center font-normal">{{ $item->barang_keluar }}</td>
                         <td class="border-collapse border-black px-1 text-center font-normal">Pcs</td>
                         <td class="border-collapse border-black px-1 text-right font-normal">Rp.</td>

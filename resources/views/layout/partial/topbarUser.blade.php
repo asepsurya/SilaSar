@@ -1,169 +1,174 @@
-<div class="border-b border-black/10 dark:border-white/10 py-[22px] px-7 flex items-center justify-between">
-    <div class="flex items-center gap-2">
+<div class="sticky top-0 z-30 border-b border-black/10 bg-white/80 px-4 py-3 backdrop-blur-sm dark:border-white/10 dark:bg-slate-950/60 sm:px-6 lg:px-7">
+    <div class="flex items-center justify-between gap-3">
+        <div class="flex min-w-0 items-center gap-3">
 
-        <button type="button" class=" text-black dark:text-white">
-            <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130" class="block dark:hidden">
-            <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130"
-                class="hidden dark:block">
-        </button>
+            <button type="button" class="shrink-0 rounded-lg p-1 transition hover:bg-black/5 dark:hover:bg-white/10">
+                <img src="{{ asset('assets/app_logo.png') }}" alt="" srcset="" width="130" class="block dark:hidden">
+                <img src="{{ asset('assets/SILASAR-LOGO-white.png') }}" alt="" srcset="" width="130"
+                    class="hidden dark:block">
+            </button>
 
 
-        <div class="hidden sm:block">
-            <nav aria-label="breadcrumb" class="w-full py-1 px-2">
-                <ol class="flex space-x-2 text-sm">
-                    @php
-                        $segments = Request::segments();
-                        $url = '';
-                    @endphp
-
-                    <li>
-                        <a href="{{ url('/') }}"
-                            class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">
-                            Home
-                        </a>
-                    </li>
-
-                    @foreach ($segments as $index => $segment)
+            <div class="hidden min-w-0 sm:block">
+                <nav aria-label="breadcrumb" class="w-full">
+                    <ol class="flex min-w-0 items-center gap-1.5 overflow-hidden text-sm">
                         @php
-                            $url .= '/' . $segment;
-                            $isLast = $loop->last;
-
-                            // Label khusus jika segmen terakhir di halaman update
-                            if ($isLast && Request::is('people/update/*')) {
-                                $label = $ikm->nama;
-                            } elseif ($isLast && Request::is('mitra/detail/*')) {
-                                $label = $mitra->nama_mitra;
-                            } elseif ($isLast && Request::is('transaksi/*')) {
-                                $label = $mitra->nama_mitra;
-                            } else {
-                                $label = ucwords(str_replace('-', ' ', $segment));
-                            }
-
-                            $isLinkable = !$isLast && $segment !== ['update', 'detail'];
+                            $segments = Request::segments();
+                            $url = '';
                         @endphp
 
-                        <li class="flex items-center space-x-1">
-                            <span class="text-black/40 dark:text-white/40">/</span>
-                            @if ($isLinkable)
-                                <span class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white">
-                                    {{ $label }}
-                                </span>
-                            @else
-                                <span class="text-black dark:text-white">{{ $label }}</span>
-                            @endif
+                        <li class="shrink-0">
+                            <a href="{{ url('/') }}"
+                                class="inline-flex items-center rounded-md px-2 py-1 text-black/45 transition hover:bg-black/5 hover:text-black dark:text-white/45 dark:hover:bg-white/10 dark:hover:text-white">
+                                Home
+                            </a>
                         </li>
-                    @endforeach
-                </ol>
-            </nav>
-        </div>
-    </div>
-    <div class="flex items-center gap-5">
 
-        <div class="flex items-center gap-2">
-            <div>
-                <a href="javascript:;" class="text-black dark:text-white" x-cloak x-show="$store.app.mode === 'light'"
-                    @click="$store.app.toggleMode('dark')">
-                    <x-icon name="moon" class="" />
-                </a>
-                <a href="javascript:;" class="text-black dark:text-white" x-cloak x-show="$store.app.mode === 'dark'"
-                    @click="$store.app.toggleMode('light')">
-                    <x-icon name="sun" class="" />
-                </a>
+                        @foreach ($segments as $index => $segment)
+                            @php
+                                $url .= '/' . $segment;
+                                $isLast = $loop->last;
+
+                                // Label khusus jika segmen terakhir di halaman update
+                                if ($isLast && Request::is('people/update/*')) {
+                                    $label = $ikm->nama;
+                                } elseif ($isLast && Request::is('mitra/detail/*')) {
+                                    $label = $mitra->nama_mitra;
+                                } elseif ($isLast && Request::is('transaksi/*')) {
+                                    $label = $mitra->nama_mitra;
+                                } else {
+                                    $label = ucwords(str_replace('-', ' ', $segment));
+                                }
+
+                                $isLinkable = !$isLast && $segment !== ['update', 'detail'];
+                            @endphp
+
+                            <li class="flex min-w-0 items-center gap-1.5">
+                                <span class="text-black/30 dark:text-white/30">/</span>
+                                @if ($isLinkable)
+                                    <span class="max-w-[120px] truncate rounded-md px-2 py-1 text-black/45 transition hover:bg-black/5 hover:text-black dark:text-white/45 dark:hover:bg-white/10 dark:hover:text-white">
+                                        {{ $label }}
+                                    </span>
+                                @else
+                                    <span class="max-w-[160px] truncate rounded-md bg-black/[0.03] px-2 py-1 font-medium text-black dark:bg-white/5 dark:text-white">{{ $label }}</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
+                </nav>
             </div>
-            <button type="button" class="relative w-7 h-7 p-1 text-black dark:text-white"
-                @click="$store.app.rightSidebar()" id="rightSidebar">
-                <x-icon name="notif" class="" />
-                <span class="flex absolute w-3 h-3 right-px top-[5px]">
-                    <span
-                        class="animate-ping absolute -left-[3px] -top-[3px] inline-flex h-full w-full rounded-full bg-black/50 dark:bg-white/50 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-black dark:bg-white"></span>
-                </span>
-            </button>
-            @if (auth()->user()->role === 'gold')
-                <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightyellow text-black">
-                    Gold</div>
-            @elseif (auth()->user()->role === 'platinum')
-                <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightblue-200 text-black">
-                    Platinum</div>
-            @elseif (auth()->user()->role === 'admin')
-                <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-indigo-300 text-black">
-                    Admin</div>
-            @elseif (auth()->user()->role === 'superadmin')
-                <div class="inline-flex items-center rounded text-xs justify-center px-2 py-1 bg-lightgreen-100 text-black">
-                    Superadmin</div>
-            @endif
-            <div class="profile" x-data="dropdown" @click.outside="open = false">
-                <button type="button" class="flex items-center gap-1.5 xl:gap-0" @click="toggle()">
-                    <img class="h-7 w-7 rounded-full xl:mr-2"
-                        src="{{ auth()->user()->ikm && auth()->user()->ikm->foto ? asset('storage/' . auth()->user()->ikm->foto) : asset('assets/images/byewind-avatar.png') }}"
-                        alt="Header Avatar" />
+        </div>
+        <div class="flex items-center gap-4 lg:gap-5">
 
-                    <span class="fw-medium hidden xl:block" title="{{ auth()->user()->name }}">
-                        Hallo, {{ explode(' ', auth()->user()->name)[0] }}
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-1.5 rounded-full border border-black/5 bg-black/[0.02] p-1 dark:border-white/10 dark:bg-white/5">
+                    <a href="javascript:;" class="flex h-9 w-9 items-center justify-center rounded-full text-black transition hover:bg-black/5 hover:text-black dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
+                        x-cloak x-show="$store.app.mode === 'light'" @click="$store.app.toggleMode('dark')" aria-label="Ganti ke mode gelap">
+                        <x-icon name="moon" class="h-4 w-4" />
+                    </a>
+                    <a href="javascript:;" class="flex h-9 w-9 items-center justify-center rounded-full text-black transition hover:bg-black/5 hover:text-black dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
+                        x-cloak x-show="$store.app.mode === 'dark'" @click="$store.app.toggleMode('light')" aria-label="Ganti ke mode terang">
+                        <x-icon name="sun" class="h-4 w-4" />
+                    </a>
+                </div>
+
+                <button type="button" class="relative flex h-9 w-9 items-center justify-center rounded-full text-black transition hover:bg-black/5 hover:text-black dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
+                    @click="$store.app.rightSidebar()" id="rightSidebar" aria-label="Notifikasi">
+                    <x-icon name="notif" class="h-4 w-4" />
+                    <span class="absolute right-[9px] top-[8px] flex h-2.5 w-2.5 items-center justify-center">
+                        <span
+                            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-black/50 opacity-75 dark:bg-white/70"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-black dark:bg-white"></span>
                     </span>
-
-                    <x-icon name="arrow-bottom" class="" />
                 </button>
-                <ul x-cloak x-show="open" x-transition x-transition.duration.300ms>
-                    <li>
-                        <div class="flex items-center !p-1">
-                            <div class="flex-none">
-                                <img class="h-7 w-7 rounded-full "
-                                    src="{{ auth()->user()->ikm && auth()->user()->ikm->foto ? asset('storage/' . auth()->user()->ikm->foto) : asset('assets/images/byewind-avatar.png') }}"
-                                    alt="Header Avatar" />
+
+                @if (auth()->user()->role === 'gold')
+                    <div class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300">
+                        Gold</div>
+                @elseif (auth()->user()->role === 'platinum')
+                    <div class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                        Platinum</div>
+                @elseif (auth()->user()->role === 'admin')
+                    <div class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
+                        Admin</div>
+                @elseif (auth()->user()->role === 'superadmin')
+                    <div class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                        Superadmin</div>
+                @endif
+
+                <div class="profile" x-data="dropdown" @click.outside="open = false">
+                    <button type="button" class="flex items-center gap-2 rounded-full border border-black/5 bg-black/[0.02] px-2 py-1.5 transition hover:bg-black/5 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10" @click="toggle()">
+                        <img class="h-8 w-8 rounded-full object-cover ring-2 ring-white dark:ring-black/30"
+                            src="{{ auth()->user()->ikm && auth()->user()->ikm->foto ? asset('storage/' . auth()->user()->ikm->foto) : asset('assets/images/byewind-avatar.png') }}"
+                            alt="Header Avatar" />
+
+                        <span class="hidden text-sm font-medium text-black dark:text-white xl:block" title="{{ auth()->user()->name }}">
+                            Hallo, {{ explode(' ', auth()->user()->name)[0] }}
+                        </span>
+
+                        <x-icon name="arrow-bottom" class="h-3.5 w-3.5 text-black/60 dark:text-white/70" />
+                    </button>
+                    <ul x-cloak x-show="open" x-transition x-transition.duration.300ms>
+                        <li>
+                            <div class="flex items-center !p-1">
+                                <div class="flex-none">
+                                    <img class="h-7 w-7 rounded-full "
+                                        src="{{ auth()->user()->ikm && auth()->user()->ikm->foto ? asset('storage/' . auth()->user()->ikm->foto) : asset('assets/images/byewind-avatar.png') }}"
+                                        alt="Header Avatar" />
+                                </div>
+                                <div class="pl-2">
+                                    <h4 class="text-sm text-black dark:text-white font-medium leading-none">
+                                        {{ auth()->user()->name }}
+                                    </h4>
+                                    @php
+                                        $email = auth()->user()->email;
+                                        $maxLength = 18;
+                                        $displayEmail =
+                                            strlen($email) > $maxLength ? substr($email, 0, $maxLength) . '...' : $email;
+                                    @endphp
+
+                                    <a href="javascript:;"
+                                        class="block max-w-[160px] truncate text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs"
+                                        title="{{ $email }}">
+                                        {{ $displayEmail }}
+                                    </a>
+                                </div>
                             </div>
-                            <div class="pl-2">
-                                <h4 class="text-sm text-black dark:text-white font-medium leading-none">
-                                    {{ auth()->user()->name }}
-                                </h4>
-                                @php
-                                    $email = auth()->user()->email;
-                                    $maxLength = 18;
-                                    $displayEmail =
-                                        strlen($email) > $maxLength ? substr($email, 0, $maxLength) . '...' : $email;
-                                @endphp
+                        </li>
 
-                                <a href="javascript:;"
-                                    class="block max-w-[160px] truncate text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs"
-                                    title="{{ $email }}">
-                                    {{ $displayEmail }}
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-
-                    <li class="h-px bg-black/5 block my-1"></li>
+                        <li class="h-px bg-black/5 block my-1"></li>
 
 
-                    <li>
-                        <a href="{{ route('ikm.update', auth()->user()->ikm->id) }}" class="flex items-center">
-                            <x-icon name="user-rounded" class="" />
-                            Profile
-                        </a>
-                    </li>
-                    <li>
+                        <li>
+                            <a href="{{ route('ikm.update', auth()->user()->ikm->id) }}" class="flex items-center">
+                                <x-icon name="user-rounded" class="" />
+                                Profile
+                            </a>
+                        </li>
+                        <li>
 
 
-                        <a href="javascript:;" class="flex items-center"
-                            @click="window.dispatchEvent(new CustomEvent('pass'))">
-                            <x-icon name="gear" class="text-gray-600" />
-                            Ubah Password
-                        </a>
-                    </li>
+                            <a href="javascript:;" class="flex items-center"
+                                @click="window.dispatchEvent(new CustomEvent('pass'))">
+                                <x-icon name="gear" class="text-gray-600" />
+                                Ubah Password
+                            </a>
+                        </li>
 
-                    <li class="h-px bg-black/5 block my-1"></li>
-                    <li>
-                        <form id="logout-form-user" method="POST" action="{{ route('logout') }}" class="hidden">
-                            @csrf
-                        </form>
-                        <button type="button" onclick="confirmLogout('logout-form-user')"
-                            class="text-black dark:text-white flex items-center w-full text-left">
-                            <x-icon name="sign-out" class="mr-2" />
-                            Sign Out
-                        </button>
-                    </li>
+                        <li class="h-px bg-black/5 block my-1"></li>
+                        <li>
+                            <form id="logout-form-user" method="POST" action="{{ route('logout') }}" class="hidden">
+                                @csrf
+                            </form>
+                            <button type="button" onclick="confirmLogout('logout-form-user')"
+                                class="text-black dark:text-white flex items-center w-full text-left">
+                                <x-icon name="sign-out" class="mr-2" />
+                                Sign Out
+                            </button>
+                        </li>
 
-                </ul>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

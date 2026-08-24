@@ -43,7 +43,12 @@ class LogActivityController extends Controller
             $icon = 'info';
             $bg = 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400';
 
-            $desc = strtolower($log->description);
+            $desc = $log->description ?? '';
+            if (is_array($desc) || is_object($desc)) {
+                $desc = json_encode($desc, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+            }
+            $desc = strtolower((string) $desc);
+
             if (str_contains($desc, 'login') || str_contains($desc, 'masuk')) {
                 $icon = 'user-circle-plus';
                 $bg = 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400';
