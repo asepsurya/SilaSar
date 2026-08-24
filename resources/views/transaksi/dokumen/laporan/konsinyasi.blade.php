@@ -76,6 +76,22 @@
             color: #666;
         }
         .pagenum:before { content: counter(page); }
+        .logo-wrap {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-wrap img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -83,12 +99,12 @@
         <div class="flex justify-between items-start mb-4">
             <!-- Logo & Alamat Perusahaan -->
             <div class="flex flex-col" style="width: 50%;">
-                <div style="width: 90px; height: 90px;" class="mb-2">
+                <div style="width: 90px; height: 90px;" class="logo-wrap mb-2">
                     @php
                         $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id);
                         $logo = $perusahaan->logo ? asset('storage/' . $perusahaan->logo) : asset('assets/default_logo.png');
                     @endphp
-                    <img alt="logo" class="w-full h-auto" src="{{ $logo }}" />
+                    <img alt="logo" src="{{ $logo }}" />
                 </div>
                 @php
                     $alamat = ($perusahaan->alamat ?? '') . ', ' .

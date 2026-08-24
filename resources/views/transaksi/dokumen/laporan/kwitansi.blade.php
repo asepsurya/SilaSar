@@ -79,18 +79,34 @@
             white-space: normal;
             line-height: 1.4;
         }
+        .logo-wrap {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-wrap img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="max-w-[900px] mx-auto p-6 text-black">
         <div class="flex justify-between items-center mb-2">
-            <div style="width: 90px, height: 90px;">
+            <div class="logo-wrap">
                 @php
                     $perusahaan = \App\Models\Perusahaan::find(auth()->user()->perusahaanUser->id);
                     $nama = $perusahaan->nama_perusahaan ?? 'Perusahaan tidak ditemukan';
                     $logo = $perusahaan->logo ? asset('storage/' . $perusahaan->logo) : asset('assets/default_logo.png');
                 @endphp
-                <img alt="logo" class="w-full h-auto" height="70" src="{{ $logo }}" width="150" />
+                <img alt="logo" src="{{ $logo }}" />
             </div>
             <div class="text-right">
                 <h1 class="text-2xl font-normal mb-5">
