@@ -1,4 +1,4 @@
-<div class="sticky top-0 z-30 border-b border-black/10 bg-white/80 px-4 py-3 backdrop-blur-sm dark:border-white/10 dark:bg-slate-950/60 sm:px-6 lg:px-7">
+<div class="sticky top-0 z-30 border-b border-black/10 px-4 py-3 backdrop-blur-sm dark:border-white/10 dark:bg-slate-950/60 sm:px-6 lg:px-7">
     <div class="flex items-center justify-between gap-3">
         <div class="flex min-w-0 items-center gap-3">
             <button class="flex items-start rounded-lg p-1 transition hover:bg-black/5 md:hidden dark:hover:bg-white/10"
