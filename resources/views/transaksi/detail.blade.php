@@ -467,7 +467,7 @@
                                     $barang_retur = (int) ($row->barang_retur ?? 0);
                                     $harga = (int) ($row->harga ?? 0);
                                     $total_barang_keluar = $barang_terjual + $barang_retur;
-                                    $total = $barang_keluar * $harga;
+                                    $total = ($barang_keluar - $barang_retur) * $harga;
                                     $totalSemua += $total;
                                 @endphp
 
@@ -749,20 +749,7 @@
                                 let barangRetur = parseInt(barangReturInput?.value) || 0;
 
                                 // --- LOGIKA BARU UNTUK MENANGANI NILAI AWAL ---
-                                let totalRow = 0;
-
-                                if (barangRetur === jumlahKeluar && jumlahKeluar > 0) {
-                                    // Kasus 1: Jika retur dan keluar sama jumlahnya, harga HARUS 0
-                                    totalRow = 0;
-                                } else if (barangRetur > 0) {
-                                    // Kasus 2: Jika ada retur sebagian, hitung berdasarkan (Keluar - Retur) alias yang terjual
-                                    // Jika input terjual kosong/0 tapi retur diisi, kita hitung otomatis sisa terjualnya
-                                    let sisaTerjual = jumlahKeluar - barangRetur;
-                                    totalRow = sisaTerjual * harga;
-                                } else {
-                                    // Kasus 3: Jika retur masih 0 (atau belum diisi), jumlahnya TETAP dihitung penuh dari barang keluar
-                                    totalRow = jumlahKeluar * harga;
-                                }
+                                let totalRow = (jumlahKeluar - barangRetur) * harga;
 
                                 if (totalInput) {
                                     totalInput.value = formatRupiah(totalRow);
@@ -1030,7 +1017,7 @@
                             $barang_retur_mobile = (int) ($row->barang_retur ?? 0);
                             $harga_mobile = (int) ($row->harga ?? 0);
                             $total_barang_keluar_mobile = $barang_terjual_mobile + $barang_retur_mobile;
-                            $total_mobile = $barang_keluar_mobile * $harga_mobile;
+                            $total_mobile = ($barang_keluar_mobile - $barang_retur_mobile) * $harga_mobile;
                             $totalSemua_mobile += $total_mobile;
                         @endphp
 
@@ -1479,7 +1466,7 @@
                         }
 
                         // Hitung total per produk
-                        const totalRow = (barangTerjual > 0 ? barangTerjual : jumlahKeluar) * harga;
+                        const totalRow = (jumlahKeluar - barangRetur) * harga;
                         if (totalInput) totalInput.value = formatRupiah(totalRow);
 
                         if (totalInputku) {
