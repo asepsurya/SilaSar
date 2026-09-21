@@ -173,7 +173,9 @@
       </div>
       <div class="bg-lightwhite dark:bg-white/5 p-4 sm:p-6 rounded-2xl flex flex-col items-center shadow-md">
         <h2 class="text-lg font-semibold mb-3">Transaksi per Mitra</h2>
-        <canvas id="chartMitra" class="w-full h-64"></canvas>
+        <div class="w-full overflow-y-auto max-h-[320px]">
+          <canvas id="chartMitra" class="w-full h-auto"></canvas>
+        </div>
       </div>
     </div>
 
@@ -386,7 +388,15 @@
       '#0ea5e9', '#d946ef', '#64748b', '#ef4444', '#3b82f6'
     ];
 
-    new Chart(document.getElementById('chartMitra'), {
+    const mitraCanvas = document.getElementById('chartMitra');
+    const mitraCount = mitraSafe.labels.length;
+    if (mitraCount > 0 && mitraCount <= 5) {
+      mitraCanvas.style.height = '220px';
+    } else if (mitraCount > 5) {
+      mitraCanvas.style.height = (mitraCount * 44) + 'px';
+    }
+
+    new Chart(mitraCanvas, {
       type: 'bar',
       data: {
         labels: mitraSafe.labels,
@@ -402,7 +412,7 @@
       options: {
         indexAxis: 'y',
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -429,7 +439,8 @@
             border: { display: false },
             ticks: {
               font: { size: 12 },
-              color: '#374151'
+              color: '#374151',
+              autoSkip: false
             }
           }
         }

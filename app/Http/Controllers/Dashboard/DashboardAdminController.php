@@ -49,12 +49,21 @@ class DashboardAdminController extends Controller
             ->pluck('total', 'status_bayar');
 
         // Transaksi per mitra
-        $mitra = DB::table('transaksis')
+        $mitraRaw = DB::table('transaksis')
             ->join('mitras', 'transaksis.kode_mitra', '=', 'mitras.kode_mitra')
             ->select('mitras.nama_mitra', DB::raw('COUNT(*) as total'))
-            ->where('transaksis.auth', auth()->user()->id) // tambahkan ini
+            ->where('transaksis.auth', auth()->user()->id)
             ->groupBy('mitras.nama_mitra')
-            ->pluck('total', 'mitras.nama_mitra');
+            ->orderBy('total', 'desc')
+            ->get();
+
+        $topMiter = $mitraRaw->take(5);
+        $lainnyaTotal = $mitraRaw->slice(5)->sum('total');
+
+        $mitra = $topMiter->pluck('total', 'nama_mitra');
+        if ($lainnyaTotal > 0) {
+            $mitra['Lainnya'] = $lainnyaTotal;
+        }
 
         // Keuntungan
         $keuntungan = DB::table('transaksis')

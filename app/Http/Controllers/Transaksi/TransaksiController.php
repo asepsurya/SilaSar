@@ -346,7 +346,6 @@ class TransaksiController extends Controller
 
         // Buat transaksi baru
         $transaksi = new Transaksi();
-        $transaksi->kode_transaksi = $request->kode_transaksi;
         $transaksi->kode_mitra = $request->kode_mitra;
         $transaksi->tanggal_transaksi = now();
         $transaksi->auth = auth()->user()->id;
@@ -895,8 +894,8 @@ class TransaksiController extends Controller
         $bulan = request('bulan');          // 1–12
         $tahunBulan = request('tahun_bulan');    // contoh: 2025
         $tahunTahun = request('tahun_tahun');    // contoh: 2025
-        $awal = request('tanggal_awal', now()->startOfMonth()->toDateString());           // contoh: 2025-11-01
-        $akhir = request('tanggal_akhir', now()->endOfMonth()->toDateString());          // contoh: 2025-11-30
+        $awal = request('tanggal_awal');
+        $akhir = request('tanggal_akhir');
         $tanggalAwal = $awal;
         $tanggalAkhir = $akhir;
 
@@ -1121,8 +1120,8 @@ class TransaksiController extends Controller
 
     public function exportPDFRekap()
     {
-        $awal = request('tanggal_awal', now()->startOfMonth()->toDateString());
-        $akhir = request('tanggal_akhir', now()->endOfMonth()->toDateString());
+        $awal = request('tanggal_awal');
+        $akhir = request('tanggal_akhir');
         $periode = request('periode');
         $bulan = request('bulan');
         $tahunBulan = request('tahun_bulan');
