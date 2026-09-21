@@ -88,9 +88,35 @@ class DashboardAdminController extends Controller
             ->orderBy('stok', 'asc')
             ->take(5)
             ->get();
+
+        $batasHari = 7;
+        $tanggalSekarang = now()->startOfDay();
+        $tanggalBatas = now()->addDays($batasHari)->endOfDay();
+
+        $notifikasiPembayaran = Transaksi::select(
+                'transaksis.kode_transaksi',
+                'transaksis.tanggal_pembayaran',
+                'transaksis.total',
+                'transaksis.status_bayar',
+                'mitras.nama_mitra',
+                DB::raw('DATEDIFF(transaksis.tanggal_pembayaran, ?) as sisa_hari')
+            )
+            ->leftJoin('mitras', 'transaksis.kode_mitra', '=', 'mitras.kode_mitra')
+            ->where('transaksis.auth', auth()->user()->id)
+            ->whereNotNull('transaksis.tanggal_pembayaran')
+            ->where('transaksis.tanggal_pembayaran', '<=', $tanggalBatas)
+            ->where('transaksis.tanggal_pembayaran', '>=', $tanggalSekarang)
+            ->orderBy('transaksis.tanggal_pembayaran', 'asc')
+            ->addBinding([$tanggalSekarang], 'where')
+            ->get();
+
+        $jumlahPembayaranMendekati = $notifikasiPembayaran->where('status_bayar', 'Belum Bayar')->count();
+
         return view('dashboard.admin', [
             'activeMenu' => 'dashboard',
             'active' => 'dashboard',
+            'notifikasiPembayaran' => $notifikasiPembayaran,
+            'jumlahPembayaranMendekati' => $jumlahPembayaranMendekati,
         ], compact(
             'logs',
             'totalTransaksiluar',

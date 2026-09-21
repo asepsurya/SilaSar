@@ -177,10 +177,74 @@
       </div>
     </div>
 
-    <!-- Chart Transaksi (Full Width) -->
-    <div class="bg-white dark:bg-transparent p-4 rounded ">
-      <h2 class="text-lg font-semibold mb-3">Transaksi per Bulan</h2>
-      <canvas id="chartTransaksi" class="w-full h-64"></canvas>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Chart Transaksi per Bulan -->
+      <div class="lg:col-span-2 bg-white dark:bg-transparent p-4 rounded">
+        <h2 class="text-lg font-semibold mb-3">Transaksi per Bulan</h2>
+        <canvas id="chartTransaksi" class="w-full h-64"></canvas>
+      </div>
+
+      <!-- Notifikasi Pembayaran -->
+      <div class="bg-white dark:bg-transparent p-4 sm:p-6 rounded-2xl shadow-md border dark:border-white/10 flex flex-col h-full">
+        <h2 class="text-sm font-semibold mb-3 text-black dark:text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+            </path>
+          </svg>
+          Notifikasi Pembayaran
+        </h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          @if($jumlahPembayaranMendekati > 0)
+            <span class="text-orange-600 dark:text-orange-400 font-semibold">{{ $jumlahPembayaranMendekati }}</span> pembayaran jatuh tempo dalam 7 hari ke depan.
+          @else
+            Semua pembayaran jatuh tempo 7 hari ke depan sudah lunas.
+          @endif
+        </p>
+        @if($notifikasiPembayaran->count() > 0)
+          <div class="flex-1 overflow-y-auto pr-1 space-y-3">
+            @foreach($notifikasiPembayaran as $notif)
+              @php
+                $sisaHari = (int) $notif->sisa_hari;
+                $sudahLunas = $notif->status_bayar === 'Sudah Bayar';
+                $totalNumeric = (float) ($notif->total ?? 0);
+                $statusLabel = $sudahLunas ? 'Paid in Full' : 'Unpaid / Outstanding';
+                $badgeClass = $sudahLunas
+                  ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400'
+                  : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400';
+                $sisaBadgeClass = $sisaHari <= 7
+                  ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 font-bold'
+                  : ($sisaHari <= 14
+                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400'
+                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400');
+                $rowBorderClass = $sudahLunas ? 'border-green-200 dark:border-green-500/30' : 'border-red-200 dark:border-red-500/30';
+              @endphp
+              <div class="p-3 rounded-xl border {{ $rowBorderClass }} {{ $sudahLunas ? 'bg-green-50/40 dark:bg-green-900/5' : 'bg-red-50/40 dark:bg-red-900/5' }} hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-mono font-bold text-gray-800 dark:text-gray-200">{{ $notif->kode_transaksi }}</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $badgeClass }}">
+                    {{ $statusLabel }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-400 mb-1">
+                  <span class="truncate pr-2">{{ $notif->nama_mitra ?? '-' }}</span>
+                  <span class="text-right whitespace-nowrap">{{ \Carbon\Carbon::parse($notif->tanggal_pembayaran)->format('d M Y') }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold {{ $sisaBadgeClass }}">
+                    {{ $sisaHari <= 0 ? 'Lewat ' . abs($sisaHari) . ' hari' : $sisaHari . ' hari lagi' }}
+                  </span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">Rp. {{ number_format($totalNumeric, 0, ',', '.') }}</span>
+                </div>
+              </div>
+            @endforeach
+          </div>
+        @else
+          <div class="flex-1 flex items-center justify-center">
+            <p class="text-xs text-gray-400 dark:text-gray-500 text-center py-4">Tidak ada pembayaran yang jatuh tempo dalam 7 hari ke depan.</p>
+          </div>
+        @endif
+      </div>
     </div>
 
   </div>
@@ -313,34 +377,32 @@
       plugins: [centerTextPlugin]
     });
 
-    // Chart Mitra (Doughnut) dengan fallback & warna yang lebih bervariasi
-    const colorPalette = [
+    // Chart Mitra (Horizontal Bar) dengan fallback
+    let mitraSafe = safeChartData(mitraLabel, mitraTotal, 'Belum ada mitra');
+    const mitraColors = [
       '#6366f1', '#ec4899', '#f97316', '#10b981', '#3b82f6',
       '#8b5cf6', '#ef4444', '#eab308', '#06b6d4', '#14b8a6',
       '#f43f5e', '#84cc16', '#a855f7', '#f59e0b', '#22c55e',
       '#0ea5e9', '#d946ef', '#64748b', '#ef4444', '#3b82f6'
     ];
-    let mitraSafe = safeChartData(mitraLabel, mitraTotal, 'Belum ada mitra');
-    let mitraColors = mitraSafe.colors;
-    if (!mitraColors && mitraSafe.labels.length > 0) {
-      mitraColors = mitraSafe.labels.map((_, i) => colorPalette[i % colorPalette.length]);
-    }
 
     new Chart(document.getElementById('chartMitra'), {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels: mitraSafe.labels,
         datasets: [{
+          label: 'Jumlah Transaksi',
           data: mitraSafe.data,
-          backgroundColor: mitraColors,
-          borderWidth: 2,
-          borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff'
+          backgroundColor: mitraSafe.empty ? ['#9ca3af'] : mitraSafe.labels.map((_, i) => mitraColors[i % mitraColors.length]),
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: true,
-        cutout: '60%',
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -353,6 +415,22 @@
           centerText: {
             show: mitraSafe.empty,
             text: 'Belum ada mitra'
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(0, 0, 0, 0.05)', borderDash: [5, 5] },
+            beginAtZero: true,
+            border: { display: false },
+            ticks: { precision: 0 }
+          },
+          y: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: {
+              font: { size: 12 },
+              color: '#374151'
+            }
           }
         }
       },
