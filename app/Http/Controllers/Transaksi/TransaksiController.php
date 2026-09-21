@@ -1121,6 +1121,7 @@ class TransaksiController extends Controller
         $bulan = request('bulan');
         $tahunBulan = request('tahun_bulan');
         $tahunTahun = request('tahun_tahun');
+        $status_bayar = request('status_bayar');
         $id_kota = request('id_kota');
         $user = auth()->user();
 

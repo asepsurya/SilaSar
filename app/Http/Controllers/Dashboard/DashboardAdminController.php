@@ -111,7 +111,6 @@ class DashboardAdminController extends Controller
                 DB::raw('DATEDIFF(transaksis.tanggal_pembayaran, ?) as sisa_hari')
             )
             ->leftJoin('mitras', 'transaksis.kode_mitra', '=', 'mitras.kode_mitra')
-            ->where('transaksis.auth', auth()->user()->id)
             ->whereNotNull('transaksis.tanggal_pembayaran')
             ->where('transaksis.tanggal_pembayaran', '<=', $tanggalBatas)
             ->where('transaksis.tanggal_pembayaran', '>=', $tanggalSekarang)
