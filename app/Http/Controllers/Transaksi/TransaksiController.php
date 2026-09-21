@@ -824,7 +824,6 @@ class TransaksiController extends Controller
                 $q->where('t.status_bayar', $status_bayar);
             })
             ->where('t.auth', $user->id)
-            ->where('t.status_bayar', 'Sudah Bayar')
             ->whereNotNull('t.tanggal_pembayaran')
             ->orderBy('t.tanggal_pembayaran')
             ->get();
@@ -978,7 +977,9 @@ class TransaksiController extends Controller
                 $q->where('m.kode_mitra', $kode_mitra);
             })
             ->where('t.auth', $user->id)
-            ->where('t.status_bayar', 'Sudah Bayar')
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
             ->whereNotNull('t.tanggal_pembayaran')
             ->orderBy('t.tanggal_pembayaran')
             ->get();
@@ -1026,6 +1027,7 @@ class TransaksiController extends Controller
         $bulan = request('bulan');
         $tahun_bulan = request('tahun_bulan');
         $tahun_tahun = request('tahun_tahun');
+        $status_bayar = request('status_bayar');
 
         $id_kota = request('id_kota');
         $user = auth()->user();
@@ -1064,7 +1066,9 @@ class TransaksiController extends Controller
 
         $laporan = $laporanQuery
             ->where('t.auth', $user->id)
-            ->where('t.status_bayar', 'Sudah Bayar')
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
             ->get();
 
         $pembayaranQuery = DB::table('transaksis as t')
@@ -1091,7 +1095,9 @@ class TransaksiController extends Controller
 
         $pembayaranMasuk = $pembayaranQuery
             ->where('t.auth', $user->id)
-            ->where('t.status_bayar', 'Sudah Bayar')
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
             ->whereNotNull('t.tanggal_pembayaran')
             ->orderBy('t.tanggal_pembayaran')
             ->get();
@@ -1152,7 +1158,9 @@ class TransaksiController extends Controller
 
         $laporan = $laporanQuery
             ->where('t.auth', $user->id)
-            ->where('t.status_bayar', 'Sudah Bayar')
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
             ->get();
 
         $pembayaranQuery = DB::table('transaksis as t')
@@ -1179,7 +1187,9 @@ class TransaksiController extends Controller
 
         $pembayaranMasuk = $pembayaranQuery
             ->where('t.auth', $user->id)
-            ->where('t.status_bayar', 'Sudah Bayar')
+            ->when($status_bayar, function ($q) use ($status_bayar) {
+                $q->where('t.status_bayar', $status_bayar);
+            })
             ->whereNotNull('t.tanggal_pembayaran')
             ->orderBy('t.tanggal_pembayaran')
             ->get();
