@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AppSummaryController;
 use App\Http\Controllers\Api\LogActivityController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Mitra\MitraController;
 use App\Http\Controllers\Nota\NotaController;
 use App\Http\Controllers\Perusahaan\PerusahaanController;
 use App\Http\Controllers\Produk\ProdukController;
+use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\Region\RegionController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use App\Http\Controllers\UpdateController;
@@ -50,10 +52,26 @@ Route::post('/getkabupaten', [RegionController::class, 'getkabupaten'])->name('g
 Route::post('/getkecamatan', [RegionController::class, 'getkecamatan'])->name('getkecamatan');
 Route::post('/getdesa', [RegionController::class, 'getdesa'])->name('getdesa');
 
+Route::post('/api/push/send', [PushNotificationController::class, 'send'])
+    ->name('api.push.send')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
 Route::middleware(['auth', 'checkPerusahaan', 'redirectIfNotAdmin'])->group(function () {
     Route::get('/api/logs/activity', [LogActivityController::class, 'getLogs'])->name('api.logs.activity');
     Route::get('/api/app-summary', [AppSummaryController::class, 'getSummary'])->name('api.app.summary');
     Route::post('/api/ai/generate', [AiController::class, 'generate'])->name('api.ai.generate');
+    Route::get('/api/jatuh-tempo', [NotificationController::class, 'jatuhTempo'])->name('api.jatuh-tempo');
+
+    // Notification API routes
+    Route::prefix('api/notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('api.notifications.index');
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread-count');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('api.notifications.mark-read');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('api.notifications.mark-all-read');
+        Route::get('/unnotified-overdue', [NotificationController::class, 'getUnnotifiedOverdue'])->name('api.notifications.unnotified-overdue');
+        Route::post('/mark-browser-notified', [NotificationController::class, 'markBrowserNotified'])->name('api.notifications.mark-browser-notified');
+    });
+
     Route::post('/change-password', [AuthController::class, 'passChange'])->name('passChange')->middleware('auth');
     // ------------------------------------------------
     // Middleware untuk superadmin|admin|pengguna level platinum

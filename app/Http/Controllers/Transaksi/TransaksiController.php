@@ -10,10 +10,11 @@ use App\Models\StokLog;
 use App\Models\Penawaran;
 use App\Models\Transaksi;
 use App\Models\Itemdokumen;
+use App\Models\TransaksiProduct;
+use App\Services\PaymentNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\TransaksiProduct;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Spatie\Activitylog\Models\Activity;
@@ -348,6 +349,7 @@ class TransaksiController extends Controller
         $transaksi = new Transaksi();
         $transaksi->kode_mitra = $request->kode_mitra;
         $transaksi->tanggal_transaksi = now();
+        $transaksi->tanggal_pembayaran = now()->endOfMonth()->toDateString();
         $transaksi->auth = auth()->user()->id;
         $transaksi->status_bayar = 'Belum Bayar';
         $transaksi->save();
@@ -399,6 +401,11 @@ class TransaksiController extends Controller
 
         $kode_mitra = $request->kode_mitra;
         $transaksi = Transaksi::where('kode_transaksi', $request->nomor_transaksi)->firstOrFail();
+        
+        // Capture original values for notification triggers
+        $originalStatusBayar = $transaksi->status_bayar;
+        $originalTanggalBayar = $transaksi->tanggal_pembayaran;
+
         $transaksi->tanggal_transaksi = $request->tanggal_transaksi ?? $transaksi->tanggal_transaksi;
         $transaksi->diskon = str_replace(['.', ','], '', $request->discount ?? '0');
         $transaksi->ongkir = str_replace(['.', ','], '', $request->ongkir ?? '0');
@@ -499,9 +506,22 @@ class TransaksiController extends Controller
 
         }
 
+$transaksi->update();
 
-        $transaksi->update();
 
+        // Trigger payment notifications
+        if ($request->status_bayar === 'Sudah Bayar' && $originalStatusBayar !== 'Sudah Bayar') {
+            PaymentNotificationService::createPaymentReceived($transaksi);
+            activity('ikm')
+                ->causedBy(auth()->user())
+                ->performedOn($transaksi)
+                ->log('Menerima pembayaran transaksi ' . $transaksi->kode_transaksi);
+        }
+
+        if ($request->tanggal_bayar && $originalTanggalBayar != $request->tanggal_bayar) {
+            // Re-check due notifications for this transaction
+            PaymentNotificationService::createPaymentDue($transaksi);
+        }
 
         activity('ikm')
             ->causedBy(auth()->user())

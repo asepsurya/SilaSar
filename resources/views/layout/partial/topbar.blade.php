@@ -16,6 +16,13 @@
                 <x-icon name="sidebar" class="h-4 w-4 text-gray-600 dark:text-gray-300" />
             </button>
 
+            <!-- Search Icon -->
+            <button type="button"
+                class="flex h-9 w-9 items-center justify-center rounded-full text-black transition hover:bg-black/5 hover:text-black dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
+                @click="$store.app.openSearchModal()" aria-label="Cari">
+                <x-icon name="search" class="h-4 w-4 text-gray-600 dark:text-gray-300" />
+            </button>
+
             <div class="hidden min-w-0 sm:block">
                 <nav aria-label="breadcrumb" class="w-full">
                     <ol class="flex min-w-0 items-center gap-1.5 overflow-hidden text-sm">
@@ -291,3 +298,98 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Search -->
+<div x-data="topbarSearch()" x-init="initMenus()">
+    <!-- Overlay -->
+    <div class="fixed inset-0 z-[999] hidden overflow-y-auto bg-black/60 dark:bg-white/10"
+        :class="{ 'block': $store.app.searchModal, 'hidden': !$store.app.searchModal }"
+        @keydown.window.escape="$store.app.closeSearchModal()">
+        <div class="flex min-h-screen items-center justify-center px-4" @click.self="$store.app.closeSearchModal()">
+            <!-- Modal Box -->
+            <div x-show="$store.app.searchModal" x-transition x-transition.duration.300ms
+                class="relative my-8 w-full max-w-lg overflow-hidden rounded-lg border-0 bg-white p-0 shadow-3xl dark:bg-black"
+                style="display: none;">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b border-black/10 bg-white px-5 py-3 dark:border-white/10 dark:bg-black">
+                    <h5 class="text-lg font-semibold">Cari Menu</h5>
+                    <button type="button"
+                        class="text-black/40 transition hover:text-black dark:text-white/40 dark:hover:text-white"
+                        @click="$store.app.closeSearchModal()" aria-label="Tutup">
+                        <svg class="h-5 w-5" width="32" height="32" viewBox="0 0 32 32" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z"
+                                fill="currentcolor" />
+                            <path
+                                d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z"
+                                fill="currentcolor" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="p-5">
+                    <input type="text" placeholder="Ketik nama menu..."
+                        x-ref="searchInput"
+                        x-model="keyword"
+                        @input="filterMenus"
+                        @keydown.escape="$store.app.closeSearchModal()"
+                        autocomplete="off"
+                        class="form-input w-full rounded-lg border border-black/10 bg-transparent px-3 py-2 pr-10 text-sm text-black focus:border-blue-300 focus:outline-none focus:ring dark:border-white/10 dark:bg-black dark:text-white" />
+
+                    <ul class="mt-3 max-h-72 overflow-y-auto rounded-lg border border-black/10 dark:border-white/10">
+                        <template x-for="item in results" :key="item.url">
+                            <li>
+                                <a :href="item.url" @click="$store.app.closeSearchModal()"
+                                    class="block px-4 py-2 text-sm text-black transition hover:bg-black/5 dark:text-white dark:hover:bg-white/10"
+                                    x-text="item.name"></a>
+                            </li>
+                        </template>
+                        <template x-if="results.length === 0 && keyword.length > 0">
+                            <li class="px-4 py-3 text-sm italic text-black/40 dark:text-white/40">
+                                Menu tidak ditemukan
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function topbarSearch() {
+        return {
+            keyword: '',
+            results: [],
+            menus: [],
+            initMenus() {
+                let menuEls = document.querySelectorAll('#menu a');
+                let menus = [];
+                menuEls.forEach(a => {
+                    let name = a.textContent.trim();
+                    let url = a.getAttribute('href');
+                    if (name && url && url !== 'javascript:;' && url !== 'javaScript:;') {
+                        menus.push({ name, url });
+                    }
+                });
+                this.menus = menus;
+
+                this.$watch('$store.app.searchModal', (val) => {
+                    if (val) {
+                        this.keyword = '';
+                        this.results = [];
+                        this.$nextTick(() => this.$refs.searchInput.focus());
+                    }
+                });
+            },
+            filterMenus() {
+                if (this.keyword.length > 0) {
+                    this.results = this.menus.filter(m => m.name.toLowerCase().includes(this.keyword.toLowerCase()));
+                } else {
+                    this.results = [];
+                }
+            }
+        }
+    }
+</script>

@@ -57,13 +57,7 @@ class DashboardAdminController extends Controller
             ->orderBy('total', 'desc')
             ->get();
 
-        $topMiter = $mitraRaw->take(5);
-        $lainnyaTotal = $mitraRaw->slice(5)->sum('total');
-
-        $mitra = $topMiter->pluck('total', 'nama_mitra');
-        if ($lainnyaTotal > 0) {
-            $mitra['Lainnya'] = $lainnyaTotal;
-        }
+        $mitra = $mitraRaw->pluck('total', 'nama_mitra');
 
         // Keuntungan
         $keuntungan = DB::table('transaksis')
@@ -98,33 +92,19 @@ class DashboardAdminController extends Controller
             ->take(5)
             ->get();
 
-        $batasHari = 7;
-        $tanggalSekarang = now()->startOfDay();
-        $tanggalBatas = now()->addDays($batasHari)->endOfDay();
-
-        $notifikasiPembayaran = Transaksi::select(
-                'transaksis.kode_transaksi',
-                'transaksis.tanggal_pembayaran',
-                'transaksis.total',
-                'transaksis.status_bayar',
-                'mitras.nama_mitra',
-                DB::raw('DATEDIFF(transaksis.tanggal_pembayaran, ?) as sisa_hari')
-            )
-            ->leftJoin('mitras', 'transaksis.kode_mitra', '=', 'mitras.kode_mitra')
-            ->whereNotNull('transaksis.tanggal_pembayaran')
-            ->where('transaksis.tanggal_pembayaran', '<=', $tanggalBatas)
-            ->where('transaksis.tanggal_pembayaran', '>=', $tanggalSekarang)
-            ->orderBy('transaksis.tanggal_pembayaran', 'asc')
-            ->addBinding([$tanggalSekarang], 'where')
+        // Pembayaran jatuh tempo (overdue atau dalam 7 hari ke depan)
+        // Jika tanggal_pembayaran kosong, gunakan tanggal_transaksi + 30 hari
+        $jatuhTempo = Transaksi::with('mitra')
+            ->where('auth', auth()->user()->id)
+            ->where('status_bayar', '!=', 'Sudah Bayar')
+            ->whereNotNull('tanggal_transaksi')
+            ->whereRaw("IFNULL(tanggal_pembayaran, DATE_ADD(tanggal_transaksi, INTERVAL 30 DAY)) <= ?", [now()->addDays(7)->toDateString()])
+            ->orderByRaw("IFNULL(tanggal_pembayaran, DATE_ADD(tanggal_transaksi, INTERVAL 30 DAY)) ASC")
             ->get();
-
-        $jumlahPembayaranMendekati = $notifikasiPembayaran->where('status_bayar', 'Belum Bayar')->count();
 
         return view('dashboard.admin', [
             'activeMenu' => 'dashboard',
             'active' => 'dashboard',
-            'notifikasiPembayaran' => $notifikasiPembayaran,
-            'jumlahPembayaranMendekati' => $jumlahPembayaranMendekati,
         ], compact(
             'logs',
             'totalTransaksiluar',
@@ -135,7 +115,8 @@ class DashboardAdminController extends Controller
             'mitra',
             'keuntungan',
             'kerugian',
-            'produk_habis'
+            'produk_habis',
+            'jatuhTempo'
         ));
     }
     public function dashboardKeuangan(Request $request)

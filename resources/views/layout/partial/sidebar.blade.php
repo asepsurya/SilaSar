@@ -69,9 +69,9 @@
         <!-- Start Menu -->
         <ul class="relative h-[calc(100vh-58px)] flex flex-col gap-1 overflow-y-auto overflow-x-hidden p-4 py-0"
             x-data="{ activeMenu: '{{ $activeMenu }}' }" id="menu">
-            <li class="menu nav-item mb-3" id="search-menu-wrapper">
+            {{-- <li class="menu nav-item mb-3" id="search-menu-wrapper">
                 @include('layout.partial.seachmenu')
-            </li>
+            </li> --}}
 
             {{-- Dashboard --}}
 

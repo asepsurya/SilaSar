@@ -9,6 +9,21 @@ document.addEventListener('alpine:init', () => {
         logFilter: 'semua',
         hasFetchedLogs: false,
 
+        // Notifications State
+        notifications: [],
+        isLoadingNotifs: false,
+        notifError: null,
+        notifFilter: 'all',
+        hasFetchedNotifs: false,
+        unreadNotifCount: 0,
+        browserNotificationInterval: null,
+        notificationListInterval: null,
+
+        // Jatuh Tempo State
+        jatuhTempo: [],
+        isLoadingJatuhTempo: false,
+        hasFetchedJatuhTempo: false,
+
         // AI Chat State
         chatHistory: [],
         chatThreads: [], // [{id, title, messages, date}]
@@ -20,6 +35,8 @@ document.addEventListener('alpine:init', () => {
         hasFetchedSummary: false,
 
         init() {
+            this.requestBrowserNotificationPermission();
+
             // Load threads from localStorage
             const savedThreads = localStorage.getItem('silasar_ai_threads');
             if (savedThreads) {
@@ -45,17 +62,34 @@ document.addEventListener('alpine:init', () => {
             // Fetch logs immediately on init so they are ready
             this.fetchLogs();
             this.fetchAppSummary();
+            this.fetchUnreadNotifCount();
 
             // Watch for rightSidebar visibility if it uses Alpine store
             this.$watch('$store.app.rightsidebar', (value) => {
                 if (value) {
                     this.fetchLogs(); // Refresh when opened
+                    this.fetchUnreadNotifCount();
                 }
             });
 
             this.$watch('activeTab', (value) => {
                 if (value === 'ai') {
                     this.$nextTick(() => this.scrollToBottom());
+                }
+                if (value === 'notifications') {
+                    this.fetchNotifications();
+                    this.fetchJatuhTempo();
+                    if (this.notificationListInterval) {
+                        clearInterval(this.notificationListInterval);
+                    }
+                    this.notificationListInterval = setInterval(() => {
+                        this.fetchNotifications();
+                    }, 15000);
+                } else {
+                    if (this.notificationListInterval) {
+                        clearInterval(this.notificationListInterval);
+                        this.notificationListInterval = null;
+                    }
                 }
             });
 
@@ -113,6 +147,190 @@ document.addEventListener('alpine:init', () => {
                     }
                 })
                 .catch(err => console.error('Gagal mengambil summary:', err));
+        },
+
+        // --- Notifications Logic ---
+        fetchNotifications() {
+            this.isLoadingNotifs = true;
+            this.notifError = null;
+            this.notifications = [];
+
+            fetch(`/api/notifications?filter=${this.notifFilter}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Gagal mengambil data notifikasi.');
+                    return res.json();
+                })
+                .then(res => {
+                    if (res.status === 'success') {
+                        this.notifications = res.data;
+                        this.unreadNotifCount = res.unread_count;
+                        this.hasFetchedNotifs = true;
+                    }
+                })
+                .catch(err => {
+                    this.notifError = err.message || 'Terjadi kesalahan sistem.';
+                })
+                .finally(() => {
+                    this.isLoadingNotifs = false;
+                });
+        },
+
+        fetchJatuhTempo() {
+            this.isLoadingJatuhTempo = true;
+            fetch(`/api/jatuh-tempo`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Gagal mengambil data jatuh tempo.');
+                    return res.json();
+                })
+                .then(res => {
+                    if (res.status === 'success') {
+                        this.jatuhTempo = res.data;
+                        this.hasFetchedJatuhTempo = true;
+                    }
+                })
+                .catch(err => {
+                    console.error('Gagal mengambil jatuh tempo:', err);
+                })
+                .finally(() => {
+                    this.isLoadingJatuhTempo = false;
+                });
+        },
+
+        fetchUnreadNotifCount() {
+            fetch(`/api/notifications/unread-count`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        this.unreadNotifCount = res.count;
+                    }
+                })
+                .catch(err => console.error('Gagal mengambil unread count:', err));
+        },
+
+        requestBrowserNotificationPermission() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        this.pollUnnotifiedOverdue();
+                        this.browserNotificationInterval = setInterval(() => this.pollUnnotifiedOverdue(), 60000);
+                    }
+                });
+            } else if (Notification.permission === 'granted') {
+                this.pollUnnotifiedOverdue();
+                this.browserNotificationInterval = setInterval(() => this.pollUnnotifiedOverdue(), 60000);
+            }
+        },
+
+        async pollUnnotifiedOverdue() {
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+            try {
+                const res = await fetch(`/api/notifications/unnotified-overdue`);
+                const json = await res.json();
+
+                 if (json.status === 'success' && json.data && json.data.length > 0) {
+                    const notifiedIds = [];
+
+                    for (const notif of json.data) {
+                        const totalFormatted = notif.transaksi?.total
+                            ? 'Rp ' + Number(notif.transaksi.total).toLocaleString('id-ID')
+                            : '';
+
+                        const body = notif.message + (totalFormatted ? ' — ' + totalFormatted : '');
+                        const iconType = notif.type === 'payment_overdue' ? '🔴' : '⚠️';
+
+                        const notification = new Notification(iconType + ' ' + notif.title, {
+                            body: body,
+                            icon: '/assets/fav.png',
+                            silent: false,
+                            tag: `notif-${notif.id}`,
+                            data: {
+                                id: notif.id,
+                                url: notif.transaksi ? `/transaksi/${notif.transaksi.kode}` : null,
+                            },
+                        });
+
+                        notification.onclick = () => {
+                            window.focus();
+                            if (notif.transaksi?.id) {
+                                window.location.href = `/transaksi/${notif.transaksi.id}`;
+                            }
+                        };
+
+                        notifiedIds.push(notif.id);
+
+                        // Jeda antar notifikasi agar browser menampilkannya semua
+                        if (notifiedIds.length < json.data.length) {
+                            await new Promise(r => setTimeout(r, 500));
+                        }
+                    }
+
+                    if (notifiedIds.length > 0) {
+                        await fetch(`/api/notifications/mark-browser-notified`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            },
+                            body: JSON.stringify({ ids: notifiedIds }),
+                        });
+
+                        this.fetchUnreadNotifCount();
+                        window.dispatchEvent(new CustomEvent('notif-count-updated', { detail: this.unreadNotifCount }));
+                    }
+                }
+            } catch (err) {
+                console.error('Gagal memproses notifikasi browser:', err);
+            }
+        },
+
+        markNotifRead(id) {
+            if (!id) return;
+            fetch(`/api/notifications/${id}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    const notif = this.notifications.find(n => n.id == id);
+                    if (notif) {
+                        notif.is_read = true;
+                        this.unreadNotifCount = Math.max(0, this.unreadNotifCount - 1);
+                        window.dispatchEvent(new CustomEvent('notif-count-updated', { detail: this.unreadNotifCount }));
+                    }
+
+                    // Navigate ke detail transaksi jika ada
+                    const notifWithTrx = this.notifications.find(n => n.id == id);
+                    if (notifWithTrx && notifWithTrx.transaksi && notifWithTrx.transaksi.id) {
+                        window.location.href = `/transaksi/${notifWithTrx.transaksi.id}`;
+                    }
+                }
+            })
+            .catch(err => console.error('Gagal menandai dibaca:', err));
+        },
+
+        markAllNotifRead() {
+            fetch(`/api/notifications/mark-all-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    this.notifications.forEach(n => n.is_read = true);
+                    this.unreadNotifCount = 0;
+                    window.dispatchEvent(new CustomEvent('notif-count-updated', { detail: 0 }));
+                }
+            })
+            .catch(err => console.error('Gagal menandai semua dibaca:', err));
         },
 
         createNewThread() {
@@ -182,6 +400,7 @@ document.addEventListener('alpine:init', () => {
 
         handleEnter(e) {
             if (!e.shiftKey) {
+                e.preventDefault();
                 this.sendMessage();
             }
         },

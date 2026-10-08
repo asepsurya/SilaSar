@@ -63,6 +63,18 @@ document.addEventListener("alpine:init", () => {
             this.rightsidebar = !this.rightsidebar;
         },
 
+        // search modal
+        searchModal: false,
+        openSearchModal() {
+            this.searchModal = true;
+        },
+        closeSearchModal() {
+            this.searchModal = false;
+        },
+        toggleSearchModal() {
+            this.searchModal = !this.searchModal;
+        },
+
         syncResponsiveState() {
             if (closeSidebarOnDesktop()) {
                 this.sidebar = false;

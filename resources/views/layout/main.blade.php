@@ -21,6 +21,9 @@
     <!-- Site favicon -->
     <link rel="shortcut icon" href="{{asset('assets/fav.png')}}" />
 
+    <!-- Pusher Beams SDK -->
+    <script src="https://js.pusher.com/beams/2.1.0/push-notifications-cdn.js"></script>
+
     <!-- Custom Style -->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
@@ -208,8 +211,44 @@
                     }
                 })
             }
-        </script>
+</script>
         @yield('js')
-</body>
+
+        @stack('scripts')
+        <script>
+            (function () {
+                var instanceId = '{{ config('services.pusher_beams.instance_id') }}';
+                var userId = {{ auth()->id() ?? 'null' }};
+                var interest = 'user_' + userId;
+
+                if (!window.PusherPushNotifications || !instanceId || !userId) return;
+
+                if (!window.beamsClient) {
+                    var client = new PusherPushNotifications.Client({ instanceId: instanceId });
+                    window.beamsClient = client;
+                }
+
+                var client = window.beamsClient;
+
+                client.start().then(function () {
+                    return client.addDeviceInterest(interest);
+                }).then(function () {
+                    console.log('Beams registered & subscribed to ' + interest);
+                }).catch(function (err) {
+                    console.warn('Beams start failed:', err && err.message ? err.message : err);
+
+                    try {
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.register('/service-worker.js')
+                                .then(function (reg) { console.log('SW fallback registered:', reg.scope); })
+                                .catch(function (e) { console.warn('SW register failed:', e); });
+                        }
+                    } catch (swErr) {
+                        console.warn('Service worker registration error:', swErr);
+                    }
+                });
+            })();
+        </script>
+    </body>
 
 </html>
