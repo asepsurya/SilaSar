@@ -384,11 +384,18 @@
                     <div class="flex items-center justify-between gap-4">
                         <img src="{{ asset('assets/app_logo_new.png') }}" alt="App Logo"
                             class="h-12 w-auto object-contain">
-                        <a href="{{ asset('SiLasar_v1.2.1.apk') }}" target="_blank"
-                            class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100">
-                            <i class="fab fa-android"></i>
-                            <span>Unduh App</span>
-                        </a>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ asset('assets/Tidessa_Setup_1.0.0.exe') }}" target="_blank"
+                                class="hidden items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 lg:inline-flex">
+                                <i class="fab fa-windows"></i>
+                                <span>Download for Desktop</span>
+                            </a>
+                            <a href="{{ asset('SiLasar_v1.2.1.apk') }}" target="_blank"
+                                class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 lg:hidden">
+                                <i class="fab fa-android"></i>
+                                <span>Unduh App</span>
+                            </a>
+                        </div>
                     </div>
 
                     <div class="mt-8">
