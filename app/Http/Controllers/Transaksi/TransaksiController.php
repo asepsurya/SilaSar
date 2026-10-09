@@ -1242,6 +1242,44 @@ $transaksi->update();
         return response()->json(['error' => 'No file'], 400);
     }
 
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        if (strlen($q) < 1) {
+            return response()->json(['status' => 'success', 'data' => []]);
+        }
+
+        $transaksi = Transaksi::where('auth', auth()->user()->id)
+            ->where(function ($query) use ($q) {
+                $query->where('kode_transaksi', 'like', "%{$q}%")
+                    ->orWhereHas('mitra', function ($mq) use ($q) {
+                        $mq->where('nama_mitra', 'like', "%{$q}%");
+                    });
+            })
+            ->with('mitra')
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get()
+            ->unique('kode_transaksi')
+            ->values()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'kode_transaksi' => $item->kode_transaksi,
+                    'nama_mitra' => $item->mitra->nama_mitra ?? '-',
+                    'total' => $item->total ?? 0,
+                    'status_bayar' => $item->status_bayar,
+                    'tanggal' => $item->tanggal_transaksi
+                        ? \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d M Y')
+                        : '',
+                    'url' => route('transaksi.detail', $item->id),
+                ];
+            });
+
+        return response()->json(['status' => 'success', 'data' => $transaksi]);
+    }
+
 
 
 }

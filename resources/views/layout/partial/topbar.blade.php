@@ -302,55 +302,153 @@
 <!-- Modal Search -->
 <div x-data="topbarSearch()" x-init="initMenus()">
     <!-- Overlay -->
-    <div class="fixed inset-0 z-[999] hidden overflow-y-auto bg-black/60 dark:bg-white/10"
+    <div class="fixed inset-0 z-[999] hidden overflow-y-auto bg-black/40 backdrop-blur-[2px] transition-all duration-300"
         :class="{ 'block': $store.app.searchModal, 'hidden': !$store.app.searchModal }"
         @keydown.window.escape="$store.app.closeSearchModal()">
-        <div class="flex min-h-screen items-center justify-center px-4" @click.self="$store.app.closeSearchModal()">
+        
+        <div class="flex min-h-screen items-center justify-center px-4 py-8" @click.self="$store.app.closeSearchModal()">
+            
             <!-- Modal Box -->
-            <div x-show="$store.app.searchModal" x-transition x-transition.duration.300ms
-                class="relative my-8 w-full max-w-lg overflow-hidden rounded-lg border-0 bg-white p-0 shadow-3xl dark:bg-black"
-                style="display: none;">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b border-black/10 bg-white px-5 py-3 dark:border-white/10 dark:bg-black">
-                    <h5 class="text-lg font-semibold">Cari Menu</h5>
-                    <button type="button"
-                        class="text-black/40 transition hover:text-black dark:text-white/40 dark:hover:text-white"
-                        @click="$store.app.closeSearchModal()" aria-label="Tutup">
-                        <svg class="h-5 w-5" width="32" height="32" viewBox="0 0 32 32" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M24.2929 6.29289L6.29289 24.2929C6.10536 24.4804 6 24.7348 6 25C6 25.2652 6.10536 25.5196 6.29289 25.7071C6.48043 25.8946 6.73478 26 7 26C7.26522 26 7.51957 25.8946 7.70711 25.7071L25.7071 7.70711C25.8946 7.51957 26 7.26522 26 7C26 6.73478 25.8946 6.48043 25.7071 6.29289C25.5196 6.10536 25.2652 6 25 6C24.7348 6 24.4804 6.10536 24.2929 6.29289Z"
-                                fill="currentcolor" />
-                            <path
-                                d="M7.70711 6.29289C7.51957 6.10536 7.26522 6 7 6C6.73478 6 6.48043 6.10536 6.29289 6.29289C6.10536 6.48043 6 6.73478 6 7C6 7.26522 6.10536 7.51957 6.29289 7.70711L24.2929 25.7071C24.4804 25.8946 24.7348 26 25 26C25.2652 26 25.5196 25.8946 25.7071 25.7071C25.8946 25.5196 26 25.2652 26 25C26 24.7348 25.8946 24.4804 25.7071 24.2929L7.70711 6.29289Z"
-                                fill="currentcolor" />
-                        </svg>
-                    </button>
+            <div x-show="$store.app.searchModal" 
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                style="display: none; width: 100%; max-width: 32rem; max-height: 80vh; display: flex; flex-direction: column; background-color: #ffffff; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e5e7eb; overflow: hidden;"
+                class="dark:border-zinc-800 dark:bg-zinc-900">
+                
+                <!-- Search Input Area (Padding ikon search ditambah dengan margin-left yang lebih besar) -->
+                <div style="padding: 1rem; border-bottom: 1px solid #f3f4f6; flex: 0 0 auto;" class="dark:border-zinc-800">
+                    <div style="position: relative; display: flex; align-items: center; border-radius: 0.75rem; background-color: #f9fafb; border: 1px solid #d1d5db;" class="dark:bg-white/5 dark:border-zinc-700">
+                        <!-- Tambah margin-left (misal: 1.25rem atau 1.5rem) agar padding luarnya bertambah -->
+                        <x-icon name="search" style="height: 1rem; width: 1rem; color: #9ca3af; margin-left: 1.25rem; flex: none;" />
+                        <input type="text" placeholder="Cari Menu (Misal: Dashboard, Transaksi...)"
+                            x-ref="searchInput"
+                            x-model="keyword"
+                            @input="filterMenus"
+                            @keydown.escape="$store.app.closeSearchModal()"
+                            autocomplete="off"
+                            style="width: 100%; border: none; background: transparent; padding-left: 0.75rem; padding-right: 3rem; padding-top: 0.75rem; padding-bottom: 0.75rem; font-size: 0.875rem; color: #000000; outline: none; box-shadow: none;"
+                            class="dark:text-white placeholder:text-gray-400" />
+                        
+                        <button type="button" 
+                            style="position: absolute; right: 0.75rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background-color: #ffffff; padding-left: 0.5rem; padding-right: 0.5rem; padding-top: 0.25rem; padding-bottom: 0.25rem; font-size: 10px; font-weight: 600; color: #6b7280; cursor: pointer;"
+                            class="dark:border-zinc-700 dark:bg-zinc-800 dark:text-gray-400"
+                            @click="$store.app.closeSearchModal()">
+                            ESC
+                        </button>
+                    </div>
                 </div>
 
-                <div class="p-5">
-                    <input type="text" placeholder="Ketik nama menu..."
-                        x-ref="searchInput"
-                        x-model="keyword"
-                        @input="filterMenus"
-                        @keydown.escape="$store.app.closeSearchModal()"
-                        autocomplete="off"
-                        class="form-input w-full rounded-lg border border-black/10 bg-transparent px-3 py-2 pr-10 text-sm text-black focus:border-blue-300 focus:outline-none focus:ring dark:border-white/10 dark:bg-black dark:text-white" />
-
-                    <ul class="mt-3 max-h-72 overflow-y-auto rounded-lg border border-black/10 dark:border-white/10">
-                        <template x-for="item in results" :key="item.url">
-                            <li>
+                <!-- Results Area -->
+                <div style="flex: 1 1 auto; overflow-y: auto; max-height: 50vh; padding: 0.5rem;" class="custom-scrollbar">
+                    <template x-if="results.length > 0">
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                            <template x-for="item in results" :key="item.url">
                                 <a :href="item.url" @click="$store.app.closeSearchModal()"
-                                    class="block px-4 py-2 text-sm text-black transition hover:bg-black/5 dark:text-white dark:hover:bg-white/10"
-                                    x-text="item.name"></a>
-                            </li>
-                        </template>
-                        <template x-if="results.length === 0 && keyword.length > 0">
-                            <li class="px-4 py-3 text-sm italic text-black/40 dark:text-white/40">
-                                Menu tidak ditemukan
-                            </li>
-                        </template>
-                    </ul>
+                                    style="display: flex; align-items: center; gap: 0.75rem; border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem; color: #374151; text-decoration: none; transition: background-color 0.15s;"
+                                    class="hover:bg-blue-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white">
+                                    <div style="display: flex; height: 2rem; width: 2rem; align-items: center; justify-content: center; border-radius: 0.375rem; background-color: #f3f4f6; flex: none;" class="dark:bg-white/5">
+                                        <x-icon name="layer" style="height: 1rem; width: 1rem; color: #6b7280;" class="dark:text-gray-400" />
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; min-width: 0;">
+                                        <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="item.name"></span>
+                                        <span style="font-size: 11px; color: #9ca3af; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="item.url"></span>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Transaction Results -->
+                    <template x-if="transactions.length > 0">
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #f3f4f6;" class="dark:border-zinc-800">
+                            <p style="padding: 0 0.75rem 0.375rem; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ca3af;">
+                                Transaksi
+                            </p>
+                            <template x-for="tx in transactions" :key="tx.id">
+                                <a :href="tx.url" @click="$store.app.closeSearchModal()"
+                                    style="display: flex; align-items: center; gap: 0.75rem; border-radius: 0.5rem; padding: 0.625rem 0.75rem; font-size: 0.875rem; color: #374151; text-decoration: none; transition: background-color 0.15s;"
+                                    class="hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white">
+                                    <div style="display: flex; height: 2rem; width: 2rem; align-items: center; justify-content: center; border-radius: 0.375rem; background-color: #ecfdf5; color: #059669; flex: none;" class="dark:bg-emerald-500/10 dark:text-emerald-400">
+                                        <x-icon name="document" style="height: 1rem; width: 1rem;" />
+                                    </div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="tx.kode_transaksi"></span>
+                                            <span style="flex: none; font-size: 10px; font-weight: 700; padding: 0.125rem 0.375rem; border-radius: 0.25rem;"
+                                                :class="tx.status_bayar === 'Sudah Bayar' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'"
+                                                x-text="tx.status_bayar"></span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.375rem; font-size: 11px; color: #9ca3af;">
+                                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="tx.nama_mitra"></span>
+                                            <span x-show="tx.tanggal">&middot;</span>
+                                            <span x-text="tx.tanggal"></span>
+                                        </div>
+                                    </div>
+                                    <span style="flex: none; font-size: 12px; font-weight: 700; color: #374151; font-variant-numeric: tabular-nums;" class="dark:text-gray-200"
+                                        x-text="'Rp ' + Number(tx.total || 0).toLocaleString('id-ID')"></span>
+                                </a>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Loading Transactions Skeleton -->
+                    <template x-if="isLoadingTransactions">
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #f3f4f6;" class="dark:border-zinc-800">
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0 0.25rem;" class="animate-pulse">
+                                <template x-for="i in 3">
+                                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                        <div style="height: 2rem; width: 2rem; border-radius: 0.375rem; background-color: #f3f4f6; flex: none;" class="dark:bg-white/5"></div>
+                                        <div style="flex: 1; display: flex; flex-direction: column; gap: 0.375rem;">
+                                            <div style="height: 0.625rem; background-color: #f3f4f6; border-radius: 0.25rem; width: 33%;" class="dark:bg-white/5"></div>
+                                            <div style="height: 0.5rem; background-color: #f3f4f6; border-radius: 0.25rem; width: 50%;" class="dark:bg-white/5"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Empty State -->
+                    <template x-if="results.length === 0 && transactions.length === 0 && !isLoadingTransactions && keyword.length > 0">
+                        <div style="display: flex; height: 10rem; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center;">
+                            <div style="margin-bottom: 0.75rem; border-radius: 9999px; background-color: #f9fafb; padding: 0.75rem;" class="dark:bg-white/5">
+                                <x-icon name="search" style="height: 1.5rem; width: 1.5rem; color: #d1d5db;" />
+                            </div>
+                            <p style="font-size: 0.875rem; font-weight: 500; color: #111827;" class="dark:text-white">Tidak ditemukan</p>
+                            <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">Coba kata kunci lain atau periksa ejaan.</p>
+                        </div>
+                    </template>
+
+                    <!-- Initial State / Hints -->
+                    <template x-if="keyword.length === 0">
+                        <div style="padding: 0.75rem 1rem;">
+                            <p style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; margin-bottom: 0.5rem;">Paling Sering Dicari</p>
+                            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem;">
+                                <template x-for="suggest in menus.slice(0, 4)">
+                                    <button @click="keyword = suggest.name; filterMenus()" 
+                                        style="display: flex; align-items: center; gap: 0.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; color: #4b5563; background: transparent; cursor: pointer;"
+                                        class="dark:border-zinc-800 dark:text-gray-400 dark:hover:bg-white/5">
+                                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="suggest.name"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Footer -->
+                <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f3f4f6; background-color: rgba(249, 250, 251, 0.5); padding: 0.75rem 1rem; flex: 0 0 auto;" class="dark:border-zinc-800 dark:bg-black/20">
+                    <div style="display: flex; gap: 1rem; font-size: 10px; color: #9ca3af;">
+                        <span style="display: flex; align-items: center; gap: 0.25rem;"><kbd style="border-radius: 0.25rem; border: 1px solid #e5e7eb; background-color: #ffffff; padding: 0.125rem 0.375rem;" class="dark:border-zinc-700 dark:bg-zinc-800">↵</kbd> pilih</span>
+                        <span style="display: flex; align-items: center; gap: 0.25rem;"><kbd style="border-radius: 0.25rem; border: 1px solid #e5e7eb; background-color: #ffffff; padding: 0.125rem 0.375rem;" class="dark:border-zinc-700 dark:bg-zinc-800">ESC</kbd> tutup</span>
+                    </div>
+                    <div style="font-size: 10px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">
+                        SilaSar Search
+                    </div>
                 </div>
             </div>
         </div>
@@ -362,6 +460,10 @@
         return {
             keyword: '',
             results: [],
+            transactions: [],
+            isLoadingTransactions: false,
+            txDebounceTimer: null,
+            txRequestSeq: 0,
             menus: [],
             initMenus() {
                 let menuEls = document.querySelectorAll('#menu a');
@@ -379,6 +481,9 @@
                     if (val) {
                         this.keyword = '';
                         this.results = [];
+                        this.transactions = [];
+                        this.isLoadingTransactions = false;
+                        this.txRequestSeq++;
                         this.$nextTick(() => this.$refs.searchInput.focus());
                     }
                 });
@@ -389,6 +494,39 @@
                 } else {
                     this.results = [];
                 }
+                this.fetchTransactions();
+            },
+
+            fetchTransactions() {
+                if (this.txDebounceTimer) {
+                    clearTimeout(this.txDebounceTimer);
+                }
+                const q = this.keyword.trim();
+                if (q.length < 1) {
+                    this.transactions = [];
+                    this.isLoadingTransactions = false;
+                    return;
+                }
+                this.txDebounceTimer = setTimeout(() => {
+                    const seq = ++this.txRequestSeq;
+                    this.isLoadingTransactions = true;
+                    fetch(`/api/transaksi/search?q=${encodeURIComponent(q)}`)
+                        .then(res => {
+                            if (!res.ok) throw new Error('Gagal mengambil data transaksi.');
+                            return res.json();
+                        })
+                        .then(res => {
+                            if (seq === this.txRequestSeq && res.status === 'success') {
+                                this.transactions = res.data;
+                            }
+                        })
+                        .catch(() => {})
+                        .finally(() => {
+                            if (seq === this.txRequestSeq) {
+                                this.isLoadingTransactions = false;
+                            }
+                        });
+                }, 300);
             }
         }
     }

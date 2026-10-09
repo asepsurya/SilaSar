@@ -61,6 +61,7 @@ Route::middleware(['auth', 'checkPerusahaan', 'redirectIfNotAdmin'])->group(func
     Route::get('/api/app-summary', [AppSummaryController::class, 'getSummary'])->name('api.app.summary');
     Route::post('/api/ai/generate', [AiController::class, 'generate'])->name('api.ai.generate');
     Route::get('/api/jatuh-tempo', [NotificationController::class, 'jatuhTempo'])->name('api.jatuh-tempo');
+    Route::get('/api/transaksi/search', [TransaksiController::class, 'search'])->name('api.transaksi.search');
 
     // Notification API routes
     Route::prefix('api/notifications')->group(function () {
