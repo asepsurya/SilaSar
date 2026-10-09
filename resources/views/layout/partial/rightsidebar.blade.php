@@ -135,7 +135,7 @@
                         x-text="jatuhTempo.length"></span>
                 </div>
 
-                <div class="px-2 py-2 space-y-1">
+                {{-- <div class="px-2 py-2 space-y-1">
                     <template x-if="isLoadingJatuhTempo">
                         <div class="space-y-2 animate-pulse">
                             <template x-for="i in 3">
@@ -177,7 +177,7 @@
                             </a>
                         </template>
                     </template>
-                </div>
+                </div> --}}
             </div>
 
             <div id="notification-list" class="space-y-4 py-2">
@@ -195,6 +195,47 @@
                     </div>
                 </template>
 
+                <template x-if="!isLoadingNotifs">
+                    <template x-for="item in notifications" :key="item.id">
+                        <a :href="item.transaksi ? '/transaksi/' + item.transaksi.id : 'javascript:;'"
+                            @click.prevent="markNotifRead(item.id)"
+                            class="flex gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                            <div class="notif-icon-box" :class="{
+                                'overdue': item.type === 'payment_overdue',
+                                'due': item.type === 'payment_due',
+                                'received': item.type === 'payment_received',
+                                'partial': item.type === 'payment_partial',
+                                'default': !['payment_overdue', 'payment_due', 'payment_received', 'payment_partial'].includes(item.type)
+                            }">
+                                <i class="ph text-base" :class="{
+                                        'ph-warning-circle': item.type === 'payment_overdue',
+                                        'ph-clock': item.type === 'payment_due',
+                                        'ph-check-circle': item.type === 'payment_received',
+                                        'ph-percent': item.type === 'payment_partial',
+                                        'ph-bell': !['payment_overdue', 'payment_due', 'payment_received', 'payment_partial'].includes(item.type)
+                                    }"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-[12px] font-bold text-gray-900 dark:text-white truncate"
+                                        x-text="item.title"></p>
+                                    <span x-show="!item.is_read"
+                                        class="flex-none h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                                </div>
+                                <p class="text-[11px] text-gray-600 dark:text-gray-400 truncate" x-text="item.message">
+                                </p>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                    <span x-text="item.created_at"></span>
+                                    <template x-if="item.transaksi">
+                                        <span> · <span x-text="item.transaksi.kode"></span> — <span
+                                                x-text="item.transaksi.mitra"></span> — Rp <span
+                                                x-text="Number(item.transaksi.total || 0).toLocaleString('id-ID')"></span></span>
+                                    </template>
+                                </p>
+                            </div>
+                        </a>
+                    </template>
+                </template>
 
                 <template x-if="!isLoadingNotifs && notifications.length === 0">
                     <div class="text-center py-10">
@@ -361,10 +402,13 @@
 
             <div class="flex items-center justify-between mt-2 px-1">
                 <p class="text-[10px] font-medium text-gray-400 dark:text-gray-500">
-                    <kbd class="px-1.5 py-0.5 rounded bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 font-sans">Enter</kbd>
+                    <kbd
+                        class="px-1.5 py-0.5 rounded bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 font-sans">Enter</kbd>
                     Kirim
                     <span class="mx-1">·</span>
-                    <kbd class="px-1.5 py-0.5 rounded bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 font-sans">Shift + Enter</kbd>
+                    <kbd
+                        class="px-1.5 py-0.5 rounded bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 font-sans">Shift
+                        + Enter</kbd>
                     Baris baru
                 </p>
                 <span x-show="chatInput.length > 0" x-text="chatInput.length"

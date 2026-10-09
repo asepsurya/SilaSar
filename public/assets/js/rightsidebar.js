@@ -16,6 +16,7 @@ document.addEventListener('alpine:init', () => {
         notifFilter: 'all',
         hasFetchedNotifs: false,
         unreadNotifCount: 0,
+        notifRequestId: 0,
         browserNotificationInterval: null,
         notificationListInterval: null,
 
@@ -155,12 +156,16 @@ document.addEventListener('alpine:init', () => {
             this.notifError = null;
             this.notifications = [];
 
+            const requestId = ++this.notifRequestId;
+
             fetch(`/api/notifications?filter=${this.notifFilter}`)
                 .then(res => {
                     if (!res.ok) throw new Error('Gagal mengambil data notifikasi.');
                     return res.json();
                 })
                 .then(res => {
+                    if (requestId !== this.notifRequestId) return;
+
                     if (res.status === 'success') {
                         this.notifications = res.data;
                         this.unreadNotifCount = res.unread_count;
@@ -168,9 +173,11 @@ document.addEventListener('alpine:init', () => {
                     }
                 })
                 .catch(err => {
+                    if (requestId !== this.notifRequestId) return;
                     this.notifError = err.message || 'Terjadi kesalahan sistem.';
                 })
                 .finally(() => {
+                    if (requestId !== this.notifRequestId) return;
                     this.isLoadingNotifs = false;
                 });
         },

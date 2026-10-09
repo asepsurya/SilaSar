@@ -15,7 +15,9 @@ class NotificationController extends Controller
         $filter = $request->query('filter', 'all');
         $query = Notification::where('user_id', auth()->id())->with('transaksi.mitra');
 
-        if ($filter !== 'all') {
+        if ($filter === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($filter !== 'all') {
             $query->where('type', $filter);
         }
 
